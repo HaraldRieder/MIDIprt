@@ -10,6 +10,8 @@
 #ifndef MFPMAINWINDOW_H
 #define MFPMAINWINDOW_H
 
+#include <wx/printdlg.h>
+
 #include "slider.h"
 #include "infow.h"
 #include "paramsw.h"

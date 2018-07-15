@@ -15,9 +15,9 @@
 #endif
 #include <errno.h>
 
+#include <wx/filedlg.h>
 #include <wx/metafile.h>
 #include <wx/print.h>
-#include <wx/printdlg.h>
 #include <wx/file.h>
 #include <wx/stdpaths.h>
 #include <wx/splash.h>
@@ -555,13 +555,11 @@ void MFPMainFrame::SetAccelerators()
   entries[i++].Set(wxACCEL_CTRL  , WXK_UP      , Key_Pageup      );
   entries[i++].Set(wxACCEL_SHIFT , WXK_UP      , Key_Pageup      );
   entries[i++].Set(wxACCEL_NORMAL, WXK_PAGEUP  , Key_Pageup      );
-  entries[i++].Set(wxACCEL_NORMAL, WXK_PRIOR   , Key_Pageup      );
 
   entries[i++].Set(wxACCEL_NORMAL, WXK_DOWN    , Key_Down        );
   entries[i++].Set(wxACCEL_CTRL  , WXK_DOWN    , Key_Pagedown    );
   entries[i++].Set(wxACCEL_SHIFT , WXK_DOWN    , Key_Pagedown    );
   entries[i++].Set(wxACCEL_NORMAL, WXK_PAGEDOWN, Key_Pagedown    );
-  entries[i++].Set(wxACCEL_NORMAL, WXK_NEXT    , Key_Pagedown    );
 
   entries[i++].Set(wxACCEL_CTRL  , WXK_LEFT    , Key_Pageleft    );
   entries[i++].Set(wxACCEL_SHIFT , WXK_LEFT    , Key_Pageleft    );
@@ -1117,7 +1115,7 @@ void MFPMainFrame::do_save_as(bool remove_originals)
         s_save_as_dir = wxString::FromAscii(db.pathname) ;
     wxFileDialog dialog(this, msg, s_save_as_dir, wxString::FromAscii(db.filename),
                         _T("MIDI files (*.mid,*.midi)|*.mid;*.MID;*.midi;*.MIDI"),
-                        wxSAVE|wxOVERWRITE_PROMPT) ;
+                        wxFD_SAVE|wxFD_OVERWRITE_PROMPT) ;
     dialog.SetFilterIndex(1);
     if (dialog.ShowModal() == wxID_OK)
     {

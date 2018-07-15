@@ -296,10 +296,10 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
     m_borders_choice->SetSelection(0) ;
     y = TITLE_H + MFP_SPACING*3 + H ;
     sz.x = sz.x / 3 ;
-    m_left_border  = new Slider(panel, Slider_Left_border ,  0, 0, 49, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
+    m_left_border  = new Slider(panel, Slider_Left_border , 0, 0, 49, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
     m_left_border->SetPageSize(1) ;
     x = (LEFT_W - 2*MFP_SPACING) - sz.x ;
-    m_right_border = new Slider(panel, Slider_Right_border, 49, 0, 49, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
+    m_right_border = new Slider(panel, Slider_Right_border, 0, 0, 49, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_INVERSE) ;
     m_right_border->SetPageSize(1) ;
     x = 3*MFP_SPACING + sz.x ;
     sz.x = (sz.x - MFP_SPACING)/2 - MFP_SPACING ;
@@ -581,7 +581,7 @@ void MFPParamsWindow::OnRightBorderSlider( wxCommandEvent &WXUNUSED(event) )
 {
     if (!db) return ;
     
-    int value = MAX_BORDER - m_right_border->GetValue() ;
+    int value = m_right_border->GetValue() ;
     if (m_borders_choice->GetSelection() == 0)
         db->lower_border = value ;
     else
@@ -605,7 +605,7 @@ void MFPParamsWindow::update_border_sliders()
         m_left_border->Disable() ;
         m_right_border->Disable() ;
         pos1 = 0 ;
-        pos2 = MAX_BORDER ;
+        pos2 = 0 ;
     }
     else
     {
@@ -617,13 +617,13 @@ void MFPParamsWindow::update_border_sliders()
         {
             /* top and bottom */
             pos1 = db->upper_border ;
-            pos2 = MAX_BORDER - db->lower_border ;
+            pos2 = db->lower_border ;
         }
         else 
         {
             /* left and right */
             pos1 = db->left_border ;
-            pos2 = MAX_BORDER - db->right_border ;
+            pos2 = db->right_border ;
         }
     }
     /* set positions */
