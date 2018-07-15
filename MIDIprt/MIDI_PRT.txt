@@ -1,0 +1,1161 @@
+                             Mad Harry's
+
+                          MIDI File Printer
+
+            Version 4.3 for Atari TOS and wxWidgets (C++)
+                          February 16, 2009
+
+                                  by
+
+                            Harald Rieder
+                          Schwilkenhofstr. 5
+                           70439 Stuttgart
+                             Deutschland
+
+
+
+Contents
+========
+
+ 1  Introduction
+    1.1  Copyright
+    1.2  Disclaimer
+    1.3  What for and how ?
+    1.4  How can you read the new music notation ?
+    1.5  Restrictions
+    1.6  Meaning Of Terms
+    1.7  Delivery
+    1.8  Installation
+
+ 2  Using the MIDI File Printer
+    2.1  General
+    2.2  The Desktop
+    2.3  The Information Window
+    2.4  The Parameters Window
+    2.5  The Filter Window
+    2.6  The Document Window
+    2.7  The Scheme Editor
+    2.8  Profiling
+    2.9  Hot Keys
+    2.10  Command Line
+
+ 3  Schemes
+    3.1  Description
+    3.2  Why these colors and patterns ?
+
+ 4  Known Errors
+    4.1  MIDI Files
+    4.2  Boxkite
+    4.3  Speedo GDOS on Atari TOS
+    4.4  ST Emulator
+    4.5  WDIALOG on Atari TOS
+
+ 5  History
+    5.1  Version 0.2 (1993)
+    5.2  Version 1.0
+    5.3  Version 1.1
+    5.4  Version 1.2
+    5.5  Version 1.5
+    5.6  Version 2.0 (1995)
+    5.7  Version 2.0a
+    5.8  Version 2.1
+    5.9  Version 3.0 (1999 February)
+    5.10  Version 0.0 for Win32 (1999 November)
+    5.11  Version 4.0 for TOS (2003 January)
+    5.12  Version 4.1 for TOS and Windows (2005 June)
+    5.13  Version 4.1a for TOS and Windows (2005 December)
+    5.14  Version 4.2 for TOS and wxWidgets (2008 August)
+    5.15  Version 4.3 for TOS and wxWidgets (2009 February)
+
+
+
+1  Introduction
+***************
+
+The MIDI  File  Printer  prints  a new easy-to-read music notation. It
+expects standard MIDI files as input, displays them in a  configurable
+way on the screen and prints them out (via GDOS/NVDI on TOS).
+
+
+1.1  Copyright
+==============
+
+Copyright (c) 1993-2009 Harald Rieder
+
+The MIDI File Printer version 4.3 and higher is released under the Gnu
+General  Public  License  Version  3  (GPL  V3),  see  also  the  file
+license.txt that comes with the source and executable distributions.
+
+
+1.2  Disclaimer
+===============
+
+USE THIS PROGRAM AT YOUR OWN RISK !
+
+The author  assumes no liability what-so-ever for any damages that may
+result from using this program or its accompanying files. This program
+includes absolutely no warranty, written or implied.
+
+
+1.3  What for and how ?
+=======================
+
+Learning the  common  Western music notation requires a lot of effort.
+The reason for that is, that this notation is much more complicated as
+it  needs  to  be.  If you can read the common music notation, you are
+probably proud of it, because it was hard to learn it.
+
+The notation of the MIDI file printer is easy-to-learn. It is  not  at
+all complicated. It does NOT require:
+
+   . different clef types for bass and treble
+   . sharps and flats
+   . necks
+   . signs for rests
+   . different variants to express the length of a 3/8 note
+   . ...
+
+
+1.4  How can you read the new music notation ?
+==============================================
+
+Normally you  have  3  or more dimensions to be represented by a music
+notation:
+
+  1. time (bar)
+  2. frequency (height)
+  3. intensity (volume)
+  4. ...
+
+The new notation uses a 2 dim. coordinate system:
+
+     log(frequency)
+     
+      ^       (mode: "Mix", 6 horizontal lines)
+      |
+      |   |------------|------------|------------|---
+      |   |            |            |            |
+      |   |------------|------------|------------|[2]
+      |   |            |            |         [1]|
+      | 4 |============|============|======[0]===|===
+      |   |            |            |   [B]      |
+      |   |------------|------------|[A]---------|---
+      |   |            |         [9]|            |
+      |   |------------|------[8]---|------------|---
+      |   |            |   [7]      |            |
+      |   |------------|[6]---------|------------|---
+      |   |         [5]|            |            |
+      |   |------[4]---|------------|------------|---
+      |   |   [3]      |            |            |
+      |   |[2]---------|------------|------------|---
+      |
+      |
+      +-----------------------------------------------> time
+
+     The diagram shows a chromatic scale, beginning with a 2 (=D)
+     and  ending with a 2 (=D) one dodecime (=octave) higher. All
+     notes have the same duration. Succeeding notes have the same
+     frequency ratio in this example.
+
+This means:  the  note  "height" (y-direction) is a linear function of
+the logarithm of its (basic) frequency.
+
+For the common notation this also holds APPROXIMATELY. The  difference
+is  "approximately".  Furthermore,  the  common  notation makes use of
+sharps and flats as  frequency  modifiers.  All  that  has  historical
+reasons, but that is another story ...
+
+In the  new notation, the note duration in time is proportional to its
+extension in horizontal direction. You need not to learn  the  meaning
+of different necks and tails and whatsoever.
+
+The volume   is   proportional  to  the  note  extension  in  vertical
+direction. Therefore you will not  find  any  pp  (pianissimo)  or  mf
+(mezzoforte)  signs  or anything like that. And you do not have to ask
+yourself whether a note in pp carrying a ^ is louder than a note in  p
+or not.
+
+You will  not find any of the strange things of the common notation in
+the new notation, nor will you find them in the  MIDI  file  standard.
+The  reason  is,  that  THESE  RELICTS  ARE  NOT  NECESSARY IN A MUSIC
+NOTATION and that THEY ARE NOT NECESSARY FOR ACCURATELY STORING  MUSIC
+INFORMATION !!!
+
+If you are further interested in modern notations:
+
+  http://musicnotation.org/
+
+
+1.5  Restrictions
+=================
+
+The MIDI  File  Printer  in  its  current version only shows notes and
+their durations as well as their note-on dynamics (volume).
+
+It does not  show  any  controller  information  like  sustain  pedal,
+modulation or pitch bend.
+
+It does  not  recognize  tempo  changes  or changes of the time or key
+signatures in the middle of the piece.
+
+I also use a more logical  writing  for  chords,  but  the  MIDI  File
+Printer does not show any chords.
+
+It evaluates  only the first tempo change and text events found in the
+MIDI file per track and shows  them  in  the  information  and  filter
+windows. Succeeding events are not visible at the user interface.
+
+
+1.6  Meaning Of Terms
+=====================
+
+Let me summarize the new terms I use below and in the program briefly:
+
+
+                        +-----+-------------+
+                        | New | Traditional |
+                        +-----+-------------+
+                        | 0   | C           |
+                        | 1   | C#          |
+                        | 2   | D           |
+                        | 3   | D#          |
+                        | 4   | E           |
+                        | 5   | F           |
+                        | 6   | F#          |
+                        | 7   | G           |
+                        | 8   | G#          |
+                        | 9   | A           |
+                        | A   | A#          |
+                        | B   | H           |
+                        +-----+-------------+
+
+Actually, the  note  numers I use are their MIDI numbers with a number
+base of 12 (not 10 = decimal and not 16 = hexadeciamal).
+
+Thus I also use the new term "dodecime"  instead  of  the  traditional
+"octave".
+
+The base of 12 is not intrinsic to music. It is only a common approach
+to the  "real"  notes,  which  actually  are  innummerable.  The  MIDI
+specification  and  the  MIDI  File  Printer  are based on this common
+approach.
+
+
+1.7  Delivery
+=============
+
+You should have the following files:
+
+ MIDIPRT.EXE: program variant for 32 bit Windows.
+ SCHMEDIT.EXE: separate program to  edit  color  schemes  for  32  bit
+         Windows.
+ midiprt: program variant for Unix/Linux.
+ schmedit: separate program to edit color schemes for Unix/Linux.
+ *.ICO:  icon files for the Windows variant.
+ *.BMP:  background bitmap for the about me dialog.
+ MIDIPRTS.APP: for ST-like Ataris and all others.
+ MIDIPRTT.APP: requires  at  least  68020 processor and FPU (Atari TT-
+         like).
+ *.AM:   ACS modules used by the Atari program variants.
+ SCHEMES\*: a folder with *.PAR color schemes.
+ EXAMPLES\*: a folder with free MIDI files and profiles.
+ HELP\INDEX.HTM: this documentation as HTML.
+ MIDI_PRT.TXT: this documentation as plain text.
+
+You might have these files:
+
+ DESKTOP.CFG: automatically  generated,  stores  global  ACS  settings
+         (Atari only).
+ EDITOR.CFG: automatically   generated,  stores  ACS  editor  settings
+         (Atari only).
+ .MIDI_PRT.CFG: automatically generated, stores  personal  application
+         settings.
+ .MIDI_PRT.MI$: personal default profile, generated by user action.
+
+
+1.8  Installation
+=================
+
+The program  might  not  run  reasonably  from  CD-ROM or other write-
+protected media! Copy all files to a writable destination directory.
+
+On Atari TOS the program runs as application, but not as accessory.
+
+If you want, associate the application program file with "*.MID"  [and
+"*.MIDI", "*.mid", "*.midi", "*.SMF", "*.smf"] files. On Atari TOS the
+application understands VA_START.
+
+The program  saves  its  settings  on   singletasking   TOS   in   its
+installation directory, else in the user's home directory.
+
+On Atari  TOS  you need a GDOS/NVDI for printing, and you need WDIALOG
+or Magic if you want to use the  standard  font  selection  and  print
+dialogs.
+
+
+
+2  Using the MIDI File Printer
+******************************
+
+
+2.1  General
+============
+
+The MIDI  File  Printer  may  look different in different environments
+(e.g. single-/multitasking) and on different operating  systems.  Thus
+not  all  functions described below might be available in your current
+environment.
+
+Since the Atari TOS variant it is an ACS application, you can load ACS
+modules  with  the  usual  mechanism.  ACS  modules  you  can  find on
+http://acspro.atari.org . When Bubble Help is installed, most controls
+report their function by pressing the right mouse keys upon them.
+
+
+2.2  The Desktop
+================
+
+On singletasking  Atari  TOS,  and  only  there, the MIDI File Printer
+comes with an own desktop.
+
+At any time there are at least 2 icons on the desktop:
+
+   . New: a double-click to NEW opens the file selector  and  you  can
+     select  one  (or  more, depending on the capabilites of your file
+     selector) MIDI standard file(s) to be read.
+   . Trash: close a MIDI file by dragging its icon onto the trash bin.
+     Unload an ACS module with the same action.
+
+
+2.3  The Information Window
+===========================
+
+This window  shows information from and about the MIDI file of the one
+document window that was most recently on top.
+
+When there is no current document window, e.g. no MIDI file at all  is
+loaded,  the  values  are  drawn in a way indicating that they are not
+valid.
+
+The values have the following meanings:
+
+   . File size: size of the file on disk  in  KByte  (Atari)  or  Byte
+     (other OS).
+   . Size in memory: the standard MIDI file format is not suitable for
+     fast access. The MIDI file printer therefore uses an  own  format
+     which consumes more RAM. Here you see how much RAM is consumed by
+     the transformed file.
+   . MIDI file type: I tested the MIDI File Printer with type 0 and  1
+     standard  MIDI  files.  These are the most widely spread types (I
+     never ever saw a type 2 file). Type 0 contains  1  single  track.
+     Type  1  may  contain more than 1 track, there usually track 0 is
+     reserved for timing information.
+   . No. of tracks: number of tracks that have been found in the  MIDI
+     file.  Note  that  in  general  not every track will contain note
+     events.
+   . Ticks per beat: time resolution of the MIDI standard file in case
+     of non-SMTPE format.
+   . SMPTE:  SMPTE  value. The SMPTE timing format is not supported by
+     the MIDI File Printer!
+   . Ticks per frame: time resolution in case of SMPTE format.
+   . Initial tempo: this value comes from the first tempo  meta  event
+     found in the MIDI file.
+   . Time signature: from the first time signature meta event.
+   . Key signature: from the first key signature meta event. Major and
+     minor are indicated by "maj" and "min", respectively.
+   . Copyright Notice: the first copyright notice found  in  the  MIDI
+     file.  On  Atari  TOS the copyright notice is shown in a separate
+     window after pressing a button, which is disabled if no copyright
+     notice was found.
+
+
+2.4  The Parameters Window
+==========================
+
+This window shows information from the profile of the MIDI file of the
+one document window that was most recently on top.
+
+If the MIDI file does not have a profile attached, the information  in
+this  window comes from the default profile .MIDI_PRT.MI$ or - if that
+does not exist - from fix coded defaults.
+
+Initially also the MIDI file influences some fields:
+
+   . title: whenever it is still empty the file name will be inserted.
+   . bar length: initialized from the time signature meta event
+   . sub-bars: the nominator of the time signature
+   . transpose: the key of the key signature. Major/minor  is  ignored
+     here!
+
+Hint: to avoid the file name as default title, enter a blank character
+as title for the default profile.
+
+When there is no document window with a  MIDI  file,  the  values  are
+drawn in a way that indicates their invalidity.
+
+You can manipulate the following things:
+
+   . title:  title  of  the piece (shown on top of 1st page), its text
+     effects and its font. The font selected here  is  used  also  for
+     track and dodecime labels and bar numbers.
+   . borders:  free  space  on the top, bottom, left and right of each
+     page can be reserved in percent of the  page  height  and  width,
+     respectively.
+   . distances: the system distance is the vertical distance between 2
+     staff systems - in percent of the page height. The track distance
+     is  the  vertical  distance between 2 enabled tracks. (Tracks are
+     enabled or disabled with the help of the filter window.) The note
+     distance is the vertical distance between 2 succeeding notes, for
+     example between 3 and 4 or 9 and A.
+   . bars: the bars to be drawn per line (per system), their length in
+     1/8  notes,  and  the  number  of dashed auxiliary lines or "sub-
+     bars". The values are used throughout
+   . notation:  time  division  and  style   according   to   Johannes
+     Beyreuther's  notation,  Harald Rieder's notation or a mixture of
+     both. The number of horizontal lines per dodecime, which must  be
+     a  divider of 12, can be chosen. Johannes Beyreuther uses 3 and I
+     orignially used 6 lines per dodecime.
+   . notes: the average height, or "thickness" of  a  note,  i.e.  the
+     height  of a note with mean dynamic, can be adjusted in arbitrary
+     units. The dynamic determines how much the note height depends on
+     the  MIDI  note-on  dynamic. For the note heads, bodies and tails
+     several shapes can be selected.
+   . color scheme: the notes, dodecimes and bars can be colorized with
+     color  schemes  that are stored in a separate files. Click on the
+     color scheme to edit it (Atari TOS only) or to select a different
+     one.  The color scheme can be transposed to better fit to the key
+     of the piece. Notes can be drawn with normal, 3D or  no  borders.
+     The  3D  effect  looks  best  when the fill color is a little bit
+     lighter than the border color.
+   . line widths: whenever there is a  button  with  a  "-",  you  can
+     select the corresponding item's line width.
+
+
+2.5  The Filter Window
+======================
+
+This window  shows  information  from the MIDI file and its profile of
+the one document window that was most recently on top.
+
+The filter operates before display/printing. It does  not  modify  any
+MIDI  file  data.  If  you want to delete tracks or channels or rename
+tracks in the MIDI file itself, take a sequencer program.
+
+There are 3 groups of controls:
+
+   . tracks: with the slider or the arrow keys you select one  of  the
+     tracks  found  in  the MIDI file. You can switch each track on or
+     off, except those that  contain  no  note  events  and  therefore
+     appear  disabled.  Tracks  that  are  switched  off  here are not
+     displayed/printed at all. You can also switch all tracks together
+     on or off.
+   . channels:  here  you  can enable/disable the 16 MIDI channels per
+     track. A pressed button means that the corresponding  channel  is
+     switched  on.  Channel buttons of empty channels are disabled and
+     carry a minus label. Enabled buttons can be  triggered  from  the
+     keyboard  with the keys 0..F. You can also switch all channels of
+     a track together on or off. Use Contol+Tab and Enter  to  perform
+     these functions with the keyboard.
+   . show: with the radio buttons you can choose a text as track label
+     from one of those shown on the right side. The textes were  found
+     in the MIDI file. The chosen text will be displayed in each staff
+     as title for the track.
+
+
+2.6  The Document Window
+========================
+
+One document window per loaded MIDI  file  presents  the  note  events
+found therein in a human readable form.
+
+The window's  title bar indicates the whole path name of the MIDI file
+loaded.
+
+The window's height/width ratio depends on the paper  format  selected
+globally in the main menu.
+
+Besides the  MIDI  file  itself,  the  settings  in the parameters and
+filter windows determine what you see in the document window.
+
+The tool bar offers controls for leaving and zooming. On Atari TOS  it
+can  be  hidden  with  its  left  button  and becomes visible again by
+clicking into the document area.
+
+
+2.7  The Scheme Editor
+======================
+
+On Windows start the separate program file SCHMEDIT.EXE. On Unix/Linux
+start  the  separate  program file schmedit. On Atari TOS click on the
+color scheme in the parameters window to show the scheme editor.
+
+The scheme editor allows you to modify or create a new  color  scheme.
+The  scheme's  file  name  is  shown in the info line or title bar. If
+there is no file name, the scheme was copied from a fix coded  default
+scheme.
+
+The following objects accept different colors and/or fill styles:
+
+
++-----------------------------------+-------+-----------------------+
+| Object                            | Color | Fill Style            |
++-----------------------------------+-------+-----------------------+
+| note body                         | x     | x                     |
+| note ends, i.e. head and tail     | x     | x                     |
+| dodecime numbers and lines        | x     | x, empty = thick line |
+| track labels, bar numbers & lines | x     |                       |
+| staff background                  | x     | x                     |
++-----------------------------------+-------+-----------------------+
+
+On Atari  TOS  together  with  the  first opening of the scheme editor
+window a color selector and a fill  style  selector  window  open.  On
+other  operating systems the corresponding controls are integreated in
+the scheme editor window.
+
+When objects are selected, they will accept new colors  when  clicking
+on  a  color  or  fill style button (or when dragging them onto such a
+button).
+
+Selected objects get a dashed border line. There are different ways to
+select objects of the bottom right dodecime example:
+
+   . click on 1 object => the object will be selected.
+   . click  on 1 object holding down Shift => the object will be added
+     to the selection (Atari TOS).
+   . click on "all" => all objects of the corresponding type  will  be
+     selected or deselected.
+   . click  on  "7+5"  => 7 or 5 note bodies and ends will be selected
+     and the others  not  -  like  the  black  and  white  keys  on  a
+     traditional piano keyboard.
+   . click on "6+6" => 6 note bodies and ends will be selected and the
+     others not - like the  black  and  white  keys  on  my  chromatic
+     keyboard.
+
+Hint: if  you  want to select 6 note ends but not the bodies, click on
+"6+6" to select 6 note ends and bodies, then on "all"  in  the  "body"
+group  to  deselect  the  bodies.  Note  that when the heads are drawn
+selected, the tails are meant, too.
+
+The "View" control lets you select one of the 11 dodecimes to be shown
+in the example. It does not manipulate any data.
+
+Furthermore there are functions that manipulate colors and fill styles
+of all objects of a certain type:
+
+   . rotate: the objects cyclically exchange  their  fill  styles  and
+     colors.
+   . swap:  the  objects  exchange  their fill styles and colors as if
+     they were mirrored at the center.
+
+On Atari TOS store the modified scheme to update the  document  window
+with it.
+
+Hint: the  colors are stored as 5+5+5 bit red-greed-blue values in the
+scheme files. In screen resolutions with less than 32768  colors  some
+color  schemes might not be displayed correctly. The MIDI File Printer
+then uses  a  nearest  color  dithering.  Always  edit  schemes  in  a
+resolution with sufficient colors! On Windows/Unix/Linux only high and
+true color modes are supported!
+
+
+2.8  Profiling
+==============
+
+2 types of profiling are performed:
+
+  1. Default Profile: the  first  time  you  press  "Save  profile  as
+     default"  in  the  "File" menu you generate a new default profile
+     midi_prt.mi$. Its settings  can  later  be  recalled  with  "Load
+     default profile". Whenever a MIDI file with no individual profile
+     is opened, the settings from the default profile are used.
+
+  2. Individual Profiles: additionally you  have  the  possibility  to
+     attach  a  profile  to  a certain MIDI file. For example, if your
+     MIDI file is named sonata.mid, the accompanying profile  will  be
+     called  sonata.mi$.  Whenever  you  load  a  MIDI  file having an
+     individual profile, the settings from this profile are loaded and
+     overwrite any default settings.
+
+The following  table  lists  which  information  is  profiled in which
+profile type:
+
+
+     +-----------------------------------+---------+------------+
+     | Information                       | Default | Individual |
+     +-----------------------------------+---------+------------+
+     | main window position and size     | x       | x          |
+     | current page                      |         | x          |
+     | zoom value                        | x       | x          |
+     | tool bar visibility               | x       | x          |
+     | status bar visibility             | x       | x          |
+     +-----------------------------------+---------+------------+
+     | title of the piece                |         | x          |
+     | bars per line                     | x       | x          |
+     | length, sub-bars                  |         | x          |
+     | left, right, upper, lower borders | x       | x          |
+     | system, track and note distances  | x       | x          |
+     | notation mode                     | x       | x          |
+     | number of hor. lines per dodecime | x       | x          |
+     +-----------------------------------+---------+------------+
+     | note head, body, tail             | x       | x          |
+     | note height, dynamic              | x       | x          |
+     | note borders, 3D borders          | x       | x          |
+     +-----------------------------------+---------+------------+
+     | transpose                         |         | x          |
+     | scheme path                       | x       | x          |
+     +-----------------------------------+---------+------------+
+     | filter settings                   |         | x          |
+     +-----------------------------------+---------+------------+
+
+
+2.9  Hot Keys
+=============
+
+The hot keys in this chapter are not documented in any menu.
+
+Whenever a character is underlined, the corresponding control  can  be
+triggered by Alternate+character.
+
+On Atari  TOS  a double-click to an arrow button of a slider positions
+it to the corresponding end. In the filter window use  Contol+Tab  and
+Enter to switch all items on or off.
+
+On other  OS a selected slider or choice can be manipulated with arrow
+and page keys. Control+Q leaves the application in  a  way,  that  the
+currently  open  files  will  be  remebered  and re-opened at the next
+application start.
+
+
+Leafing
+-------
+
+These keys apply to the current document window:
+
+ Home:   to the first page on Atari TOS. To the  top  of  the  current
+         page on Windows/Unix/Linux.
+ +Shift or Control: to  the  last page on Atari TOS. To the first page
+         on Windows/Unix/Linux.
+ End:    to the bottom of the current page on Windows/Unix/Linux.
+ +Shift or Control: to the last page on Windows/Unix/Linux.
+ Arrow keys: a certain amount of pixels up/down/left/right.
+ +Shift or Control: horizontal/vertical slider up/down/left/right.
+
+
+Zooming
+-------
+
+These keys can be used to zoom the document window contents:
+
+ +:      zoom in.
+ -:      zoom out.
+
+
+Edit Fields
+-----------
+
+These hot keys are available on Atari TOS whenever a text  edit  field
+is current:
+
+ Delete: Erase selected text.
+ Insert: Insert character from popup menu.
+ Control+X: Cut selected text.
+ Control+C: Copy selected text.
+ Control+V: Paste from clipboard.
+ Arrow keys: left/right.
+ +Shift: to the beginning/end.
+ +Control: one word left/right.
+
+
+2.10  Command Line
+==================
+
+The MIDI   File   Printer   understands   the  follwing  command  line
+parameters:
+
+      midiprts.app ...
+
+ ...:    any number of MIDI file paths.
+
+
+
+3  Schemes
+**********
+
+
+3.1  Description
+================
+
+There are 4 sub-folders in the SCHEMES folder:
+
+  1. 002_COLS: black & white shemes
+  2. 016_COLS: at least 16 colors required
+  3. 256_COLS: at least 256 colors required
+  4. MANYCOLS: at least 32768 colors recommended
+
+There are schemes  representing  pythagorean  tunings,  clean  natural
+tunings, meantone tunings, chromatic tunings and piano keyboards.
+
+For the  chromatic  schemes  the  key  is not really critical. For the
+other ones you must transpose the key until it fits to the key of your
+piece  of  music. Use the transpose control of the parameter window to
+achieve this. For example, if you have a piece in  8  (G#)  major  you
+must transpose by 8 to make the scheme suitable for your piece.
+
+When the MIDI file printer detects a key signature in the MIDI file it
+initializes the transpose control correspondingly.
+
+You may find these abbreviations in the scheme file names:
+
+ 75:     traditional piano keyboard (7+5)
+ 66:     chromatic piano keyboard (6+6)
+ PYT:    pythagorean tuning
+ CLN:    clean natural tuning
+ MNT:    meantone tuning
+ CHR:    chromatic tuning
+
+For PYT and CLN, the  background  and  dodecime  colors  and  patterns
+should  harmonize  with  the  note colors of the tonic, dominant, sub-
+dominant and other related notes. Notes with far relationships, e.g. a
+F#  (6) in a piece written in C (0), should look contrasting. Read the
+file TUNINGS.HTM to learn more about tunings.
+
+
+3.2  Why these colors and patterns ?
+====================================
+
+My idea is simple:
+
+   . See with one glance the harmonic context of your piece by  simply
+     looking at the note colors of the corresponding bars.
+
+   . Let  the  development  of  a  sonata  appear  in  contrast to the
+     introduction of the main theme.
+
+
+
+4  Known Errors
+***************
+
+
+4.1  MIDI Files
+===============
+
+The text meta event is not intended  for  labelling  the  track.  Some
+sequenzers however write text events when meaning track name events.
+
+Often MIDI files contain a key signature event with a default value "0
+major" not fitting to the real key of the piece.
+
+
+4.2  Boxkite
+============
+
+On a ST Emulator / Windows 2000 installation  it  was  observed,  that
+Boxkite  always  hangs. If you experience this problem don't boot with
+Boxkite.
+
+
+4.3  Speedo GDOS on Atari TOS
+=============================
+
+Known Speedo GDOS 4.x and 5.0 problems with HP Deskjet driver:
+
+   . The quality must NOT be set to "draft". Otherwise lines  will  be
+     missing.
+   . Using  text  effect  "light"  leads to missing letters, therefore
+     this attribute is no more supported by the MIDI file printer.
+   . Using text effect "outlined" leads to a crash, this attribute  is
+     no more supported.
+
+Set the print area switch to "off" and select the right paper size.
+
+
+4.4  ST Emulator
+================
+
+With ST Emulator 1.6 several effects could be observed, that could not
+be reproduced on Magic 6 or TOS 4:
+
+   . More than 20 points font size can not be set.
+   . 3D ellipses are not correctly drawn (dashed upper line is  wrong)
+     in palette modes, but are drawn correctly in direct color mode.
+   . vst_height()  leads  to wrong results when printing with the GDOS
+     emulation. Therefore the  MIDI  file  printers  uses  vst_point()
+     only.  (Also  some  metafile  viewers  seem to have problems with
+     vst_height().)
+   . The activation of the "hot close box" window flag leads to  pixel
+     garbage on the screen. Therefore this flag is always off.
+
+
+4.5  WDIALOG on Atari TOS
+=========================
+
+The print  dialog  inits  the  GEM metafile path with "*.*", therefore
+selection of a file outside the current  directory  is  possible  only
+after change of the drive.
+
+Further effects  observed  together  with  the  last English ACS3 beta
+were:
+
+   . Print dialog works on a ST Emulator / Windows 98 installation.
+   . Works not on a  Magic  6.1  /  Falcon  installation  (pdlg_create
+     returns  always  NULL).  Behaviour is equal for MIDI File Printer
+     and the example programs that come together with WDIALOG.
+   . Crashes  on  a  TOS   4.04   on   Falcon   installation   (inside
+     aes/pdlg_create). The WDIALOG examples do NOT crash.
+   . Print dialog hangs on a ST Emulator / Windows 2000 installation.
+
+If you  get  too  many undesired effects together with WDIALOG, select
+"Use own dialogs" in the "Dialogs" menu.
+
+
+
+5  History
+**********
+
+In the  year  1991,  after  making  music  for  22  years  on  various
+instruments,  I  still had to intensively practice voicings and scales
+on the piano, and there were difficult keys and  easy  keys.  And  the
+moment  came when I did not understand anymore, why pieces like "Giant
+Steps"  from  John  Coltrane,  which  consist  of  of   simple   chord
+progressions,  should  be so much easier to play on a guitar than on a
+piano.
+
+I decided that it should become easier to play the piano, at least for
+myself.
+
+For this  purpose  I re-arranged the keys of my piano (of course I had
+to buy some new keys from the manufacturer, thanks to FATAR):
+
+     
+     
+     |  | | | | | | | | | | | |
+     |  | | | | | | | | | | | |
+     |  | | | | | | | | | | | | ...       OLD, asymmetrical
+     |  |_| | |_| |_| | |_| |_|
+     |   |  |  |   |  |  |   |
+     | A | H|C | D | E|F | G | A
+     |___|__|__|___|__|__|___|__
+     
+     
+     
+     
+     |  | |:| | | | | |.| | | |
+     |  | |:| | | | | |.| | | |
+     |  |A|:|0| |2| |4|.|6| |8| ...       NEW, more symmetrical
+     |  |_|:|_| |_| |_|.|_| |_|
+     |   |:::|   |   |...|   |
+     | 9 |:B:| 1 | 3 |.5.| 7 | 9
+     |___|:::|___|___|...|___|__
+     
+           ^           ^
+           |           |
+      dark brown  light brown
+     
+
+With the new arrangement of keys only 2 different fingerings  need  to
+be  practised,  with  the  old  arrangement  of keys there had been 12
+different fingerings.
+
+Then I started to learn how to play the new keyboard.  It  took  me  2
+years to get as good as I was before. But many things became easy, for
+example "Giant Steps".
+
+Unfortunately the  usual  western  note  writings  are  suitable   for
+asymmetrical keyboards. They are neither suitable for my new keyboard,
+nor are they suitable for guitars, violins, voices, ... .
+
+I had to invent a music notation fitting  to  my  new  keyboard.  This
+notation  would  also  fit  better  than  the  usual  one to all other
+instruments. Of course I tried to write the new notation  onto  paper,
+but  soon  I  realized  that  it  would  be better to write a computer
+program doing that work. MIDI files were already widely spread at that
+time,  and the Atari ST was the choice for MIDI applications. The MIDI
+File Printer was born.
+
+
+5.1  Version 0.2 (1993)
+=======================
+
+first public release
+
+
+5.2  Version 1.0
+================
+
+Corrected Faults:
+
+   . "exit" menu entry disappeared when selected  (in  certain  screen
+     resolutions). Now titled "quit", which is more usual.
+   . when  the last note system only contained note off events, the y-
+     sizes of  the  tracks  were  calculated  wrongly.  Now  they  are
+     calculated correctly.
+   . when  using  files  with  more than 9 tracks, a wrong track index
+     could be displayed in the filter window.
+
+New Features:
+
+   . more functions can be triggered from keyboard now.
+   . ACS modules can be loaded.
+   . V1.0 recognizes V0.2 parameter files and loads them correctly.
+   . the desktop has got a table-cloth.
+   . a program variant for computers with at least 68020 CPU and  with
+     FPU is also delivered.
+   . MIDI  File  Printer now allocates memory in blocks of at least 32
+     KByte. The GEMDOS memory management only can administer a limited
+     number  of  memory  blocks. Originally I intended to no more load
+     the printer driver  and  fonts  at  the  start  of  MIDI_PRT  but
+     directly  after  the  "go"  button in the printer window had been
+     pressed. This would have been a good new feature, since  MIDI_PRT
+     then  would  not  have  prevented other programs from printing in
+     multitasking environments. However this lead to  severe  problems
+     with  the  memory management. GEMDOS gave away memory blocks to 2
+     users, first to MIDI_PRT and  then  to  GDOS.  So,  suddenly  the
+     memory  blocks used by MIDI_PRT were written by GDOS. I could not
+     find a work around for this problem, the only hope is that  Atari
+     implements a better memory management.
+   . "info" entry in the menu bar of the desktop.
+   . printable  area  corresponds to inner area of the display window.
+     No more dashed lines necessary.
+   . turning over pages is possible if the display window or the  info
+     window is topped.
+   . changing  filter  settings immediately updates the display window
+     ("return" needs no more to be presssed).
+   . changing  parameters  immediately  updates  the  display   window
+     ("return" needs no more to be pressed).
+   . note  color,  background  pattern  and color now can be selected,
+     too.
+   . headline style is selectable. You do not need  to  install  extra
+     GDOS fonts if the quality with these VDI attributes is sufficient
+     for you.
+   . "save ..." and "load ..." entries in the menu  of  the  parameter
+     window  make  it possible to select a file name for the parameter
+     file.
+   . zooming also reachable via buttons in the drawer window.
+   . page field in the drawer window no more editable.
+   . more than 1 metafiles can be generated at the same time.
+   . SCRAP.GEM is generated to support the "paste" commands  of  other
+     programs.
+   . the page currently put out is displayed.
+
+
+5.3  Version 1.1
+================
+
+New Features:
+
+   . up to 128 GDOS fonts supported (formerly 19)
+
+
+5.4  Version 1.2
+================
+
+Corrected Faults:
+
+   . Now  the  fonts  are  sorted  correctly  by their names (up to 32
+     characters long).
+
+
+5.5  Version 1.5
+================
+
+Corrected Faults:
+
+   . bar length now measured  in  1/8.  In  the  former  releases  for
+     example 9/8 bars could not be properly displayed.
+
+New Features:
+
+   . filter window indicates empty channels (buttons disabled)
+   . different patterns possible, dependent on note number
+   . line notation similar to Beyreuther's notation supported
+
+
+5.6  Version 2.0 (1995)
+=======================
+
+Corrected Faults:
+
+   . wrong dodecime numbers in Beyreuther mode
+   . font window not updated after loading of parameter file
+
+Known Faults:
+
+   . dragging more than 1 icon of the same file onto the trash bin can
+     lead to an endless loop showing alert boxes.
+
+New Features:
+
+   . 2 new notation modes
+   . 0 now corresponds to note "C",  no  more  to  "H"  !  This  is  a
+     concession to Marhold's and Beyreuther's notations.
+   . numbering of bars
+   . up to 12 different note colors per dodecime possible
+   . up to 9 different fill patterns per dodecime possible
+   . up to 12 different background colors possible
+   . up to 9 different background patterns possible
+   . thick lines instead of patterns can be chosen for the background
+   . 1,2,3,4 or 6 horizontal lines per dodecime possible
+   . different colors for different icons (per MIDI file)
+
+Version 0.x and version 1.x parameter files are no longer supported !
+
+
+5.7  Version 2.0a
+=================
+
+New Features:
+
+   . a  timer driven refresh (3 seconds) after text editing now avoids
+     screen confusion
+   . page number can be entered directly in the drawer  window,  timer
+     driven refresh with automatic input correction
+   . note number directly displayed in the parameters window
+   . no  more  info  line  in the display window saves precious screen
+     area
+
+
+5.8  Version 2.1
+================
+
+Corrected Faults:
+
+   . printers with different resolutions in x- and  y-direction  (e.g.
+     720 dpi * 360 dpi) now correctly supported.
+
+New Features:
+
+   . takes long file names on command line
+   . takes more than 1 file name on command line
+   . only  1  metafile "SCRAP.GEM" generatable, pages are separated by
+     "form  advance".  A  good  graphics  program  should  treat  that
+     correctly (try latest versions of ArtWorx and Kandinsky).
+
+
+5.9  Version 3.0 (1999 February)
+================================
+
+Corrected Faults:
+
+   . user interface harmonized a little bit with current fashion
+   . page  numbers  start  with  1,  not 0 (a matter of philisophy and
+     psychology)
+
+New Features:
+
+   . primitive help function implemented
+   . open MIDI files are remembered
+   . new triangle body for notes
+   . new circular ends for notes
+   . 256 colors supported
+   . color and style for staff background selectable
+   . colors and styles  for  each  of  the  12  note  ends  separately
+     selectable
+   . powerful controls for color and style manipulation
+   . footline  showing date, file name and size, page and total number
+     of pages, and more ...
+   . title line only on first page to save paper
+   . sophisticated *.par examples, supporting pythagorean, natural and
+     equal tunings
+
+
+5.10  Version 0.0 for Win32 (1999 November)
+===========================================
+
+first public  release  of  the  windows variant, a Version 3.0 feature
+content without scheme editing
+
+
+5.11  Version 4.0 for TOS (2003 January)
+========================================
+
+New Features:
+
+   . complete re-design of the user interface
+   . support of Magic file selector and multi file selection
+   . use of WDIALOG print and font selection dialogs
+   . support of image file printing
+   . support of VA_START for MIDI files
+   . support of drag & drop for MIDI file and scheme files
+   . support of bubble help
+   . separation of scheme and profiles now also for the TOS variant
+   . support of Falcon direct color mode
+   . evaluation of more MIDI meta events
+   . line width adjustable (high resolution printers are affordable!)
+
+Changes until 2004 January:
+
+   . Options menu split into Options and Dialogs menues.
+   . Own print and ACS font dialogs as alternative to WDIALOG. WDIALOG
+     calls can be deactivated at the user interface.
+   . Shorter footline textes to allow bigger font.
+   . Bug fixes (printing, metafile generation).
+   . Produced with first English ACS3 beta version.
+
+
+5.12  Version 4.1 for TOS and Windows (2005 June)
+=================================================
+
+Corrected Faults:
+
+   . (hollow) ellipses could be drawn partly outside the staff and not
+     cut
+   . more than 127 sub-bars could be adjusted (who needs this  ?)  but
+     were not drawn correctly
+
+New Features:
+
+The Windows  variant  was  re-implemented  based  on wxWindows version
+2.4.2 (now called wxWidgets). This  allows  to  publish  the  complete
+source  code  and  to  build  Unix and Mac OS variants with minor code
+changes. The Windows and TOS  variants  now  again  provide  the  same
+feature  set.  The former Windows version 0.0 dependet on a commercial
+library.
+
+
+5.13  Version 4.1a for TOS and Windows (2005 December)
+======================================================
+
+Corrected Faults:
+
+   . not drawn cut notes at begin of track: fixed
+   . TOS variant:  wrong  color  for  horizontal  lines  around  track
+     background made them invisible
+
+
+5.14  Version 4.2 for TOS and wxWidgets (2008 August)
+=====================================================
+
+Corrected Faults:
+
+   . wxWidgets  variant:  default  profile loading did only update the
+     color scheme path, not the color scheme itself.
+   . wxWidgets variant: not  choosing  a  file  when  the  application
+     started could crash the application.
+   . home.eplus-online.de  and  with  it the homepage of the MIDI File
+     Printer was switched off. Bye-Bye E-Plus!
+
+New Features:
+
+The wxWidgets variant was re-based on wxWidgets version 2.8. Makefiles
+for Unix/Linux are now included. On Windows the application was tested
+with wxWidgets 2.8.8 non-unicode and on Linux (andLinux  Ubuntu)  with
+wxWidgets  2.8.0  GTK-unicode.  The application has no unicode support
+but now can be linked to unicode and non-unicode variants of  the  GUI
+libraries.  Few  code changes were made to support Unix like operating
+systems (because of file path conventions and C library function names
+and availability).
+
+The license model changed to GPL V3.
+
+
+5.15  Version 4.3 for TOS and wxWidgets (2009 February)
+=======================================================
+
+Corrected Faults:
+
+   . borders of ellipses not always drawn correctly
+   . tail-less triangles no drawn correctly
+
+
+

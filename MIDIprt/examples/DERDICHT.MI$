@@ -1,0 +1,47 @@
+[ MidiPrt ]
+font = 1
+titleHeight = 18
+barsPerSystem = 10
+barLength = 8
+subBarLevel = 1
+leftBorder  = 1
+rightBorder = 1
+upperBorder = 1
+lowerBorder = 1
+systemDistance = 5
+trackDistance  = 4
+noteDistance   = 0.400000
+noteHeight =  5
+noteDynamic = 0
+horizontalLines = 2
+lineWidthHorizontal = 0.2
+lineWidthBars       = 0.2
+lineWidthSubBars    = 0.2
+lineWidthNotes      = 0.2
+transpose = 7
+title = Der Dichter spricht - R. Schumann op.15
+scheme = SCHEMES\MANYCOLS\66FOREST.PAR
+titleEffects = 
+mode = Rieder
+noteHead = triangle
+noteBody = ellipse
+noteTail = 
+noteBorders = yes
+trackFilter = off,on
+channelFilter = 0,3
+trackLabel = name,instrument
+
+[ WindowMenu ]
+ToolBar   = yes
+StatusBar = yes
+
+[ ToolBar ]
+Zoom = 98
+Page = 1
+
+[ MainWindow ]
+left   = 0
+top    = 40
+right  = 809
+bottom = 921
+open   = yes

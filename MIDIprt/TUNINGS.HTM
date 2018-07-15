@@ -1,0 +1,203 @@
+<html>
+<head>
+<title>
+Theory
+</title>
+<meta name="Author" content="Harald Rieder">
+</head>
+<body>
+<h1><a name="Theory">Tunings</a></h1>
+<h2>Author &amp; License</h2>
+<p>Author:<br>
+<br>
+  Harald Wolfgang Rieder&nbsp;<br>
+  Schwilkenhofstrasse 5<br>
+  D-70439 Stuttgart<br>
+  Germany<br>
+  1999 February
+</p>
+<p>License:<br>
+<br>GNU Free Documentation License Version 1.2</p>
+<h2>History
+</h2>
+<p>In the 18th century the equal tuning of musical instruments won through
+against the meantone tuning and against natural scales. Those sounded better but
+had a major disadvantage: they only allowed making music in a subset of the 12
+keys. If you wanted to make music for example in F#, and your piano was tuned in
+C, you had to retune each single key before playing. Of course, most people
+restricted themselves to few keys, wherein their instruments sounded good. If
+you are a musician, you surely know the story about J. S. Bach's
+&quot;wohltemperiertes Klavier&quot; ...
+</p>
+<h2>Theory
+</h2>
+<p>Let me first redefine the terms &quot;note&quot;,
+&quot;interval&quot; and &quot;distance&quot; as used in this
+document.
+</p>
+<p>A &quot;note&quot; is identified by its MIDI note number. So the
+lowest C is note 0, the lowest C# is note 1, and so on. The next
+higher C is note 12 then - in the decimal system. To indicate the
+relationship between different C's, we use the dodecimal system here,
+leading to note numbers 0, 10, 20, 30, ... for the different C's. The
+least significant digit of a C thus will always be 0. So we can
+shortly speak of &quot;0&quot; and mean all C's together.
+</p>
+<blockquote>
+<p>
+<table border=1 frame=box>
+<tr><td align=left><b>Classical&nbsp;</b></td><td align=left><b>This document&nbsp;</b></td></tr>
+<tr><td align=left>C</td><td align=left>0</td></tr>
+<tr><td align=left>C#</td><td align=left>1</td></tr>
+<tr><td align=left>D</td><td align=left>2</td></tr>
+<tr><td align=left>D#</td><td align=left>3</td></tr>
+<tr><td align=left>E</td><td align=left>4</td></tr>
+<tr><td align=left>F</td><td align=left>5</td></tr>
+<tr><td align=left>F#</td><td align=left>6</td></tr>
+<tr><td align=left>G</td><td align=left>7</td></tr>
+<tr><td align=left>G#</td><td align=left>8</td></tr>
+<tr><td align=left>A</td><td align=left>9</td></tr>
+<tr><td align=left>A#</td><td align=left>A</td></tr>
+<tr><td align=left>H</td><td align=left>B</td></tr>
+</table>
+
+<p>Least significant digit of note number (dodecimal system)
+</p>
+</blockquote>
+<p>&quot;Interval&quot; is simply the difference between MIDI note
+numbers. For example, the lowest MIDI note number is 0 and corresponds
+to a very low C. The note with number 5 is an F. The interval between
+the F and the C then is 5&nbsp;-&nbsp;0&nbsp;=&nbsp;5.
+</p>
+<p>A &quot;distance&quot; finally shall mean the real frequency
+distance of 2 sounding notes. To be more exact, the distance between 2
+notes is the logarithm of the ratio of their sounds' basic
+frequencies: log(f2/f1).
+</p>
+<p>&quot;Tuning&quot; means, that the distance of an interval gets
+modified. The interval itself is not changed, since it is only the
+difference between the numbers of its notes.
+</p>
+<p>Intervals are tuned &quot;clean&quot; if their distances
+correspond to simple frequency ratios: the simpler the ratio the
+cleaner the interval. For example the octave - which is the interval
+&quot;10&quot; in our dodecimal system - normally consists of 2 tones
+tuned in the ratio 2/1. Other good sounding ratios are 3/2, 4/3, 5/4,
+6/5, 7/4, 7/5, ... .
+</p>
+<p>All tunings discussed in the following will not change the clean
+tuning 2/1 of the interval 10.&nbsp;
+</p>
+<p>The most convenient today's &quot;well tempered&quot; tuning uses
+the ratios
+</p>
+<blockquote>
+<p>2^(1/12), 2^(2/12), 2^(3/12), ...
+</p>
+</blockquote>
+<p>2^(3/12) you find from C to D#, or from D to F, for example.
+Actually, besides the 10s with their ratios of 2^(12/12) = 2/1, there
+are no other rational frequency ratios, but only irrational numbers.
+The easy formula
+</p>
+<blockquote>
+<p>f / f0 = 2 ^ ( n / 12 )
+</p>
+</blockquote>
+<p>expresses the relation between MIDI note number &quot;n&quot; and
+sounding frequency &quot;f&quot;. &quot;f0&quot; is the frequency of
+the lowest MIDI note 0.
+</p>
+<p>Pythagoras is supposed to have invented the
+&quot;pythagoraen&quot; tuning. Beginning from any special note other
+notes are found by repeated application of clean 7s (quints):
+</p>
+<blockquote>
+<p>1 &gt; 8 &gt; 3 &gt; A &gt; 5 &gt; 0 &gt; 7 &gt; 2 &gt; 9 &gt; 4
+&gt; B &gt; 6
+</p>
+<p>&quot;&gt;&quot; means, that right and left notes have a ratio of
+3/2.
+</p>
+</blockquote>
+<p><small>(You could apply for example this colour scheme in the MIDI File Printer for a pythagoraen
+tuning:<br>
+<span style="background-color: #FF0000">    1=red</span>...<span style="background-color: #00FF00">0=green</span>...<span style="background-color: #0000FF">6=blue</span>  
+with a smooth course from red over green to blue, like a
+rainbow.)<br></small>
+</p>
+<p>Thus you are lead to tunings like the following, which is repeated every dodecime:
+</p>
+<blockquote>
+<p>
+<table border=1 frame=box>
+<tr><td align=left><b>Distance</b></td><td align=left><b>Tuning</b></td><td align=left></td></tr>
+<tr><td align=left>0</td><td align=left>1/1</td><td align=left>* f</td></tr>
+<tr><td align=left>1</td><td align=left>256/243</td><td align=left>* f</td></tr>
+<tr><td align=left>2</td><td align=left>9/8</td><td align=left>* f</td></tr>
+<tr><td align=left>3</td><td align=left>32/27</td><td align=left>* f</td></tr>
+<tr><td align=left>4</td><td align=left>81/64</td><td align=left>* f</td></tr>
+<tr><td align=left>5</td><td align=left>4/3</td><td align=left>* f</td></tr>
+<tr><td align=left>6</td><td align=left>729/512</td><td align=left>* f</td></tr>
+<tr><td align=left>7</td><td align=left>3/2</td><td align=left>* f</td></tr>
+<tr><td align=left>8</td><td align=left>128/81</td><td align=left>* f</td></tr>
+<tr><td align=left>9</td><td align=left>27/16</td><td align=left>* f</td></tr>
+<tr><td align=left>A</td><td align=left>16/9</td><td align=left>* f</td></tr>
+<tr><td align=left>B</td><td align=left>243/128</td><td align=left>* f</td></tr>
+</table>
+</p>
+
+</blockquote>
+<p>This pythagoraen tuning has a &quot;woolf's 7&quot; between 6 and
+1, i.e. the &quot;quint circle&quot; does never close (like it does
+after 12 steps in the well tempered tuning). Besides that, it sounds
+very similar to today's equal spacing. The reason is, that 2^(7/12)
+nearly equals 3/2.
+</p>
+<p>With polyphonic music coming up more and more, a more
+sophisticated tuning was invented: the clean tuning. Beginning from
+any special note, all other notes are found by repeated application of
+clean 7s and clean 4s:
+</p>
+<blockquote>
+<p>
+<table>
+<tr><td align=left>9</td><td align=left>&gt;</td><td align=left>4</td><td align=left>&gt;</td><td align=left>B</td><td align=left>&gt;</td><td align=left>6</td></tr>
+<tr><td align=left>^</td><td align=left></td><td align=left>^</td><td align=left></td><td align=left>^</td><td align=left></td><td align=left>^</td></tr>
+<tr><td align=left>5</td><td align=left>&gt;</td><td align=left>0</td><td align=left>&gt;</td><td align=left>7</td><td align=left>&gt;</td><td align=left>2</td></tr>
+<tr><td align=left>^</td><td align=left></td><td align=left>^</td><td align=left></td><td align=left>^</td><td align=left></td><td align=left>^</td></tr>
+<tr><td align=left>1</td><td align=left>&gt;</td><td align=left>8</td><td align=left>&gt;</td><td align=left>3</td><td align=left>&gt;</td><td align=left>A</td></tr>
+</table>
+</p>
+
+<p>&quot;&gt;&quot; means 3/2 used for the 7s. &quot;^&quot; means
+5/4 used for the 4s.
+</p>
+</blockquote>
+<p>Thus leading to tunings like this:
+</p>
+<blockquote>
+<p>
+<table border=1 frame=box>
+<tr><td align=left><b>Distance</b></td><td align=left><b>Tuning</b></td><td align=left></td></tr>
+<tr><td align=left>0</td><td align=left>1/1</td><td align=left>* f</td></tr>
+<tr><td align=left>1</td><td align=left>16/15</td><td align=left>* f</td></tr>
+<tr><td align=left>2</td><td align=left>9/8</td><td align=left>* f</td></tr>
+<tr><td align=left>3</td><td align=left>6/5</td><td align=left>* f</td></tr>
+<tr><td align=left>4</td><td align=left>5/4</td><td align=left>* f</td></tr>
+<tr><td align=left>5</td><td align=left>4/3</td><td align=left>* f</td></tr>
+<tr><td align=left>6</td><td align=left>45/32</td><td align=left>* f</td></tr>
+<tr><td align=left>7</td><td align=left>3/2</td><td align=left>* f</td></tr>
+<tr><td align=left>8</td><td align=left>8/5</td><td align=left>* f</td></tr>
+<tr><td align=left>9</td><td align=left>5/3</td><td align=left>* f</td></tr>
+<tr><td align=left>A</td><td align=left>9/5</td><td align=left>* f</td></tr>
+<tr><td align=left>B</td><td align=left>15/8</td><td align=left>* f</td></tr>
+</table>
+</p>
+
+</blockquote>
+<p>This tuning contains many beautiful ratios, but is suitable only
+for easy pieces in the tonica key.&nbsp;
+</p>
+</body>
+</html>

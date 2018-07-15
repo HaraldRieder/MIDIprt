@@ -1,0 +1,47 @@
+[ MidiPrt ]
+font = 1
+titleHeight = 18
+barsPerSystem = 12
+barLength = 8
+subBarLevel = 1
+leftBorder  = 1
+rightBorder = 1
+upperBorder = 1
+lowerBorder = 1
+systemDistance = 5
+trackDistance  = 4
+noteDistance   = 0.300000
+noteHeight =  6
+noteDynamic = 0
+horizontalLines = 2
+lineWidthHorizontal = 0.2
+lineWidthBars       = 0.2
+lineWidthSubBars    = 0.2
+lineWidthNotes      = 0.2
+transpose = 5
+title = Fireworks Bour‚e (2 minor) - G. F. H„ndel
+scheme = SCHEMES\256_COLS\CHRVIOLT.PAR
+titleEffects = 
+mode = Mix
+noteHead = triangle
+noteBody = triangle
+noteTail = 
+noteBorders = yes
+trackFilter = off,on,on,on
+channelFilter = 0,1,2,10
+trackLabel = instrument,text,text,text
+
+[ WindowMenu ]
+ToolBar   = yes
+StatusBar = no
+
+[ ToolBar ]
+Zoom = 110
+Page = 1
+
+[ MainWindow ]
+left   = 29
+top    = 59
+right  = 933
+bottom = 964
+open   = yes

@@ -1,0 +1,47 @@
+[ MidiPrt ]
+font = 1
+titleHeight = 18
+barsPerSystem = 12
+barLength = 3
+subBarLevel = 2
+leftBorder  = 1
+rightBorder = 1
+upperBorder = 3
+lowerBorder = 1
+systemDistance = 5
+trackDistance  = 4
+noteDistance   = 0.300000
+noteHeight =  5
+noteDynamic = 0
+horizontalLines = 4
+lineWidthHorizontal = 0.2
+lineWidthBars       = 0.2
+lineWidthSubBars    = 0.2
+lineWidthNotes      = 0.2
+transpose = 8
+title = Etude No. 25 (8 major) - F. Chopin
+scheme = 
+titleEffects = 
+mode = Rieder
+noteHead = triangle
+noteBody = ellipse
+noteTail = triangle
+noteBorders = yes
+trackFilter = off,on
+channelFilter = 0,11
+trackLabel = instrument,name
+
+[ WindowMenu ]
+ToolBar   = yes
+StatusBar = yes
+
+[ ToolBar ]
+Zoom = 102
+Page = 1
+
+[ MainWindow ]
+left   = 63
+top    = 100
+right  = 925
+bottom = 944
+open   = yes

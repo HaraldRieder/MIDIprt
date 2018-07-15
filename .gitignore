@@ -1,0 +1,7 @@
+.svn
+*.o
+*.P
+*.swp
+*.cfg
+*.CFG
+

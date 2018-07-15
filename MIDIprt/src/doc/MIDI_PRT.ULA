@@ -1,0 +1,82 @@
+This is UDO Version 6.4.1 for Win32
+Copyright (c) 1995-2001 by Dirk Hagedorn
+Copyright (c) 2001-2004 by The UDO community
+UDO is Open Source (see http://www.udo-open-source.org for further information).
+
+######## errors, warnings and notes:
+
+Error: MIDI_PRT.U 26: missing parameter(s) at !use_ansi_tables
+Error: MIDI_PRT.U 5: unknown command: !code_tos
+Error: MIDI_PRT.U 6: unknown command: !english
+Error: MIDI_PRT.U 8: unknown command: !title
+Error: MIDI_PRT.U 9: unknown command: !program
+Error: MIDI_PRT.U 10: unknown command: !version
+Error: MIDI_PRT.U 11: unknown command: !date
+Error: MIDI_PRT.U 13: unknown command: !author
+Error: MIDI_PRT.U 14: unknown command: !street
+Error: MIDI_PRT.U 15: unknown command: !town
+Error: MIDI_PRT.U 16: unknown command: !country
+Error: MIDI_PRT.U 17: unknown command: !email
+Error: MIDI_PRT.U 18: unknown command: !email
+Error: MIDI_PRT.U 20: unknown command: !no_toc_subsubnodes
+Error: MIDI_PRT.U 31: !use_ansi_tables ignored outside preamble
+Error: MIDI_PRT.U 34: no title data available
+Warning: MIDI_PRT.txt 79: underfull line: 63: explicit
+Note: MIDI_PRT.U 64: check this paragraph
+Warning: MIDI_PRT.txt 165: underfull line: 61: direction.
+Note: MIDI_PRT.U 157: check this paragraph
+Warning: MIDI_PRT.txt 173: underfull line: 63: NOTATION
+Note: MIDI_PRT.U 163: check this paragraph
+Warning: MIDI_PRT.txt 241: underfull line: 63: specification
+Note: MIDI_PRT.U 230: check this paragraph
+Warning: MIDI_PRT.txt 290: underfull line: 59: installation
+Note: MIDI_PRT.U 274: check this paragraph
+Warning: MIDI_PRT.txt 312: underfull line: 62: http://acspro.atari.org
+Note: MIDI_PRT.U 291: check this paragraph
+Warning: MIDI_PRT.txt 415: underfull line: 61: Beyreuther's
+Note: MIDI_PRT.U 396: check this paragraph
+Warning: MIDI_PRT.txt 530: underfull line: 61: traditional
+Note: MIDI_PRT.U 509: check this paragraph
+Warning: MIDI_PRT.txt 558: underfull line: 62: resolution
+Note: MIDI_PRT.U 538: check this paragraph
+Warning: MIDI_PRT.txt 745: underfull line: 63: introduction
+Note: MIDI_PRT.U 729: check this paragraph
+Warning: MIDI_PRT.txt 818: underfull line: 58: aes/pdlg_create).
+Note: MIDI_PRT.U 791: check this paragraph
+Warning: MIDI_PRT.txt 830: underfull line: 61: instruments,
+Note: MIDI_PRT.U 805: check this paragraph
+Warning: MIDI_PRT.txt 834: underfull line: 60: progressions,
+Note: MIDI_PRT.U 805: check this paragraph
+Warning: MIDI_PRT.txt 878: underfull line: 63: asymmetrical
+Note: MIDI_PRT.U 850: check this paragraph
+Warning: MIDI_PRT.txt 883: underfull line: 63: instruments.
+Note: MIDI_PRT.U 857: check this paragraph
+Warning: MIDI_PRT.txt 905: underfull line: 63: calculated
+Note: MIDI_PRT.U 870: check this paragraph
+Warning: MIDI_PRT.txt 921: underfull line: 63: directly
+Note: MIDI_PRT.U 896: check this paragraph
+Warning: MIDI_PRT.txt 1004: underfull line: 63: concession
+Note: MIDI_PRT.U 963: check this paragraph
+Warning: MIDI_PRT.txt 1045: underfull line: 63: correctly
+Note: MIDI_PRT.U 1002: check this paragraph
+
+######## information:
+
+source file: MIDI_PRT.U
+
+Warnings:       19
+Notes:          19
+Errors:         16
+
+Nodes:          5
+Subnodes:       40
+Subsubnodes:    3
+Subsubsubnodes: 0
+Macros:         0
+Defines:        0
+Hyphens:        0
+
+started:  20:35:02
+finished: 20:35:02
+
+Output written to MIDI_PRT.txt

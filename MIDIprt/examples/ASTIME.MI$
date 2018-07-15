@@ -1,0 +1,47 @@
+[ MidiPrt ]
+font = 1
+titleHeight = 18
+barsPerSystem = 10
+barLength = 8
+subBarLevel = 3
+leftBorder  = 1
+rightBorder = 1
+upperBorder = 1
+lowerBorder = 1
+systemDistance = 5
+trackDistance  = 4
+noteDistance   = 0.300000
+noteHeight =  5
+noteDynamic = 0
+horizontalLines = 2
+lineWidthHorizontal = 0.2
+lineWidthBars       = 0.2
+lineWidthSubBars    = 0.2
+lineWidthNotes      = 0.2
+transpose = 2
+title = As Time Goes By (2 major)
+scheme = SCHEMES\256_COLS\75rainbw.par
+titleEffects = underlined
+mode = Mix
+noteHead = 
+noteBody = ellipse
+noteTail = 
+noteBorders = yes
+trackFilter = off,on,on
+channelFilter = 0,1,3
+trackLabel = instrument,text,instrument
+
+[ WindowMenu ]
+ToolBar   = yes
+StatusBar = no
+
+[ ToolBar ]
+Zoom = 100
+Page = 1
+
+[ MainWindow ]
+left   = 124
+top    = 47
+right  = 982
+bottom = 1025
+open   = no

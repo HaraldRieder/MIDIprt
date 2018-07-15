@@ -1,0 +1,47 @@
+[ MidiPrt ]
+font = 1005
+titleHeight = 20
+barsPerSystem = 11
+barLength = 4
+subBarLevel = 1
+leftBorder  = 1
+rightBorder = 4
+upperBorder = 3
+lowerBorder = 5
+systemDistance = 6
+trackDistance  = 4
+noteDistance   = 0.400000
+noteHeight =  6
+noteDynamic = 9
+horizontalLines = 2
+lineWidthHorizontal = 0.2
+lineWidthBars       = 0.2
+lineWidthSubBars    = 0.2
+lineWidthNotes      = 0.2
+transpose = 5
+title = Tr„umerei - R. Schumann op.15
+scheme = SCHEMES\MANYCOLS\66FLOWER.PAR
+titleEffects = underlined
+mode = Rieder
+noteHead = triangle
+noteBody = ellipse
+noteTail = 
+noteBorders = yes
+trackFilter = on
+channelFilter = 1
+trackLabel = instrument
+
+[ WindowMenu ]
+ToolBar   = yes
+StatusBar = yes
+
+[ ToolBar ]
+Zoom = 95
+Page = 1
+
+[ MainWindow ]
+left   = 9
+top    = 33
+right  = 913
+bottom = 978
+open   = yes
