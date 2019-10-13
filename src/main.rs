@@ -3,7 +3,7 @@ extern crate glib;
 extern crate gio;
 use gtk::prelude::*;
 use gio::prelude::*;
-use gtk::{ButtonsType, DialogFlags, MessageType, MessageDialog, Window};
+use gtk::{ButtonsType, DialogFlags, MessageType, MessageDialog, Window, Menu, MenuBar, MenuItem, Label};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -134,12 +134,35 @@ fn build_ui(application: &gtk::Application) {
                           &windows);
     }));
 
+    let v_box = gtk::Box::new(gtk::Orientation::Vertical, 10/*TODO spacing*/);
+    let menubar = gtk::MenuBar::new();
+    let file = MenuItem::new_with_label("File");
+    let file_label = Label::new(Some("File")); // warum noch ein Label????
+    let quit = MenuItem::new_with_label("Quit");
+    let file_box = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+    //file_box.pack_start(&file_image, false, false, 0);
+    file_box.pack_start(&file_label, true, true, 0);
+    let file_item = MenuItem::new();
+    file_item.add(&file_box);
+    let menu = Menu::new();
+    menu.append(&file_item);
+    menubar.append(&file);
+
+
+    let toolbar = gtk::Toolbar::new();
+    let label = gtk::Label::new(Some("page:"));
+    //toolbar.add(&label); // Gtk-CRITICAL **: 09:55:27.832: gtk_toolbar_insert: assertion 'GTK_IS_TOOL_ITEM (item)' failed
+
+    //v_box.pack_start(&toolbar, false, false, 0);
+    v_box.pack_start(&menubar, false, false, 0);
+    window.add(&v_box);
+
     // Now we add a layout so we can put all widgets into it.
     let layout = gtk::Box::new(gtk::Orientation::Vertical, 5);
     layout.add(&windows_title_entry);
     layout.add(&button);
     layout.add(&entry);
-    window.add(&layout);
+//    window.add(&layout);
 
     window.set_focus(Some(&button));
 
