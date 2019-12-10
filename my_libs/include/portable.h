@@ -18,7 +18,12 @@
 	#define max(A,B) (((A) > (B)) ? (A) : (B))
 #endif
 
-#if defined (__PALM__)
+#if defined (__PUREC__)
+#	include <acstype.h>
+#	ifndef UBYTE
+		typedef unsigned char UBYTE ;
+#	endif
+#elif defined (__PALM__)
 #include <PalmOS.h>
 #	ifndef INT32 
 		typedef Int32 INT32 ;

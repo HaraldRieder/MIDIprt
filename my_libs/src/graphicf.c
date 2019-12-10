@@ -12,8 +12,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#if defined (__PUREC__)
+#	include <acs.h>
+#else
 //#	include <ui_dsp.hpp>	  // because of RGB macros
-#include <my_vdi.h>
+#   include <my_vdi.h>
+#endif
 #include <graphicf.h>
 #include <graphic.h>
 
@@ -448,6 +452,7 @@ void draw_lines
 }
 
 
+#ifndef __PUREC__
 INT32 RGB_15to24(UINT16 in) 
 {
 	int red   = five_to_eight_bits( in & RGB_RED ) ;
@@ -463,5 +468,5 @@ INT16 RGB_24to15(UINT32 in)
 	int blue  = eight_to_five_bits( GetBValue(in) ) ;
 	return (blue << 10) | (green << 5) | red ;
 }
-
+#endif
 

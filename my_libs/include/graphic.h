@@ -24,6 +24,33 @@
 #define MICROMETER_PER_POINT   353 
 #define MICROMETER_PER_INCH  25400
 
+#if defined (__PUREC__)
+
+/* correct wrong definition to 7 in vdi.h */
+#ifdef IP_SOLID
+#	undef IP_SOLID
+#	define IP_SOLID 8
+#endif
+#ifndef IP_7PATT
+#	define IP_7PATT 7
+#endif
+
+#include <aes.h>
+typedef INT16 VDI_HANDLE ;
+typedef INT16 VDI_FONT_ID ;
+typedef INT32 X_HANDLE ;
+
+void vs_clip_from_parmblk(VDI_HANDLE handle, const PARMBLK* parmblk) ;
+	/* calculates clipping points from parmblk and switches clipping on */
+void te_color(OBJECT *obj, int color) ;
+	/* sets color of GEM text object to 'color' */
+	/* no verification whether object type is really text! */
+
+#define is_rgb_handle(xhandle)   ((((INT32)xhandle) & 0x00010000l) >> 16)
+#define mark_handle_rgb(xhandle) ( ((INT32)xhandle) | 0x00010000l )
+
+#else
+
 #include "my_vdi.h"
 //typedef short INT16 ;
 typedef void * X_HANDLE ; // always RGB, extended-bit not used on other platforms
@@ -37,7 +64,9 @@ typedef void * X_HANDLE ; // always RGB, extended-bit not used on other platform
 #endif
 
 /* on wxWindows we always use RGBs */
-//#define is_rgb_handle(xhandle) 1
+#define is_rgb_handle(xhandle) 1
+
+#endif
 
 void rgb_fcolor(X_HANDLE handle, int color) ;	/* fill color */
 void rgb_lcolor(X_HANDLE handle, int color) ;	/* line color */
@@ -98,8 +127,14 @@ void copy_color_palette(
 #define thousand_to_5bit(x) ( (((int)(x) * 0x1f + 500)/1000) )
 
 /* non-zero in direct color mode: */
-//#define direct_color 1 // other platforms must have at least high color
-#define DC_INDEX 255   // always 256 palette colors in emulation mode
+#ifdef __PUREC__
+#  define direct_color (ACSblk->nplanes >= 15)
+/* index to use when drawing in direct color mode: */
+#  define DC_INDEX     (ACSblk->ncolors - 1) 
+#else
+#  define direct_color 1 // other platforms must have at least high color
+#  define DC_INDEX 255   // always 256 palette colors in emulation mode
+#endif
 
 /* max palette handled by RGB table */
 #define MAX_COLORS 256

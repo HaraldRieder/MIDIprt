@@ -446,4 +446,9 @@ void v_ellpie( VDI_HANDLE handle, int x, int y, int xradius,
   vd->dc->DrawEllipticArc(x - xradius, y - yradius, 2*xradius+1, 2*yradius+1, begang/10, endang/10) ;
 }
 
+//void v_rfbox ( VDI_HANDLE handle, int *pxyarray )
+//{
+	// ???? How to emulate this ???
+//	v_bar(handle, pxyarray) ;
+//} 
 

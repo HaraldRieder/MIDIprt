@@ -12,21 +12,27 @@
 
 #define SQRT_3 17/10	/* sqrt(3) is around 1.7 */
 
-//static int my_index_to_rgb(int index)
-//{
-//#ifdef __PUREC__
-//	if (direct_color)
-		//return index ;
-//	return index_to_rgb(index) ;
-//#else
-//	return index ;
-//#endif
-//}
+static int my_index_to_rgb(int index)
+{
+#ifdef __PUREC__
+	if (direct_color)
+		return index ;
+	return index_to_rgb(index) ;
+#else
+	return index ;
+#endif
+}
 
-//static int my_rgb_to_index(int rgb)
-//{
-//	return rgb ;
-//}
+static int my_rgb_to_index(int rgb)
+{
+#ifdef __PUREC__
+	if (direct_color)
+		return rgb ;
+	return rgb_to_index(rgb) ;
+#else
+	return rgb ;
+#endif
+}
 
 void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_mid)
 {
@@ -57,7 +63,7 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 				rgb = white 
 					- ((col_max * i / steps) << 5) /* green */
 					- ((col_max * j / steps) << 10 ) ; /* blue */
-			cube->red.color[i][j] = rgb ;
+			cube->red.color[i][j] = my_rgb_to_index(rgb) ;
 
 			if (black_mid)
 				rgb = ((col_max * i / steps) << 10) /* blue */
@@ -66,7 +72,7 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 				rgb = white 
 					- ((col_max * i / steps) << 10) /* blue */
 					- (col_max * j / steps) ; /* red */
-			cube->green.color[i][j] = rgb ;
+			cube->green.color[i][j] = my_rgb_to_index(rgb) ;
 				
 			if (black_mid)
 				rgb = (col_max * i / steps) /* red */
@@ -75,7 +81,7 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 				rgb = white 
 					- (col_max * i / steps) /* red */
 					- ((col_max * j / steps) << 5) ; /* green */
-			cube->blue.color[i][j] = rgb ;
+			cube->blue.color[i][j] = my_rgb_to_index(rgb) ;
 		}
 	}
 }
