@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 glib = "^0"
 gio = "^0"
-midly = "0.3" # MIDI files
 clap = "2.33.0" # command line
 
 [dependencies.gtk]
