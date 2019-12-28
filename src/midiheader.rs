@@ -77,7 +77,7 @@ pub fn read_midi_file_header(data: &Vec<u8>) -> MidiFileHeader {
 
 #[cfg(test)]
 mod tests {
-    use crate::midi::{
+    use crate::midiheader::{
         read_midi_file_header,
         MidiFileType
     };

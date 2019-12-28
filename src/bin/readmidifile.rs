@@ -1,8 +1,8 @@
 use clap::{Arg, App};
 use std::fs;
 
-#[path = "../midi.rs"]
-mod midi;
+#[path = "../midiheader.rs"]
+mod midiheader;
 
 fn main() {
     let matches = App::new("readmidifile")
@@ -12,6 +12,6 @@ fn main() {
     let file = matches.value_of("file").unwrap();
     let data = fs::read(file).unwrap();
     //let smf = midifile::read(&data);
-    let header = midi::read_midi_file_header(&data);
+    let header = midiheader::read_midi_file_header(&data);
     println!("{:?}", header);
 }
