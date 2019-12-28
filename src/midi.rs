@@ -25,9 +25,9 @@ impl MidiFileHeader {
             midi_file_type: MidiFileType::Invalid,
             chunk_length: 6,
             number_tracks: 0,
-            smpte: 0,
-            ticks_per_beat: 0,
-            ticks_per_frame: 0
+            smpte: 0, // frames per second, usually 24,25,29 or 30
+            ticks_per_beat: 0, // if smpte is zero
+            ticks_per_frame: 0 // if smpte is not zero
         }
     }
 }
@@ -58,10 +58,10 @@ pub fn read_midi_file_header(data: &Vec<u8>) -> MidiFileHeader {
     };
     header.number_tracks = to_u16(data[10], data[11]);
     let division = to_u16(data[12], data[13]);
-    if division & 0x1000 != 0
+    if division & 0x8000 != 0
     {
         /* SMPTE format */
-        header.smpte           = (0 - division) >> 8 ;
+        header.smpte           = -((division >> 8) as i8) as u16;
         header.ticks_per_frame = division & 0xff ;
         header.ticks_per_beat  = 0 ;
     }
@@ -131,5 +131,42 @@ mod tests {
         assert_eq!(header.number_tracks, 4);
     }
 
-    // TODO SMPTE
+    #[test]
+    fn read_header_midi_file_type_2_with_256_tracks() {
+        let raw = vec![0x4D, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06, 0x00, 0x02, 0x01, 0x00, 0x01, 0xE0];
+        let header = read_midi_file_header(&raw);
+        assert_eq!(header.midi_file_type, MidiFileType::Sequential);
+        assert_eq!(header.chunk_length, 6);
+        assert_eq!(header.smpte, 0);
+        assert_eq!(header.ticks_per_frame, 0);
+        assert_eq!(header.ticks_per_beat, 480);
+        assert_eq!(header.number_tracks, 256);
+    }
+
+    #[test]
+    fn read_header_midi_file_type_invalid() {
+        let raw = vec![0x4D, 0x54, 0x68, 0x64, 0x00, 0x00, 0x01, 0x00, 0x0b, 0x00, 0x00, 0x04, 0x01, 0xE0];
+        let header = read_midi_file_header(&raw);
+        assert_eq!(header.midi_file_type, MidiFileType::Invalid);
+        assert_eq!(header.chunk_length, 256);
+        assert_eq!(header.smpte, 0);
+        assert_eq!(header.ticks_per_frame, 0);
+        assert_eq!(header.ticks_per_beat, 480);
+        assert_eq!(header.number_tracks, 4);
+    }
+
+    /// Test data has been derived from https://github.com/craigsapp/binasc/wiki/smpte
+    /// example 1.
+    #[test]
+    fn read_header_midi_file_type_0_smpte() {
+        let raw = vec![0x4D, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x01, 0xE7, 0x28];
+        let header = read_midi_file_header(&raw);
+        assert_eq!(header.midi_file_type, MidiFileType::SingleTrack);
+        assert_eq!(header.chunk_length, 6);
+        assert_eq!(header.smpte, 25);
+        assert_eq!(header.ticks_per_frame, 40);
+        assert_eq!(header.ticks_per_beat, 0);
+        assert_eq!(header.number_tracks, 1);
+
+    }
 }

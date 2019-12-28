@@ -337,7 +337,7 @@ MIDI_FILE_HEADER read_midi_file_header(const unsigned char *RAM_file)
 	header.midi_file_type = read_int16(RAM_file + 4 + 4) ;
 	header.number_tracks  = read_int16(RAM_file + 4 + 4 + 2) ; 
 	division              = read_int16(RAM_file + 4 + 4 + 2 + 2) ;
-	if (division & 0x1000)
+	if (division & 0x8000)
 	{
 		/* SMPTE format */
 		header.smpte           = (-division) >> 8 ;
