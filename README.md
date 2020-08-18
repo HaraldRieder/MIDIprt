@@ -8,3 +8,6 @@
 * Show 2 or more pages when main window is wide enough
 * Visualize tempo changes, ritardandos, etc.
 * Embed about-me picture in the program code
+* Disabling / enabling of buttons does not work any more with current wxWindows version
+* Scroll bars no more visible with current wxWindows version
+* Filter window changes do no more update main window in some cases
