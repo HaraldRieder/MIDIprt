@@ -12,20 +12,27 @@
 *****************************************************************************/
 
 #include <stdlib.h>
-#ifndef min 
+#ifdef __PUREC__
+#  include <acs.h>
+#else
+# ifndef min 
 #  define min __min
 #  define max __max
+# endif
 #endif
 #include <graphic.h>
 
 void rgb_fstyle_fcolor(X_HANDLE xhandle, int style, int color)
 {
 	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
-	int rgb[3] ;
-	style_and_int16_to_rgb_array(style, color, rgb) ;
-	vs_color (handle, DC_INDEX, rgb) ;
-	color = DC_INDEX ;
-	style = IP_SOLID ;
+	if ( is_rgb_handle(xhandle) )
+	{
+		int rgb[3] ;
+		style_and_int16_to_rgb_array(style, color, rgb) ;
+		vs_color (handle, DC_INDEX, rgb) ;
+		color = DC_INDEX ;
+		style = IP_SOLID ;
+	}
 	if (!style) vsf_interior(handle, FIS_HOLLOW) ;
 	else        vsf_interior(handle, FIS_PATTERN) ;
 	vsf_style(handle, style) ;
@@ -36,26 +43,34 @@ void rgb_fstyle_fcolor(X_HANDLE xhandle, int style, int color)
 void rgb_udsty_lcolor(X_HANDLE xhandle, int udsty, int color, int back)
 {
 	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
-	int bits = 0, maxbits = 16 ;
-	int red   = get_RED  (color) ;
-	int green = get_GREEN(color) ;
-	int blue  = get_BLUE (color) ;
-	int bred   = get_RED  (back) ;
-	int bgreen = get_GREEN(back) ;
-	int bblue  = get_BLUE (back) ;
-	/* draw mixed color but solid */
-	while (udsty)
+	if ( is_rgb_handle(xhandle) )
 	{
-		if (udsty & 1)
-			bits++ ; 
-		udsty >>= 1 ;
+		int bits = 0, maxbits = 16 ;
+		int red   = get_RED  (color) ;
+		int green = get_GREEN(color) ;
+		int blue  = get_BLUE (color) ;
+		int bred   = get_RED  (back) ;
+		int bgreen = get_GREEN(back) ;
+		int bblue  = get_BLUE (back) ;
+		/* draw mixed color but solid */
+		while (udsty)
+		{
+			if (udsty & 1)
+				bits++ ; 
+			udsty >>= 1 ;
+		}
+		red   = bred   - (bred   - red  ) * bits / maxbits ;
+		green = bgreen - (bgreen - green) * bits / maxbits ;
+		blue  = bblue  - (bblue  - blue ) * bits / maxbits ;
+		color = make_RGB(red, green, blue) ;
+		
+		vsl_type (handle, SOLID) ;
 	}
-	red   = bred   - (bred   - red  ) * bits / maxbits ;
-	green = bgreen - (bgreen - green) * bits / maxbits ;
-	blue  = bblue  - (bblue  - blue ) * bits / maxbits ;
-	color = make_RGB(red, green, blue) ;
-	
-	vsl_type (handle, SOLID) ;
+	else
+	{
+		vsl_udsty(handle, udsty) ;
+		vsl_type (handle, USERLINE) ;
+	}
 	rgb_lcolor(xhandle, color) ;
 }
 
@@ -64,17 +79,27 @@ void rgb_3d_ltype_lcolor(X_HANDLE xhandle, int style, int color)
 {
 	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 	int user = 0 ;
-	int rgb[3] ;
-	/* color diff from light border to dark border 
-	   shall be twice the color diff from interior to dark border */
-	/* IP_SOLID corresponds to the dark border */
-	style = IP_SOLID - 2 * (IP_SOLID - style) ;
-	if (style < 0)
-		style = 0 ; 
-	style_and_int16_to_rgb_array(style, color, rgb) ;
-	vs_color (handle, DC_INDEX, rgb) ;
-	color = DC_INDEX ;
-	user  = 0xFFFF ;
+	if ( is_rgb_handle(xhandle) )
+	{
+		int rgb[3] ;
+		/* color diff from light border to dark border 
+		   shall be twice the color diff from interior to dark border */
+		/* IP_SOLID corresponds to the dark border */
+		style = IP_SOLID - 2 * (IP_SOLID - style) ;
+		if (style < 0)
+			style = 0 ; 
+		style_and_int16_to_rgb_array(style, color, rgb) ;
+		vs_color (handle, DC_INDEX, rgb) ;
+		color = DC_INDEX ;
+		user  = 0xFFFF ;
+	}
+	else switch (style)
+	{
+	case 8: user = 0xFFFF ; break ;
+	case 7: user = 0xEEEE ; break ;
+	case 6: user = 0x5555 ; break ;
+	case 5: user = 0x4444 ; break ;
+	}
 	vsl_udsty(handle, user) ;
 	vsl_type (handle, USERLINE) ;
 	vsl_color(handle, color) ;
@@ -100,10 +125,13 @@ void style_and_int16_to_rgb_array(int style, int compact_rgb, int rgb[3])
 void rgb_fcolor(X_HANDLE xhandle, int color)
 {
 	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
-	int rgb[3] ;
-	int16_to_rgb_array(color, rgb) ;
-	vs_color (handle, DC_INDEX, rgb) ;
-	color = DC_INDEX ;
+	if ( is_rgb_handle(xhandle) )
+	{
+		int rgb[3] ;
+		int16_to_rgb_array(color, rgb) ;
+		vs_color (handle, DC_INDEX, rgb) ;
+		color = DC_INDEX ;
+	}
 	vsf_color(handle, color) ;
 }
 
@@ -111,10 +139,13 @@ void rgb_fcolor(X_HANDLE xhandle, int color)
 void rgb_lcolor(X_HANDLE xhandle, int color)
 {
 	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
-	int rgb[3] ;
-	int16_to_rgb_array(color, rgb) ;
-	vs_color (handle, DC_INDEX, rgb) ;
-	color = DC_INDEX ;
+	if ( is_rgb_handle(xhandle) )
+	{
+		int rgb[3] ;
+		int16_to_rgb_array(color, rgb) ;
+		vs_color (handle, DC_INDEX, rgb) ;
+		color = DC_INDEX ;
+	}
 	vsl_color(handle, color) ;
 }
 
@@ -122,10 +153,13 @@ void rgb_lcolor(X_HANDLE xhandle, int color)
 void rgb_tcolor(X_HANDLE xhandle, int color)
 {
 	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
-	int rgb[3] ;
-	int16_to_rgb_array(color, rgb) ;
-	vs_color (handle, DC_INDEX, rgb) ;
-	color = DC_INDEX ;
+	if ( is_rgb_handle(xhandle) )
+	{
+		int rgb[3] ;
+		int16_to_rgb_array(color, rgb) ;
+		vs_color (handle, DC_INDEX, rgb) ;
+		color = DC_INDEX ;
+	}
 	vst_color(handle, color) ;
 }
 
@@ -150,11 +184,22 @@ void copy_color_palette(
 void vs_clip_from_parmblk(VDI_HANDLE handle, const PARMBLK* parmblk)
 {
 	int points[4] ;
+	
 	points[0] = parmblk->pb_xc ;	
 	points[1] = parmblk->pb_yc ;	
 	points[2] = parmblk->pb_xc + parmblk->pb_wc - 1 ;
 	points[3] = parmblk->pb_yc + parmblk->pb_hc - 1 ;	
+	
 	vs_clip(handle, TRUE, points) ;
+
+	/* ACS 3 VDI library Axywh ????: */
+/*	Axywh clip ;
+	clip.x = parmblk->pb_xc ;
+	clip.y = parmblk->pb_yc ;
+	clip.w = parmblk->pb_wc ;
+	clip.h = parmblk->pb_hc ;
+	
+	vs_clip(handle, TRUE, &clip) ;*/
 }
 
 void te_color(OBJECT *obj, int color)

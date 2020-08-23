@@ -8,9 +8,14 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
-#include <malloc.h>
-#define TRUE  1
-#define FALSE 0
+#if defined (__PUREC__)
+#	include <portable.h>
+#	include <acs.h>        /* because of NULL, Ax_malloc(), ... */
+#else 
+#   include <malloc.h>
+#	define TRUE  1
+#	define FALSE 0
+#endif
 #include <string.h>     /* because of memcmp(), ... */
 
 #include <servimem.h>
@@ -308,7 +313,8 @@ unsigned int fill_note_time_table
 			return next_data_overflow ;
 	} /*** <-- end while (!EOT_reached) ***/
 
-	*elements_generated = (INT32)(current_element  - first_element);
+	*elements_generated = ( (INT32)current_element  - (INT32)first_element ) / 
+	                          sizeof *first_element ;
 	/*** return success message ***/
 	return note_time_table_filled ;
 }

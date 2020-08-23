@@ -7,6 +7,10 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
+#if defined (__PUREC__)
+# include <tos.h>
+# define MIDI 3
+#endif
 #if !defined (__PALM__)
 # include <string.h>
 # include <ctype.h>
@@ -61,6 +65,10 @@ UBYTE serial_in(void)
   for (i = 0 ; i <= last_index ; i++)
     midi_out(to_send[i]) ;
 }*/
+
+#endif
+
+#if defined (__PUREC__) || defined (__PALM__)
 
 void note_on(UBYTE channel, UBYTE note, UBYTE dynamic) 
 {
@@ -304,7 +312,7 @@ void scale_tune_set(UBYTE stune[12])   { memcpy(stune_data,stune,12); }
 void scale_tune_set_equal(UBYTE stune) { memset(stune_data,stune,12); }
 
 
-#endif /* Palm */
+#endif /* PURE C or Palm */
 
 #if !defined (__PALM__)
 
@@ -329,7 +337,7 @@ MIDI_FILE_HEADER read_midi_file_header(const unsigned char *RAM_file)
 	header.midi_file_type = read_int16(RAM_file + 4 + 4) ;
 	header.number_tracks  = read_int16(RAM_file + 4 + 4 + 2) ; 
 	division              = read_int16(RAM_file + 4 + 4 + 2 + 2) ;
-	if (division & 0x1000)
+	if (division & 0x8000)
 	{
 		/* SMPTE format */
 		header.smpte           = (-division) >> 8 ;

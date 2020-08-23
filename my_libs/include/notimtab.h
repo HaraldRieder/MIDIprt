@@ -31,7 +31,9 @@ time table element size
 must be packed to its minimum possible size. 
 ------------------------------------------------*/
 
-#pragma pack(1)
+#ifndef __PUREC__
+#	pragma pack(1)
+#endif
 
 typedef struct 
 {
@@ -43,7 +45,9 @@ typedef struct
 } 
 NOTE_TIME_TABLE_ELEMENT ;
 
-#pragma pack()
+#ifndef __PUREC__
+#	pragma pack()
+#endif
 
 typedef struct
 {

@@ -24,9 +24,10 @@ CSOURCES=colcube.c diskfile.c graphic.c graphicf.c midi.c notimtab.c servimem.c
 CPPSOURCES=wxVDI.cpp 
 
 # wxWidgets gtk2-unicode-release-2.8
-CFLAGS= -I../include `wx-config --cppflags`
+CFLAGS= -I../include `wx-config --cppflags` -fpermissive
 
 # tools
+FIXNAMES=$(BIN)/fixnames.sh
 C=g++
 LINK=ar -rc
 
@@ -36,18 +37,24 @@ CPPOBJECTS = $(CPPSOURCES:%.cpp=$(OBJ)/%.o)
 
 default:
 	@-echo "Targets are:"
+	@-echo "  fixnames: fixes upper/lower case letters in filenames for UNIX"
 	@-echo "  dirs: generates necessary subdirs for object files, ..."
 	@-echo "  $(TARGET): produces the UNIX variant of my library"
 	@-echo "  all: makes all together"
 	@-echo "  clean: removes any intermediate files"
 	@-echo "  fullclean: removes also $(TARGET)"
 
-all: dirs $(TARGET)
+all: fixnames dirs $(TARGET)
 
 $(TARGET): $(COBJECTS) $(CPPOBJECTS)
 	@rm -f $@
 	@-echo "+++ creating static library $@  +++"
 	$(LINK) $@ $(COBJECTS) $(CPPOBJECTS)
+
+# Atari Pure C always writes uppercase filenames
+fixnames:
+	@$(FIXNAMES) 2>/dev/null
+	@cd ../include; $(FIXNAMES) 2>/dev/null
 
 dirs:
 	@-if [ ! -d $(OBJ) ];then \

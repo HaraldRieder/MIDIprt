@@ -104,7 +104,10 @@ void draw_lines
 
 /* 5 bits red, 5 bits green, 5 bits blue */
 /* least significant is red */
+
+#ifndef __PUREC__
 INT32 RGB_15to24(UINT16 in) ;
 INT16 RGB_24to15(UINT32 in) ;
+#endif
 
 #endif /* include blocker */

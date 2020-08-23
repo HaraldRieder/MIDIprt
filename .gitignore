@@ -4,4 +4,7 @@
 *.swp
 *.cfg
 *.CFG
+/target
+**/*.rs.bk
+Cargo.lock
 

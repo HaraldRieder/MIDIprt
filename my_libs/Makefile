@@ -22,6 +22,7 @@ default:
 
 clean:
 	@-( cd src      ; make fullclean ; cd .. )
+	@-( cd acsmodul ; make clean ; cd .. )
 	@-( cd lib ; make clean ; cd .. )
 
 ../$(TARGET): clean
