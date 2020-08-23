@@ -495,14 +495,14 @@ void MFPMainFrame::InitMenu()
     m_file_menu->Append(new wxMenuItem(m_file_menu, Menu_Move_to, _T("&Move &to...\tCtrl+M"), _T("Like \"Save as\" but delete original file [and profile]"), wxITEM_NORMAL));
     m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_PRINT, _T("&Print...\tCtrl+P"), _T("Print MIDI file"), wxITEM_NORMAL));
     m_file_menu->AppendSeparator();
-    m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_EXIT, _T("&Quit\tCtrl+Q"), _T("Quit "MFP_TITLE), wxITEM_NORMAL));
+    m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_EXIT, _T("&Quit\tCtrl+Q"), _T("Quit " MFP_TITLE), wxITEM_NORMAL));
 
     m_profile_menu = new wxMenu;
     m_profile_menu->Append(new wxMenuItem(m_profile_menu, Menu_Attach, _T("&Attach\tCtrl+A"), _T("Attach a profile (*.MI$) to the MIDI file"), wxITEM_NORMAL)); 
     m_profile_menu->Append(new wxMenuItem(m_profile_menu, Menu_Remove, _T("&Remove\tCtrl+R"), _T("Remove existing profile (*.MI$) of the MIDI file"), wxITEM_NORMAL)); 
     m_profile_menu->Append(new wxMenuItem(m_profile_menu, wxID_REVERT, _T("Reload from disk...\tCtrl+Z"), _T("Load profile from disk and loose changes"), wxITEM_NORMAL)); 
-    m_profile_menu->Append(new wxMenuItem(m_profile_menu, Menu_Save_as_default, _T("Save as default"), _T("Save current profile as default "MFP_DEFAULT_PROFILE), wxITEM_NORMAL)); 
-    m_profile_menu->Append(new wxMenuItem(m_profile_menu, Menu_Load_default, _T("Load default"), _T("Load default profile "MFP_DEFAULT_PROFILE" from disk as current profile"), wxITEM_NORMAL)); 
+    m_profile_menu->Append(new wxMenuItem(m_profile_menu, Menu_Save_as_default, _T("Save as default"), _T("Save current profile as default " MFP_DEFAULT_PROFILE), wxITEM_NORMAL)); 
+    m_profile_menu->Append(new wxMenuItem(m_profile_menu, Menu_Load_default, _T("Load default"), _T("Load default profile " MFP_DEFAULT_PROFILE" from disk as current profile"), wxITEM_NORMAL)); 
 
     m_window_menu = new wxMenu;
     m_window_menu->Append(new wxMenuItem(m_window_menu, Menu_Information, _T("File &information\tF2"), _T("Open/top information window"), wxITEM_NORMAL)); 
@@ -518,7 +518,7 @@ void MFPMainFrame::InitMenu()
 
     m_help_menu = new wxMenu;
     m_help_menu->Append(new wxMenuItem(m_help_menu, wxID_HELP, _T("&Help...\tF1"), _T("Open help"), wxITEM_NORMAL)); 
-    m_help_menu->Append(new wxMenuItem(m_help_menu, wxID_ABOUT, _T("&About "CAPTION" ..."), _T("Show version and copyright information"), wxITEM_NORMAL)); 
+    m_help_menu->Append(new wxMenuItem(m_help_menu, wxID_ABOUT, _T("&About " CAPTION" ..."), _T("Show version and copyright information"), wxITEM_NORMAL)); 
 
     // make a menubar
     wxMenuBar *menu_bar = new wxMenuBar;
@@ -586,11 +586,10 @@ MFPMainFrame::MFPMainFrame(const char * midifile) : wxFrame(NULL, -1, _T(MFP_TIT
     incarnation_list.push_back(this) ;
     current_window = this ;
 
-    default_profile = wxGetHomeDir() + _T(DIRSEP) + _T("."DEFAULT_PROFILE_NAME) ; 
+    default_profile = wxGetHomeDir() + _T(DIRSEP) + _T("." DEFAULT_PROFILE_NAME) ; 
 
     // set the icon
-    SetIcon(wxIcon(_T("AMIDIPRT"))); // app. icon from first in alphabet ???
-
+    SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("midiprt.ico")));
     // create the menu and set accelerator keys
     InitMenu();
     SetAccelerators();
@@ -1340,7 +1339,7 @@ void MFPMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
   sz.y = wxButton::GetDefaultSize().y ;
 
   // headline
-  wxString caption(_T(CAPTION" V"VERSION" for "PLATFORM)) ;
+  wxString caption(_T(CAPTION " V" VERSION " for " PLATFORM)) ;
   wxTextCtrl * headline = new wxTextCtrl(splash, -1, _T(""), 
       wxPoint(lrborder,25), sz, wxTE_READONLY | wxTE_CENTRE) ;
   wxFont font = *wxNORMAL_FONT ;
@@ -1350,8 +1349,8 @@ void MFPMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
   headline->AppendText(caption);
 
   // copyright
-  sz.y = sz.y * 7/2 ;
-  wxString copyright(_T("\n1993 - 2009 (c) Harald Rieder\n\n"
+  sz.y = sz.y * 5/2 ;
+  wxString copyright(_T("1993 - 2020 by Harald Rieder\n"
                         "This program is under the\n"
                         "GNU General Public License V3.")) ;
   int y = 280 ;

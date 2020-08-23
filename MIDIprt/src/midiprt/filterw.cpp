@@ -10,6 +10,7 @@
 // window position and size
 static const int FRAME_W = 400, FRAME_H = 600 ; // in pels
 
+#include  "common.h"
 #include  "commonw.h"
 #include  <wx/ownerdrw.h>
 #include  <wx/menuitem.h>
@@ -74,7 +75,7 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
 , m_changed(false)
 {
     // set the icon
-    SetIcon(wxIcon(_T("FILTER")));
+    SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("filter.ico")));
 
     // create the status line
 //    CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 

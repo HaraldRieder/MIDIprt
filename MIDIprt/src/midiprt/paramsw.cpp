@@ -235,7 +235,7 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
            /*, wxDEFAULT_DIALOG_STYLE, wxDialogNameStr*/)
 {
     // set the icon
-    SetIcon(wxIcon(_T("PARAMS")));
+    SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("params.ico")));
 
     // create the status line
 //    CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 

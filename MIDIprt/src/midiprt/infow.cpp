@@ -7,6 +7,7 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
+#include  "common.h"
 #include  "commonw.h"
 #include  <wx/ownerdrw.h>
 #include  <wx/menuitem.h>
@@ -32,7 +33,7 @@ MFPInfoWindow::MFPInfoWindow(wxWindow *parent)
 	db = NULL ;
 
     // set the icon
-    SetIcon(wxIcon(_T("INFO")));
+    SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("info.ico")));
 
     // create panel for the controls
     int PANEL_W, PANEL_H ;
