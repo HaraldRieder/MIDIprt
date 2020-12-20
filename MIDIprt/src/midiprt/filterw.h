@@ -38,8 +38,7 @@ public:
 private:
 
 	Slider           * m_track_slider ;
-	wxRadioButton    * m_track_on ;                /**< current track on button */
-	wxRadioButton    * m_track_off ;               /**< current track off button */
+	wxCheckBox       * m_show_track;               /**< current track on/off */
 	wxButton         * m_tracks_on ;               /**< all tracks on button */
 	wxButton         * m_tracks_off ;              /**< all tracks off button */
 	wxToggleButton   * m_channels[MIDI_CHANNELS] ; /**< channel filter buttons */
@@ -60,8 +59,7 @@ private:
     // notifications
     void OnCloseWindow       (wxCloseEvent& event);
 	void OnTrackSlider       (wxCommandEvent& event);
-	void OnTrackOn           (wxCommandEvent& event);
-	void OnTrackOff          (wxCommandEvent& event);
+	void OnShowTrack         (wxCommandEvent& event);
 	void OnAllTracksOn       (wxCommandEvent& event);
 	void OnAllTracksOff      (wxCommandEvent& event);
 	void OnChannelToggle     (wxCommandEvent& event);

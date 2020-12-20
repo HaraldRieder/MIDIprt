@@ -28,7 +28,7 @@ enum
 {
     Control_First = 1000,
     Slider_Track ,
-    Control_Track_on, Control_Track_off,
+	Control_Show_track,
     Control_All_tracks_on, Control_All_tracks_off,
     Control_All_channels_on,
     Control_All_channels_off,
@@ -40,8 +40,7 @@ enum
 BEGIN_EVENT_TABLE(MFPFilterWindow, wxDialog)
     EVT_CLOSE(MFPFilterWindow::OnCloseWindow)
     EVT_SLIDER(Slider_Track, MFPFilterWindow::OnTrackSlider)
-    EVT_COMMAND(Control_Track_on , wxEVT_COMMAND_RADIOBUTTON_SELECTED, MFPFilterWindow::OnTrackOn)
-    EVT_COMMAND(Control_Track_off, wxEVT_COMMAND_RADIOBUTTON_SELECTED, MFPFilterWindow::OnTrackOff)
+	EVT_COMMAND(Control_Show_track, wxEVT_COMMAND_CHECKBOX_CLICKED, MFPFilterWindow::OnShowTrack)
     EVT_COMMAND(Control_All_tracks_on   , wxEVT_COMMAND_BUTTON_CLICKED, MFPFilterWindow::OnAllTracksOn)
     EVT_COMMAND(Control_All_tracks_off  , wxEVT_COMMAND_BUTTON_CLICKED, MFPFilterWindow::OnAllTracksOff)
     EVT_COMMAND(Control_All_channels_on , wxEVT_COMMAND_BUTTON_CLICKED, MFPFilterWindow::OnAllChannelsOn)
@@ -104,10 +103,7 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
         wxPoint(MFP_SPACING*2,MFP_SPACING*3),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_AUTOTICKS+wxSL_LABELS) ;
     sz.x /= 2 ;
     sz.y = (upper_box_h - 4*MFP_SPACING)/3 ;
-    m_track_on   = new wxRadioButton(panel,Control_Track_on, _T("o&n"), 
-        wxPoint(5*MFP_SPACING, MFP_SPACING*4 + sz.y)) ;
-    m_track_off  = new wxRadioButton(panel,Control_Track_off, _T("o&ff"), 
-        wxPoint(5*MFP_SPACING + sz.x, MFP_SPACING*4 + sz.y)) ;
+    m_show_track = new wxCheckBox(panel, Control_Show_track, _T("&show track"),  wxPoint(2*MFP_SPACING, MFP_SPACING*4 + sz.y));
     m_tracks_on  = new wxButton(panel,Control_All_tracks_on,_T("all on"), 
         wxPoint(2*MFP_SPACING, MFP_SPACING*4 + 2*sz.y), sz) ;
     m_tracks_off = new wxButton(panel,Control_All_tracks_off,_T("all off"), 
@@ -188,25 +184,14 @@ void MFPFilterWindow::OnTrackSlider( wxCommandEvent &WXUNUSED(event) )
     update_string_buttons () ;
 }
 
-
-void MFPFilterWindow::OnTrackOn( wxCommandEvent &WXUNUSED(event) )
+void MFPFilterWindow::OnShowTrack( wxCommandEvent &WXUNUSED(event) )
 {
     if (!db) return ;
     
-    db->track[db->current_track].filter = TRUE ; 
+    db->track[db->current_track].filter = m_show_track->IsChecked(); 
     update_channel_buttons() ;
     update_string_buttons () ;
-    m_changed = true ;
-}
-
-void MFPFilterWindow::OnTrackOff( wxCommandEvent &WXUNUSED(event) )
-{
-    if (!db) return ;
-    
-    db->track[db->current_track].filter = FALSE ; 
-    update_channel_buttons() ;
-    update_string_buttons () ;
-    m_changed = true ;
+    m_changed = true ;	
 }
 
 void MFPFilterWindow::OnAllTracksOn( wxCommandEvent &WXUNUSED(event) )
@@ -316,26 +301,20 @@ void MFPFilterWindow::update_on_off_buttons()
         switch ( db->track[db->current_track].filter )
         {
         case TRUE:
-            m_track_on ->SetValue(true) ;
-            m_track_off->SetValue(false) ;
-            m_track_on ->Enable() ;
-            m_track_off->Enable() ;
+			m_show_track->Enable();
+			m_show_track->SetValue(true);
             break ;
         case FALSE:
-            m_track_off->SetValue(true) ;
-            m_track_off->SetValue(false) ;
-            m_track_on ->Enable() ;
-            m_track_off->Enable() ;
+			m_show_track->Enable();
+			m_show_track->SetValue(false);
             break ;
         default: // additional flag in filter indicates "disabled"
-            m_track_on ->Disable() ;
-            m_track_off->Disable() ;
+			m_show_track->Disable();
         }
     }
     else
     {
-        m_track_on    ->Disable() ;
-        m_track_off   ->Disable() ;
+		m_show_track  ->Disable() ;
         m_tracks_on   ->Disable() ;
         m_tracks_off  ->Disable() ;
         m_channels_on ->Disable() ;
