@@ -69,7 +69,7 @@ Slider::Slider(wxWindow* parent, wxWindowID id,
 		const wxValidator& validator, const wxString& name)
 : wxSlider(parent, id, value, minValue, maxValue, point, 
 //		   wxSize(size.x, size.y*9/10),
-       wxSize(init(parent, point, size, value, minValue, maxValue, style), size.y*9/10), 
+       wxSize(init(parent, point, size, value, minValue, maxValue, style), size.y*10/9), 
 		   style & ~wxSL_LABELS, validator, name)
 {
 	if (style & wxSL_LABELS)
