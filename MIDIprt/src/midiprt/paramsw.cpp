@@ -296,10 +296,10 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
     m_borders_choice->SetSelection(0) ;
     y = TITLE_H + MFP_SPACING*3 + H ;
     sz.x = sz.x / 3 ;
-    m_left_border  = new Slider(panel, Slider_Left_border , 0, 0, 49, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
+    m_left_border  = new Slider(panel, Slider_Left_border , 0, 0, 25, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
     m_left_border->SetPageSize(1) ;
     x = (LEFT_W - 2*MFP_SPACING) - sz.x ;
-    m_right_border = new Slider(panel, Slider_Right_border, 0, 0, 49, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_INVERSE) ;
+    m_right_border = new Slider(panel, Slider_Right_border, 0, 0, 25, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_INVERSE) ;
     m_right_border->SetPageSize(1) ;
     x = 3*MFP_SPACING + sz.x ;
     sz.x = (sz.x - MFP_SPACING)/2 - MFP_SPACING ;
@@ -340,9 +340,9 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
     y0 = y + 2*MFP_SPACING;
     sz.x = LEFT_W - x - 2*MFP_SPACING ;
     sz.y = H ;
-    m_bars_per_line = new Slider(panel, Slider_Bars, 8, 1, 40, wxPoint(x,y0),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    m_bars_per_line = new Slider(panel, Slider_Bars, 8, 4, 32, wxPoint(x,y0),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
     m_bars_per_line->SetPageSize(1) ;
-    m_bar_length = new Slider(panel, Slider_Bar_length, 8, 1, 40, wxPoint(x,y0+(MFP_SPACING+H)),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    m_bar_length = new Slider(panel, Slider_Bar_length, 8, 4, 32, wxPoint(x,y0+(MFP_SPACING+H)),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
     m_bar_length->SetPageSize(1) ;
     m_sub_bars = new Slider(panel, Slider_Subbars, 2, 1, 12, wxPoint(x,y0+2*(MFP_SPACING+H)),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
     m_sub_bars->SetPageSize(1) ;
