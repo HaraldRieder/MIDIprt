@@ -346,7 +346,7 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
     m_bar_length->SetPageSize(1) ;
     m_sub_bars = new Slider(panel, Slider_Subbars, 2, 1, 12, wxPoint(x,y0+2*(MFP_SPACING+H)),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
     m_sub_bars->SetPageSize(1) ;
-    sz.x = H/2 ;
+    sz.x = H*3/4 ;
     new wxButton(panel, Control_Bars_width   , _T("-"), wxPoint(x-H,y0)      , sz) ;
     new wxButton(panel, Control_Subbars_width, _T("-"), wxPoint(x-H,y0+2*(MFP_SPACING+H)), sz) ;
 
@@ -364,7 +364,7 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
     const wxString inv_choices[3] = { _T("Beyreuther"), _T("Rieder"), _T("Mix") } ;
     x = LEFT_W - 2*MFP_SPACING - sz.x ;
     m_inventor = new wxChoice(panel, Control_Inventor, wxPoint(x,y0),sz, 3,inv_choices) ;
-    sz.x = sz.y/2 ; // narrow button
+    sz.x = sz.y*3/4 ; // narrow button
     new wxButton(panel, Control_Horlines_width, _T("-"), wxPoint(x,y0+MFP_SPACING+H), sz) ;
     sz.x = LEFT_W/4 ;
     const wxString lines_choices[5] = { _T("1"), _T("2"), _T("3"), _T("4"), _T("6") } ;
@@ -408,7 +408,7 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
     m_tail = new NoteWidget(panel, Widget_Tail, wxPoint(x,H/4+y+2*H), sz) ;
 
     y = TITLE_H + 4*MFP_SPACING + 5*H ;
-    sz.x = H/2 ;
+    sz.x = H*3/4 ;
     sz.y = H ;
     x = LEFT_W + 2*MFP_SPACING;
     new wxButton(panel, Control_Noteborders_width, _T("-"), wxPoint(x,y), sz) ;
