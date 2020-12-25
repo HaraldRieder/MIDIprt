@@ -99,42 +99,15 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
     int pts = (int)((long)db->params.points * zoom / MEAN_ZOOM) ;
     int foot_pts = FOOTLINE_HEIGHT * zoom / MEAN_ZOOM ;
 
-    /* draw background */
-    vswr_mode   (&vdi, MD_REPLACE) ;
-    vsf_interior(&vdi, FIS_HOLLOW) ;
-    vsf_color   (&vdi, WHITE) ;
+    // dark gray background
     points[0] = 0 ;
     points[1] = 0 ;
-    points[2] = width ;
-    points[3] = height ;
-    vsl_color    (&vdi, LRED) ;
-    vsl_type     (&vdi, SOLID) ;
-    if (db->layout.npgs)
-         vsf_perimeter(&vdi, 1) ;
-    else vsf_perimeter(&vdi, 0) ; /* no red line */
-    v_bar        (&vdi, points) ;
-
-    // gray background
-    points[0] = width + 1 ;
-    points[2] = sz.x - 1 ;
+    points[2] = sz.x + 80 ;
+    points[3] = sz.y + 80 ;
     vsf_color   (&vdi, LBLACK) ;
     vsf_interior(&vdi, FIS_SOLID) ;
     vr_recfl    (&vdi, points) ;
-    points[0] = 0 ;
-    points[1] = height + 1 ;
-    points[3] = sz.y - 1 ;
-    vr_recfl    (&vdi, points) ;
 
-    /* use points for clipping */
-    int x_start, y_start ;
-    CalcUnscrolledPosition(0, 0, &x_start, &y_start) ;
-    sz = GetClientSize() ;
-    points[0] = x_start ; 
-    points[1] = y_start - 80 ;// workaround redraw errors
-    points[2] = x_start + sz.x - 1 ;
-    points[3] = y_start + sz.y + 80 ;// workaround redraw errors
-
-    /* draw note systems */
     if (db->layout.npgs /*&& messages /* avoid redraw for garbage */) 
     {
         /* line widths in pixels */
@@ -147,34 +120,63 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
         int line_width_sub_bars= mm_to_pixel(db->params.sub_bar_line_width, x_micros) * zoom/MAX_ZOOM ;
         int line_width_notes   = mm_to_pixel(db->params.note_line_width   , y_micros) * zoom/MAX_ZOOM ;
 
-        draw_page(&vdi, 
-            0, 0, width, height,
-            points,                /* clipping */ 
-            y_micros,            /* pixel height in micrometers */
-            db->track_table,    /* the data to draw... */
-            db->filter.track,
-            &(db->layout),        /* with this layout... */
-            db->opts.page - 1,    /* index of page to draw */
-            db->params.font, pts,    /* font for all texts */
-            db->params.effects,        /* text effects for title only */
-            foot_pts,
-            db->params.title,
-            db->filename,    /* for footline ... */
-            db->filesize,
-            CAPTION, VERSION, PLATFORM,
-            db->params.note_height,    
-            MAX_DYNSCALE, db->params.note_dynscale,        
-            db->params.mode,            /* Rieder, Beyreuther, Mix */
-            db->params.note_type,    /* e.g. with tail, etc. */
-            &(db->params.scheme),
-            db->params.transpose,
-            db->params.bars_per_line,
-            db->params.sub_bars,
-            line_width, 
-            line_width_bars, 
-            line_width_sub_bars, 
-            line_width_notes
-        ) ;
+		/* draw note systems from left to right */
+		short current_page = db->opts.page - 1; /* index of page to draw */
+		for (int x_offset=0; x_offset < sz.x && current_page < db->layout.npgs; x_offset+=width) {
+			/* draw background */
+			vswr_mode   (&vdi, MD_REPLACE) ;
+			vsf_interior(&vdi, FIS_HOLLOW) ;
+			vsf_color   (&vdi, WHITE) ;
+			points[0] = x_offset;
+			points[1] = 0;
+			points[2] = x_offset + width;
+			points[3] = height ;
+			vsl_color    (&vdi, LRED) ;
+			vsl_type     (&vdi, SOLID) ;
+			if (db->layout.npgs)
+				 vsf_perimeter(&vdi, 1) ;
+			else vsf_perimeter(&vdi, 0) ; /* no red line */
+			v_bar        (&vdi, points) ;
+
+			/* use points for clipping */
+			int x_start, y_start ;
+			CalcUnscrolledPosition(0, 0, &x_start, &y_start) ;
+			sz = GetClientSize() ;
+			points[0] = x_start ; 
+			points[1] = y_start - 80 ;// workaround redraw errors
+			points[2] = x_start + sz.x - 1 ;
+			points[3] = y_start + sz.y + 80 ;// workaround redraw errors
+
+			draw_page(&vdi, 
+				x_offset, 0, width, height,
+				points,                /* clipping */ 
+				y_micros,            /* pixel height in micrometers */
+				db->track_table,    /* the data to draw... */
+				db->filter.track,
+				&(db->layout),        /* with this layout... */
+				current_page,    
+				db->params.font, pts,    /* font for all texts */
+				db->params.effects,        /* text effects for title only */
+				foot_pts,
+				db->params.title,
+				db->filename,    /* for footline ... */
+				db->filesize,
+				CAPTION, VERSION, PLATFORM,
+				db->params.note_height,    
+				MAX_DYNSCALE, db->params.note_dynscale,        
+				db->params.mode,            /* Rieder, Beyreuther, Mix */
+				db->params.note_type,    /* e.g. with tail, etc. */
+				&(db->params.scheme),
+				db->params.transpose,
+				db->params.bars_per_line,
+				db->params.sub_bars,
+				line_width, 
+				line_width_bars, 
+				line_width_sub_bars, 
+				line_width_notes
+			);
+			current_page++;
+		}
     }
     else if (db->filename[0] != 0)
     {
@@ -706,7 +708,7 @@ void MFPMainFrame::update_format()
         (int)(normal_height * MAX_ZOOM / MEAN_ZOOM) );*/
     int width  = (int)(normal_width  * MAX_ZOOM / MEAN_ZOOM) ;
     int height = (int)(normal_height * MAX_ZOOM / MEAN_ZOOM) ;
-    m_area->SetVirtualSize(width, height) ;
+    m_area->SetVirtualSize(width, height);
     m_area->Refresh() ;
 }
 
