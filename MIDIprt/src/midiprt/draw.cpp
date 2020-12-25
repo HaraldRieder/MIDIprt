@@ -209,10 +209,10 @@ static void draw_footline
     strcat(footline, text) ; 
 
     /* caption, version, platform */
-    sprintf(footline + strlen(footline), 
-            " by %s V%s (%s)", caption, version, platform) ;
-    vst_alignment(handle, 0, /*4*/3, &dummy, &dummy) ; /* left, char. bottom */
-    v_gtext(handle, x_min, y, footline) ;
+    //sprintf(footline + strlen(footline), 
+    //        " by %s V%s (%s)", caption, version, platform) ;
+    //vst_alignment(handle, 0, /*4*/3, &dummy, &dummy) ; /* left, char. bottom */
+    //v_gtext(handle, x_min, y, footline) ;
         
     /* right part */
     sprintf(footline, "%d/%d", page+1, npgs) ;        
