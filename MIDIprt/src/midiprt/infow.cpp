@@ -25,76 +25,62 @@ BEGIN_EVENT_TABLE(MFPInfoWindow, wxDialog)
 END_EVENT_TABLE()
 
 
-MFPInfoWindow::MFPInfoWindow(wxWindow *parent)
-: wxDialog(parent, -1, _T(""), wxDefaultPosition, 
-		   wxSize(wxButton::GetDefaultSize().y * 10, wxButton::GetDefaultSize().y * 15)
-		   /*, wxDEFAULT_DIALOG_STYLE, wxDialogNameStr*/)
+MFPInfoWindow::MFPInfoWindow(wxWindow *parent) : wxDialog(parent, -1, _T(""), wxDefaultPosition, wxDefaultSize)
 {
-	db = NULL ;
-
+    db = NULL;
+    
     // set the icon
     SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("info.ico")));
+	
+	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+    
+    wxSizerFlags rightFlags = wxSizerFlags().Right().Border(wxLEFT|wxRIGHT|wxDOWN, MFP_TEXT_SPACING);
+    wxSizerFlags leftFlags = wxSizerFlags().Left().Border(wxLEFT|wxRIGHT|wxDOWN, MFP_TEXT_SPACING);
+	
+	// flexible grid with 3 columnns and a static box around it
+	wxStaticBoxSizer *box = new wxStaticBoxSizer(wxVERTICAL, this, _T("Size"));
+	wxFlexGridSizer *grid = new wxFlexGridSizer(3);
+	grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("File size:")), rightFlags); 
+	grid->Add(m_file_size = new wxStaticText(box->GetStaticBox(), -1, _T("?")), rightFlags); 
+	grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Byte")), leftFlags); 
+	grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Size in memory:")), rightFlags); 
+	grid->Add(m_transformed_size = new wxStaticText(box->GetStaticBox(), -1, _T("?")), rightFlags); 
+	grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Byte")), leftFlags); 
+	box->Add(grid);
+    topsizer->Add(box, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
 
-    // create panel for the controls
-    int PANEL_W, PANEL_H ;
-    DoGetClientSize(&PANEL_W, &PANEL_H) ;
-    wxPanel *panel = new wxPanel(this, -1, wxPoint(0, 0), wxSize(PANEL_W, PANEL_H), wxTAB_TRAVERSAL);
-
-	const int UPPER_H = PANEL_H * 3 / 15 ;
-	const int LOWER_H = PANEL_H * 9 / 15 ;
-
+	// flexible grid with 2 columnns and a static box around it
+	box = new wxStaticBoxSizer(wxVERTICAL, this, _T("MIDI"));
+	grid = new wxFlexGridSizer(2);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("MIDI file type:")), rightFlags);
+    grid->Add(m_midi_file_type = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("No. of tracks:")), rightFlags);
+    grid->Add(m_number_of_tracks = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Ticks per beat:")), rightFlags);
+    grid->Add(m_ticks_per_beat = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("SMPTE:")), rightFlags);
+    grid->Add(m_smpte = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Ticks per frame:")), rightFlags);
+    grid->Add(m_ticks_per_frame = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Initial tempo:")), rightFlags);
+    grid->Add(m_tempo = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Time signature:")), rightFlags);
+    grid->Add(m_time = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+    grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Key signature:")), rightFlags);
+    grid->Add(m_key = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
+	box->Add(grid);
+    topsizer->Add(box, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
+    
+   	// text control displaying the copyright notice found in the MIDI file
 	wxSize sz ; 
-	const int box_w = PANEL_W - 2*MFP_SPACING ;
-
-	// size 
-	const int size_box_h = UPPER_H ;
-    new wxStaticBox(panel,-1,_T(""), wxPoint(MFP_SPACING,MFP_SPACING),wxSize(box_w,size_box_h));
-	sz.y = (size_box_h - 2*MFP_SPACING) / 2/*lines*/ ;
-	sz.x = (PANEL_W/2) ;
-	int x  = MFP_SPACING*2;
-	int y0 = MFP_SPACING*5/2;
-	new wxStaticText(panel, -1, _T("File size:")     , wxPoint(x,y0)     , sz) ; 
-	new wxStaticText(panel, -1, _T("Size in memory:"), wxPoint(x,y0+sz.y), sz) ; 
-	int x_k = MFP_SPACING + box_w * 4/5 ;
-	sz.x = box_w/5 - MFP_SPACING ;
-	new wxStaticText(panel, -1, _T("Byte"), wxPoint(x_k,y0)     , sz) ; 
-	new wxStaticText(panel, -1, _T("Byte"), wxPoint(x_k,y0+sz.y), sz) ; 
-	int x_val = MFP_SPACING + box_w / 2 ;
-	m_file_size        = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0)     , sz) ; 
-	m_transformed_size = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y), sz) ; 
-
-	// infos from inside the MIDI file
-	const int midi_box_h = LOWER_H - MFP_SPACING ;
-    new wxStaticBox(panel,-1,_T(""), wxPoint(MFP_SPACING,UPPER_H+MFP_SPACING),wxSize(box_w, midi_box_h));
-	sz.y = (midi_box_h - 2*MFP_SPACING) / 8/*lines*/ ;
-	sz.x = (PANEL_W/2) ;
-	y0 = UPPER_H+MFP_SPACING*5/2;
-	new wxStaticText(panel, -1, _T("MIDI file type:") , wxPoint(x,y0)       , sz) ; 
-	new wxStaticText(panel, -1, _T("No. of tracks:")  , wxPoint(x,y0+sz.y)  , sz) ; 
-	new wxStaticText(panel, -1, _T("Ticks per beat:") , wxPoint(x,y0+sz.y*2), sz) ; 
-	new wxStaticText(panel, -1, _T("SMPTE:")          , wxPoint(x,y0+sz.y*3), sz) ; 
-	new wxStaticText(panel, -1, _T("Ticks per frame:"), wxPoint(x,y0+sz.y*4), sz) ; 
-	new wxStaticText(panel, -1, _T("Initial tempo:")  , wxPoint(x,y0+sz.y*5), sz) ; 
-	new wxStaticText(panel, -1, _T("Time signature:") , wxPoint(x,y0+sz.y*6), sz) ; 
-	new wxStaticText(panel, -1, _T("Key signature:")  , wxPoint(x,y0+sz.y*7), sz) ; 
-	x_val = MFP_SPACING + box_w * 3/4 ;
-	sz.x = box_w/5 - MFP_SPACING ;
-	m_midi_file_type   = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0), sz) ; 
-	m_number_of_tracks = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y), sz) ; 
-	m_ticks_per_beat   = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y*2), sz) ; 
-	m_smpte            = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y*3), sz) ; 
-	m_ticks_per_frame  = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y*4), sz) ; 
-	m_tempo            = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y*5), sz) ; 
-	m_time             = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y*6), sz) ; 
-	m_key              = new wxStaticText(panel, -1, _T("?"), wxPoint(x_val,y0+sz.y*7), sz) ; 
-
-	// text control displaying the copyright notice found in the MIDI file
-	sz.x = box_w ;
-	sz.y = wxButton::GetDefaultSize().y * 2 ;
-	m_copyright_notice = 
-		new wxTextCtrl(panel, -1, _T(""), wxPoint(MFP_SPACING,MFP_SPACING+UPPER_H+LOWER_H), sz, 
+	sz.x = wxButton::GetDefaultSize().y * 10;
+	sz.y = wxButton::GetDefaultSize().y * 3;
+	m_copyright_notice = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition, sz, 
 		               wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH) ;
-
+    topsizer->Add(m_copyright_notice, wxSizerFlags(0).Border(wxALL, MFP_SPACING).Expand());
+    
+    SetSizerAndFit(topsizer);
+    
     set_database(NULL) ;
 }
 
@@ -110,7 +96,6 @@ void MFPInfoWindow::OnCloseWindow( wxCloseEvent & WXUNUSED(event) )
 	//else
 	//	Destroy() ;
 }
-
 
 void MFPInfoWindow::set_database(INFO_DB *_db)
 {

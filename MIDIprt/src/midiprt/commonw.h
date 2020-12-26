@@ -35,6 +35,9 @@
 /** distance between control and frame(s) in pels */
 static const int MFP_SPACING = 10 ; 
 
+/** distance around text in sizers */
+static const int MFP_TEXT_SPACING = MFP_SPACING/2;
+
 /** path of the application with terminating slash */
 extern wxString apppath ;
 
