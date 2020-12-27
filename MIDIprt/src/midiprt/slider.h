@@ -47,7 +47,7 @@ private:
   wxStaticText * m_min ;
   wxStaticText * m_max ;
   int            m_desired_max;
-  wxTextCtrl   * m_current;
+  wxStaticText * m_current;
   void setCurrent(int value);
 
   /**

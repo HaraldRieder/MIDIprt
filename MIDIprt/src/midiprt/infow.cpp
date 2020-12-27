@@ -46,7 +46,7 @@ MFPInfoWindow::MFPInfoWindow(wxWindow *parent) : wxDialog(parent, -1, _T(""), wx
 	grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Size in memory:")), rightFlags); 
 	grid->Add(m_transformed_size = new wxStaticText(box->GetStaticBox(), -1, _T("?")), rightFlags); 
 	grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Byte")), leftFlags); 
-	box->Add(grid);
+	box->Add(grid, wxSizerFlags().Center());
     topsizer->Add(box, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
 
 	// flexible grid with 2 columnns and a static box around it
@@ -68,15 +68,15 @@ MFPInfoWindow::MFPInfoWindow(wxWindow *parent) : wxDialog(parent, -1, _T(""), wx
     grid->Add(m_time = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
     grid->Add(new wxStaticText(box->GetStaticBox(), -1, _T("Key signature:")), rightFlags);
     grid->Add(m_key = new wxStaticText(box->GetStaticBox(), -1, _T("?")), leftFlags);
-	box->Add(grid);
+	box->Add(grid, wxSizerFlags().Center());
     topsizer->Add(box, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
     
    	// text control displaying the copyright notice found in the MIDI file
 	wxSize sz ; 
-	sz.x = wxButton::GetDefaultSize().y * 10;
-	sz.y = wxButton::GetDefaultSize().y * 3;
+	sz.x = wxButton::GetDefaultSize().y * 8;
+	sz.y = wxButton::GetDefaultSize().y * 4;
 	m_copyright_notice = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition, sz, 
-		               wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH) ;
+		               wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH | wxTE_CENTRE) ;
     topsizer->Add(m_copyright_notice, wxSizerFlags(0).Border(wxALL, MFP_SPACING).Expand());
     
     SetSizerAndFit(topsizer);

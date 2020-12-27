@@ -37,7 +37,8 @@ public:
 
 private:
 
-	Slider           * m_track_slider ;
+    wxSlider         * m_track_slider;
+	//Slider           * m_track_slider ;
 	wxCheckBox       * m_show_track;               /**< current track on/off */
 	wxButton         * m_tracks_on ;               /**< all tracks on button */
 	wxButton         * m_tracks_off ;              /**< all tracks off button */

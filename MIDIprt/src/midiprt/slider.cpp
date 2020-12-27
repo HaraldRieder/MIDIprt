@@ -38,8 +38,8 @@ int Slider::init(wxWindow* parent, const wxPoint& point, const wxSize& size,
 		sz = m_max->GetSize();
 		m_max->Move(point.x + size.x - sz.x, ytext); // move to the right	
 
-		m_current =	new wxTextCtrl(parent, -1, smax/*adjust to max. width*/,
-			wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_CENTER);
+        m_current = new wxStaticText(parent, -1, smax/*adjust to max. width*/,
+            wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE | wxST_NO_AUTORESIZE);
 		setCurrent(value);
 		sz = m_current->GetSize();
 		size_t len = smax.size();
@@ -151,7 +151,7 @@ void Slider::setCurrent(int value)
 	if (m_current != NULL)
 	{
 		wxString sval = wxString::Format(_T("%d"), value);
-		m_current->SetValue(sval);
+        m_current->SetLabel(sval);
 	}
 }
 

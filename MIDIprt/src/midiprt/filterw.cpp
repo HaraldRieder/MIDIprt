@@ -70,8 +70,7 @@ END_EVENT_TABLE()
 
 /** filter window constructor */
 MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
-: wxDialog(parent, -1, _T(""), wxDefaultPosition, wxSize(wxButton::GetDefaultSize().y * 20, wxButton::GetDefaultSize().y * 12))
-, m_changed(false)
+: wxDialog(parent, -1, _T(""), wxDefaultPosition, wxDefaultSize), m_changed(false)
 {
     // set the icon
     SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("filter.ico")));
@@ -79,75 +78,77 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
     // create the status line
 //    CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 
 
-    // create panel for the controls
-    int PANEL_W, PANEL_H ;
-    DoGetClientSize(&PANEL_W, &PANEL_H) ;
-    wxPanel *panel = new wxPanel(this, -1, wxPoint(0, 0), wxSize(PANEL_W, PANEL_H), wxTAB_TRAVERSAL);
+    wxSize sz;
+    const wxSizerFlags flags = wxSizerFlags(1).Center().Border(wxLEFT|wxRIGHT|wxDOWN, MFP_TEXT_SPACING);
+    const wxSizerFlags buttonFlags = wxSizerFlags(0).Center().Border(wxALL, MFP_SPACING);
 
-    const int UPPER_H = PANEL_H/2 ;   // tracks and channels
-    const int LEFT_W = PANEL_W/2 ;    // tracks
-
-    const int LOWER_H = PANEL_H - UPPER_H ;  // textes: take the rest
-    const int RIGHT_W = PANEL_W - LEFT_W ;   // channels: take the rest
-
-
-    wxSize sz ;
+	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *upper = new wxBoxSizer(wxHORIZONTAL);
 
     // track filter controls
-    const int upper_box_h = UPPER_H-MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("tracks"), 
-        wxPoint(MFP_SPACING,MFP_SPACING),wxSize(LEFT_W-2*MFP_SPACING,upper_box_h));
-    sz.x = LEFT_W - 4*MFP_SPACING ;
-    sz.y = wxButton::GetDefaultSize().y;
-    m_track_slider = new Slider(panel, Slider_Track, 0, 0, 10, 
-        wxPoint(MFP_SPACING*2,MFP_SPACING*3),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_AUTOTICKS+wxSL_LABELS) ;
-    sz.x /= 2 ;
-    sz.y = (upper_box_h - 4*MFP_SPACING)/3 ;
-    m_show_track = new wxCheckBox(panel, Control_Show_track, _T("&show track"),  wxPoint(2*MFP_SPACING, MFP_SPACING*4 + sz.y));
-    m_tracks_on  = new wxButton(panel,Control_All_tracks_on,_T("all on"), 
-        wxPoint(2*MFP_SPACING, MFP_SPACING*4 + 2*sz.y), sz) ;
-    m_tracks_off = new wxButton(panel,Control_All_tracks_off,_T("all off"), 
-        wxPoint(2*MFP_SPACING + sz.x, MFP_SPACING*4 + 2*sz.y), sz) ;
+  	wxStaticBoxSizer *box = new wxStaticBoxSizer(wxVERTICAL, this, _T("Tracks"));
+    m_track_slider = new wxSlider(box->GetStaticBox(), Slider_Track, 0,0,10, 
+        wxDefaultPosition, wxDefaultSize, 
+        wxSL_HORIZONTAL+wxSL_LABELS);
+    box->Add(m_track_slider, wxSizerFlags().Center().Border(wxLEFT+wxRIGHT, MFP_SPACING).Expand());
+    m_show_track = new wxCheckBox(box->GetStaticBox(), Control_Show_track, _T("&show track"));
+    box->Add(m_show_track, flags);
+    wxBoxSizer *buttons = new wxBoxSizer(wxHORIZONTAL);
+    m_tracks_on  = new wxButton(box->GetStaticBox(),Control_All_tracks_on,_T("all on"));
+    m_tracks_off = new wxButton(box->GetStaticBox(),Control_All_tracks_off,_T("all off"));
+    buttons->Add(m_tracks_on, buttonFlags);
+    buttons->Add(m_tracks_off, buttonFlags);
+    box->Add(buttons, wxSizerFlags().Center());
+    upper->Add(box, wxSizerFlags(1).Expand());
 
     // channel filter controls
-    new wxStaticBox(panel, -1, _T("channels"), 
-        wxPoint(RIGHT_W+MFP_SPACING,MFP_SPACING), wxSize(RIGHT_W-2*MFP_SPACING,upper_box_h));
-    sz.x = (RIGHT_W-4*MFP_SPACING) * 2 / MIDI_CHANNELS ;
-    for (unsigned i = 0 ; i < 2 ; i++)
-        for (unsigned j = 0 ; j < 8 ; j++)
-        {
-            char buf[3] ;
-            unsigned index = i*8+j ;
-            sprintf(buf, "%X", index) ;
-            m_channels[index] = new wxToggleButton(panel, Control_Channel_toggle + index, 
-                wxString::FromAscii(buf), 
-                wxPoint(RIGHT_W+MFP_SPACING*2+j*sz.x,MFP_SPACING*3+i*sz.y), sz) ;
+  	box = new wxStaticBoxSizer(wxVERTICAL, this, _T("Channels"));
+    wxFlexGridSizer *grid = new wxFlexGridSizer(8);
+    sz = wxButton::GetDefaultSize();
+    sz.x = sz.y; // quadratic buttons
+    for (unsigned i = 0 ; i < 16 ; i++)
+    {
+        char buf[3] ;
+        sprintf(buf, "%X", i) ;
+        m_channels[i] = new wxToggleButton(box->GetStaticBox(), 
+                Control_Channel_toggle + i, wxString::FromAscii(buf), wxDefaultPosition, sz);
+        // compact block of quadratic buttons, spacing around the block but not between buttons
+        int direction = i < 8 ? wxTOP : wxBOTTOM;
+        switch (i) {
+            case 0: case 8: direction += wxLEFT; break;
+            case 7: case 15: direction += wxRIGHT; break;
         }
-    sz.x = (RIGHT_W - 4*MFP_SPACING)/2 ;
-    m_channels_on = new wxButton(panel, Control_All_channels_on,_T("all on"), 
-        wxPoint(RIGHT_W+MFP_SPACING*2, MFP_SPACING*4 + 2*sz.y), sz) ;
-    m_channels_off = new wxButton(panel, Control_All_channels_off,_T("all off"), 
-        wxPoint(RIGHT_W+MFP_SPACING*2 + sz.x, MFP_SPACING*4 + 2*sz.y), sz) ;
+        grid->Add(m_channels[i], wxSizerFlags(0).Center().Border(direction, MFP_SPACING));
+    }
+    box->Add(grid, flags);
+    buttons = new wxBoxSizer(wxHORIZONTAL);
+    m_channels_on = new wxButton(box->GetStaticBox(), Control_All_channels_on,_T("all on"));
+    m_channels_off = new wxButton(box->GetStaticBox(), Control_All_channels_off,_T("all off"));
+    buttons->Add(m_channels_on, buttonFlags);
+    buttons->Add(m_channels_off, buttonFlags);
+    box->Add(buttons, wxSizerFlags().Center());
+    upper->Add(box, wxSizerFlags(1).Border(wxLEFT, MFP_SPACING).Expand());
 
     // track name controls
-    const int show_box_h = LOWER_H-2*MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("show"), 
-        wxPoint(MFP_SPACING, UPPER_H+MFP_SPACING), wxSize(PANEL_W-2*MFP_SPACING, show_box_h));
-    sz.y = (show_box_h - MFP_SPACING*5/2)/4 ;
-    sz.x = sz.y * 4 ; // should be broad enough for "Track name"
-    int x = MFP_SPACING*2;
-    int y0 = UPPER_H+MFP_SPACING*3;
-    m_trackname  = new wxRadioButton(panel, Control_Track_name, _T("&Track name"), wxPoint(x, y0)       , sz) ;
-    m_instrument = new wxRadioButton(panel, Control_Instrument, _T("&Instrument"), wxPoint(x, y0+sz.y)  , sz) ;
-    m_device     = new wxRadioButton(panel, Control_Device    , _T("&Device")    , wxPoint(x, y0+sz.y*2), sz) ;
-    m_text       = new wxRadioButton(panel, Control_Text      , _T("Te&xt")      , wxPoint(x, y0+sz.y*3), sz) ;
-    const long style = wxTE_READONLY+wxTE_LEFT ;
-    x = MFP_SPACING*3+sz.x ;
-    sz.x = PANEL_W-5*MFP_SPACING-sz.x ;
-    m_trackname_txt  = new wxTextCtrl(panel, -1, _T(""), wxPoint(x, y0)       , sz, style) ;
-    m_instrument_txt = new wxTextCtrl(panel, -1, _T(""), wxPoint(x, y0+sz.y)  , sz, style) ;
-    m_device_txt     = new wxTextCtrl(panel, -1, _T(""), wxPoint(x, y0+sz.y*2), sz, style) ;
-    m_text_txt       = new wxTextCtrl(panel, -1, _T(""), wxPoint(x, y0+sz.y*3), sz, style) ;
+    // workaround TextCtrl not expanding automatically?
+    sz = wxButton::GetDefaultSize();
+    sz.x *= 5;
+  	box = new wxStaticBoxSizer(wxVERTICAL, this, _T("show"));
+    grid = new wxFlexGridSizer(2);
+    grid->Add(m_trackname = new wxRadioButton(box->GetStaticBox(), Control_Track_name, _T("&Track name")));
+    grid->Add(m_trackname_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_instrument = new wxRadioButton(box->GetStaticBox(), Control_Instrument, _T("&Instrument")));
+    grid->Add(m_instrument_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_device = new wxRadioButton(box->GetStaticBox(), Control_Device, _T("&Device")));
+    grid->Add(m_device_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_text = new wxRadioButton(box->GetStaticBox(), Control_Text, _T("Te&xt")));
+    grid->Add(m_text_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    box->Add(grid, wxSizerFlags(1).Center().Expand());    
+
+    topsizer->Add(upper, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
+    topsizer->Add(box, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
+
+    SetSizerAndFit(topsizer);
 
     set_database(NULL) ;
 }
@@ -330,6 +331,10 @@ void MFPFilterWindow::update_string_buttons()
         m_device->Disable() ;
         m_instrument->Disable() ;
         m_text->Disable() ;
+        m_trackname_txt->Disable() ;
+        m_device_txt->Disable() ;
+        m_instrument_txt->Disable() ;
+        m_text_txt->Disable() ;
     }
     else
     {
@@ -337,6 +342,10 @@ void MFPFilterWindow::update_string_buttons()
         m_device->Enable() ;
         m_instrument->Enable() ;
         m_text->Enable() ;
+        m_trackname_txt->Enable() ;
+        m_device_txt->Enable() ;
+        m_instrument_txt->Enable() ;
+        m_text_txt->Enable() ;
     }
     
     if (db) switch ( db->track[db->current_track].select )
