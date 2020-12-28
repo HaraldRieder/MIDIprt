@@ -19,7 +19,7 @@
 class NoteWidget: public wxWindow
 {
 public:
-    NoteWidget(wxWindow *parent, int id, const wxPoint& pos, const wxSize& size);
+    NoteWidget(wxWindow *parent, int id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 	/**
 	* Tells the widget which data to display. 
 	* Calls redisplay if pointer has changed.
@@ -35,7 +35,7 @@ private:
 class SchemeWidget: public wxWindow
 {
 public:
-    SchemeWidget(wxWindow *parent, const wxPoint& pos, const wxSize& size);
+    SchemeWidget(wxWindow *parent, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 	/**
 	* Tells the widget which data to display. 
 	* Calls redisplay if pointer has changed.
@@ -120,21 +120,21 @@ private:
 	wxCheckBox    * m_underlined ;
 	wxButton      * m_font ;          /**< opens the font dialog */
 	wxChoice      * m_borders_choice ;/**< whether to show left/right or top/bottom */
-	Slider        * m_left_border ;   /**< or top border */
-	wxTextCtrl    * m_left_val ;      /**< self-constructed slider value display */
-	Slider        * m_right_border ;  /**< or bottom border */
-	wxTextCtrl    * m_right_val ;     /**< self-constructed slider value display */
+	wxSlider      * m_left_border ;   /**< or top border */
+	//wxTextCtrl    * m_left_val ;      /**< self-constructed slider value display */
+	wxSlider      * m_right_border ;  /**< or bottom border */
+	//wxTextCtrl    * m_right_val ;     /**< self-constructed slider value display */
 	wxChoice      * m_distances ;     /**< which distance to show */
-	Slider        * m_distance ;
-	wxTextCtrl    * m_distance_val ;  /**< self-constructed slider value display */
-	Slider        * m_bars_per_line ;
-	Slider        * m_bar_length ;
-	Slider        * m_sub_bars ;
+	wxSlider      * m_distance ;
+	//wxTextCtrl    * m_distance_val ;  /**< self-constructed slider value display */
+	wxSlider      * m_bars_per_line ;
+	wxSlider      * m_bar_length ;
+	wxSlider      * m_sub_bars ;
 	wxChoice      * m_lines ;         /**< horizontal lines per dodec. */
 	wxChoice      * m_transpose ;     /**< 0..12 */
 	wxChoice      * m_inventor ;      /**< Beyreuther, Rieder, Mix */
-	Slider        * m_height ;        /**< average note height (corresp. dynamic=0) */
-	Slider        * m_dynamic ;       /**< note height dependence from note-on dynamic */
+	wxSlider      * m_height ;        /**< average note height (corresp. dynamic=0) */
+	wxSlider      * m_dynamic ;       /**< note height dependence from note-on dynamic */
 	wxCheckBox    * m_borders ;       /**< note borders */
 	wxCheckBox    * m_borders_3d ;    /**< 3-dimensional looking note borders */
 	NoteWidget    * m_head ;          /**< note head sample */

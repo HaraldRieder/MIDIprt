@@ -229,10 +229,7 @@ END_EVENT_TABLE()
 
 
 /** filter window constructor */
-MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
-: wxDialog(parent, -1, _T(""), wxDefaultPosition, 
-           wxSize(wxButton::GetDefaultSize().y * 23, wxButton::GetDefaultSize().y * 21) 
-           /*, wxDEFAULT_DIALOG_STYLE, wxDialogNameStr*/)
+MFPParamsWindow::MFPParamsWindow(wxWindow *parent) : wxDialog(parent, -1, _T(""), wxDefaultPosition, wxDefaultSize)
 {
     // set the icon
     SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("params.ico")));
@@ -241,198 +238,142 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent)
 //    CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 
 
     // create panel for the controls
-    int PANEL_W, PANEL_H ;
-    DoGetClientSize(&PANEL_W, &PANEL_H) ;
-    wxPanel *panel = new wxPanel(this, -1, wxPoint(0, 0), wxSize(PANEL_W, PANEL_H), wxTAB_TRAVERSAL);
 
-    const int n_y = 100 ; 
-
-    const int TITLE_H   = PANEL_H*17/n_y ;   // title label and text
-    const int BORDERS_H = PANEL_H*21/n_y ;   // border controls box
-    const int DIST_H    = PANEL_H*14/n_y ;   // distance controls box
-    const int BARS_H    = PANEL_H*28/n_y ;   // bar controls box
-    const int TYPE_H    = PANEL_H - BARS_H - DIST_H - BORDERS_H
-                        - TITLE_H;// notation type box
-    const int NOTES_H   = PANEL_H 
-                        - TITLE_H;// note controls incl. scheme
-    const int LEFT_W  = PANEL_W*6/11 ;         // borders, dist., bars, ...
-    const int RIGHT_W = PANEL_W - LEFT_W ;  // channels: take the rest
-
-    const int H = wxButton::GetDefaultSize().y ;
-
-    wxSize sz ;
-    int x,y ;
-
+    wxSize sz;
+   	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *upper = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *lower = new wxBoxSizer(wxHORIZONTAL);
+    
     // title and font controls
-    sz.x = PANEL_W - 3*MFP_SPACING - wxButton::GetDefaultSize().x ;
-    sz.y = TITLE_H - 2*MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("title"), wxPoint(MFP_SPACING,MFP_SPACING), sz);
-    sz.x = PANEL_W*3/5 ;
-    sz.y = H ;
-    x = 2*MFP_SPACING; 
-    int y0 = 1+2*MFP_SPACING;
-    m_title = new wxTextCtrl(panel, Control_Title, _T(""), wxPoint(x,3*MFP_SPACING), sz) ;
-    x = sz.x + 3*MFP_SPACING ;
-    m_bold = new wxCheckBox(panel, Control_Bold, _T("&bold"), wxPoint(x,y0)) ;
-    y = y0 + m_bold->GetSize().y ;
-    m_italic = new wxCheckBox(panel, Control_Italic, _T("&italic"), wxPoint(x,y)) ;
-    y = y0 + m_bold->GetSize().y * 2;
-    m_underlined = new wxCheckBox(panel, Control_Underlined, _T("&underlined"), wxPoint(x,y)) ;
-    x = PANEL_W    - MFP_SPACING - wxButton::GetDefaultSize().x ;
-    y = (TITLE_H - H)/2 ;
-    m_font = new wxButton(panel, Control_Font, _T("&Font..."), wxPoint(x,y)) ;
+    wxStaticBoxSizer *titlebox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Title"));
+    sz = wxButton::GetDefaultSize();
+    sz.x *= 5;
+    m_title = new wxTextCtrl(titlebox->GetStaticBox(), Control_Title, _T(""), wxDefaultPosition, sz);
+    wxBoxSizer *styles = new wxBoxSizer(wxVERTICAL);
+    styles->Add(m_bold = new wxCheckBox(titlebox->GetStaticBox(), Control_Bold, _T("&bold")));
+    styles->Add(m_italic = new wxCheckBox(titlebox->GetStaticBox(), Control_Italic, _T("&italic")));
+    styles->Add(m_underlined = new wxCheckBox(titlebox->GetStaticBox(), Control_Underlined, _T("&underlined")),
+        wxSizerFlags().Border(wxBOTTOM+wxRIGHT, MFP_TEXT_SPACING));
+    titlebox->Add(m_title, wxSizerFlags().Border(wxLEFT,MFP_SPACING).Center());
+    titlebox->Add(styles);
+    upper->Add(titlebox, wxSizerFlags().Border(wxALL, MFP_SPACING));
+    upper->Add(m_font = new wxButton(this, Control_Font, _T("&Font...")),
+        wxSizerFlags().Border(wxRIGHT, MFP_SPACING).Center());
 
+    // left boxes
+    sz = wxButton::GetDefaultSize();
+    sz.x = sz.y; // quadratic buttons
+    wxBoxSizer *left = new wxBoxSizer(wxVERTICAL);
     // borders
-    y = TITLE_H ;
-    sz.x = LEFT_W - 2*MFP_SPACING ;
-    sz.y = BORDERS_H - MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("borders in %"), wxPoint(MFP_SPACING,y), sz);
-    sz.x -= 2*MFP_SPACING ;
-    sz.y = H ;
-    x = 2*MFP_SPACING;
-    y = TITLE_H + 2*MFP_SPACING;
+    wxStaticBoxSizer *borderbox = new wxStaticBoxSizer(wxVERTICAL, this, _T("Borders in %"));
     const wxString border_choices[2] = {_T("Top / bottom:"),_T("Left / right:")} ;
-    m_borders_choice = new wxChoice(panel, Control_Borders, wxPoint(x,y),sz, 2,border_choices) ;
+    m_borders_choice = new wxChoice(borderbox->GetStaticBox(), Control_Borders, wxDefaultPosition,wxDefaultSize, 2,border_choices) ;
     m_borders_choice->SetSelection(0) ;
-    y = TITLE_H + MFP_SPACING*3 + H ;
-    sz.x = sz.x / 3 ;
-    m_left_border  = new Slider(panel, Slider_Left_border , 0, 0, 25, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
+    wxBoxSizer *sliderbox = new wxBoxSizer(wxHORIZONTAL);
+    m_left_border = new wxSlider(borderbox->GetStaticBox(), Slider_Left_border , 0, 0, 25, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
     m_left_border->SetPageSize(1) ;
-    x = (LEFT_W - 2*MFP_SPACING) - sz.x ;
-    m_right_border = new Slider(panel, Slider_Right_border, 0, 0, 25, wxPoint(x,y),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_INVERSE) ;
+    m_right_border = new wxSlider(borderbox->GetStaticBox(), Slider_Right_border, 0, 0, 25, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_INVERSE) ;
     m_right_border->SetPageSize(1) ;
-    x = 3*MFP_SPACING + sz.x ;
-    sz.x = (sz.x - MFP_SPACING)/2 - MFP_SPACING ;
-    m_left_val  = new wxTextCtrl(panel, -1, _T("?"), wxPoint(x,y), sz, wxTE_READONLY|wxTE_CENTER) ;
-    x += (MFP_SPACING + sz.x) ;
-    m_right_val = new wxTextCtrl(panel, -1, _T("?"), wxPoint(x,y), sz, wxTE_READONLY|wxTE_CENTER) ;
-
+    sliderbox->Add(m_left_border);
+    sliderbox->Add(m_right_border, wxSizerFlags().Border(wxLEFT,MFP_SPACING));
+    borderbox->Add(m_borders_choice, wxSizerFlags().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING).Center());
+    borderbox->Add(sliderbox, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
+    left->Add(borderbox, wxSizerFlags().Border(wxLEFT+wxBOTTOM,MFP_SPACING));
     // distances
-    y = TITLE_H + BORDERS_H ;
-    sz.x = LEFT_W - 2*MFP_SPACING ;
-    sz.y = DIST_H - MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("distances in %"), wxPoint(MFP_SPACING,y), sz);
-    sz.x /= 3 ;
-    sz.y = wxButton::GetDefaultSize().y ;
+    wxStaticBoxSizer *distbox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Distances in %"));
     const wxString dist_choices[3] = { _T("System:"), _T("Track:"), _T("Note:") } ;
-    x = 2*MFP_SPACING;
-    y += 2*MFP_SPACING;
-    m_distances = new wxChoice(panel, Control_Distances, wxPoint(x,y), sz, 3, dist_choices) ;
+    m_distances = new wxChoice(distbox->GetStaticBox(), Control_Distances, wxDefaultPosition,wxDefaultSize, 3, dist_choices) ;
     m_distances->SetSelection(0) ;
-    x = 3*MFP_SPACING + sz.x ;
-    sz.x = (LEFT_W - 2*MFP_SPACING)/6 ;
-    m_distance_val = new wxTextCtrl(panel, -1, _T("?"), wxPoint(x,y), sz, wxTE_READONLY|wxTE_CENTER) ;
-    x = LEFT_W - x + MFP_SPACING;
-    sz.x = LEFT_W - 2*MFP_SPACING - x;
-    m_distance = new Slider(panel, Slider_Distance, 0, 0, 10000, wxPoint(x,y), sz, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
-
+    m_distance = new wxSlider(distbox->GetStaticBox(), Slider_Distance, 0, 0, 10000, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
+    distbox->Add(m_distances, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
+    distbox->Add(m_distance, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
+    left->Add(distbox, wxSizerFlags(1).Border(wxLEFT+wxBOTTOM,MFP_SPACING).Expand());
     // bars
-    y = TITLE_H + BORDERS_H + DIST_H ;
-    sz.x = LEFT_W - 2*MFP_SPACING ;
-    sz.y = BARS_H - MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("bars"), wxPoint(MFP_SPACING,y), sz);
-    x = 2*MFP_SPACING;
-    y0 = y + 2*MFP_SPACING + LABEL_OFFSET ;
-    new wxStaticText(panel, -1, _T("Per line:")    , wxPoint(x,y0)) ; 
-    new wxStaticText(panel, -1, _T("Length [1/8]:"), wxPoint(x,y0+MFP_SPACING + H)) ; 
-    new wxStaticText(panel, -1, _T("Sub-bars:")    , wxPoint(x,y0+2*MFP_SPACING + 2*H)) ; 
-    x = MFP_SPACING + LEFT_W/3 ;
-    y0 = y + 2*MFP_SPACING;
-    sz.x = LEFT_W - x - 2*MFP_SPACING ;
-    sz.y = H ;
-    m_bars_per_line = new Slider(panel, Slider_Bars, 8, 4, 32, wxPoint(x,y0),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    wxStaticBoxSizer *barsbox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Bars"));
+    wxFlexGridSizer *grid = new wxFlexGridSizer(3);
+    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Per line:"))); 
+    grid->Add(new wxButton(barsbox->GetStaticBox(), Control_Bars_width, _T("-"), wxDefaultPosition, sz));
+    m_bars_per_line = new wxSlider(barsbox->GetStaticBox(), Slider_Bars, 8, 4, 32, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
     m_bars_per_line->SetPageSize(1) ;
-    m_bar_length = new Slider(panel, Slider_Bar_length, 8, 4, 32, wxPoint(x,y0+(MFP_SPACING+H)),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    grid->Add(m_bars_per_line, wxSizerFlags(1).Expand());
+    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Length [1/8]:"))); 
+    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T(""))); // dummy text
+    m_bar_length = new wxSlider(barsbox->GetStaticBox(), Slider_Bar_length, 8, 4, 32, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
     m_bar_length->SetPageSize(1) ;
-    m_sub_bars = new Slider(panel, Slider_Subbars, 2, 1, 12, wxPoint(x,y0+2*(MFP_SPACING+H)),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
+    grid->Add(m_bar_length, wxSizerFlags(1).Expand());
+    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Sub-bars:")));
+    grid->Add(new wxButton(barsbox->GetStaticBox(), Control_Subbars_width, _T("-"), wxDefaultPosition, sz));
+    m_sub_bars = new wxSlider(barsbox->GetStaticBox(), Slider_Subbars, 2, 1, 12, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
     m_sub_bars->SetPageSize(1) ;
-    sz.x = H*3/4 ;
-    new wxButton(panel, Control_Bars_width   , _T("-"), wxPoint(x-H,y0)      , sz) ;
-    new wxButton(panel, Control_Subbars_width, _T("-"), wxPoint(x-H,y0+2*(MFP_SPACING+H)), sz) ;
-
+    grid->Add(m_sub_bars, wxSizerFlags(1).Expand());
+    barsbox->Add(grid, wxSizerFlags(1).Border(wxALL,MFP_TEXT_SPACING).Expand());
+    left->Add(barsbox, wxSizerFlags(1).Border(wxLEFT+wxBOTTOM,MFP_SPACING).Expand());
     // notation type
-    y = TITLE_H + BORDERS_H + DIST_H + BARS_H ;
-    sz.x = LEFT_W - 2*MFP_SPACING ;
-    sz.y = TYPE_H - MFP_SPACING ;
-    x = 2*MFP_SPACING;
-    new wxStaticBox(panel, -1, _T("notation type"), wxPoint(MFP_SPACING,y), sz);
-    y0 = y + 2*MFP_SPACING;
-    new wxStaticText(panel, -1, _T("Inventor:")        , wxPoint(x,y0+LABEL_OFFSET)) ; 
-    new wxStaticText(panel, -1, _T("Horizontal lines:"), wxPoint(x,y0+LABEL_OFFSET+MFP_SPACING+H)) ; 
-    sz.x = LEFT_W/2 ;
-    sz.y = H ;
+    wxStaticBoxSizer *ntypebox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Notation type"));
+    grid = new wxFlexGridSizer(2);
+    grid->Add(new wxStaticText(ntypebox->GetStaticBox(), -1, _T("Inventor:")), wxSizerFlags().Border(wxTOP+wxRIGHT,MFP_TEXT_SPACING));
     const wxString inv_choices[3] = { _T("Beyreuther"), _T("Rieder"), _T("Mix") } ;
-    x = LEFT_W - 2*MFP_SPACING - sz.x ;
-    m_inventor = new wxChoice(panel, Control_Inventor, wxPoint(x,y0),sz, 3,inv_choices) ;
-    sz.x = sz.y*3/4 ; // narrow button
-    new wxButton(panel, Control_Horlines_width, _T("-"), wxPoint(x,y0+MFP_SPACING+H), sz) ;
-    sz.x = LEFT_W/4 ;
+    m_inventor = new wxChoice(ntypebox->GetStaticBox(), Control_Inventor, wxDefaultPosition,wxDefaultSize, 3,inv_choices) ;
+    grid->Add(m_inventor, wxSizerFlags().Border(wxBOTTOM,MFP_TEXT_SPACING));
+    grid->Add(new wxStaticText(ntypebox->GetStaticBox(), -1, _T("Horizontal lines:")), wxSizerFlags().Border(wxTOP+wxRIGHT,MFP_TEXT_SPACING)); 
+    wxBoxSizer *hlinesbox = new wxBoxSizer(wxHORIZONTAL);
+    hlinesbox->Add(new wxButton(ntypebox->GetStaticBox(), Control_Horlines_width, _T("-"), wxDefaultPosition,sz));
     const wxString lines_choices[5] = { _T("1"), _T("2"), _T("3"), _T("4"), _T("6") } ;
-    x = LEFT_W - 2*MFP_SPACING - sz.x ;
-    m_lines = new wxChoice(panel, Control_Horlines, wxPoint(x,y0+MFP_SPACING+H),sz, 5,lines_choices) ;
+    m_lines = new wxChoice(ntypebox->GetStaticBox(), Control_Horlines, wxDefaultPosition,wxDefaultSize, 5,lines_choices) ;
+    hlinesbox->Add(m_lines, wxSizerFlags().Right());
+    grid->Add(hlinesbox, wxSizerFlags(1).Expand());
+    ntypebox->Add(grid, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
+    left->Add(ntypebox, wxSizerFlags().Border(wxLEFT+wxBOTTOM,MFP_SPACING));
 
     // notes & color scheme
-    y = TITLE_H ;
-    sz.x = RIGHT_W - MFP_SPACING ;
-    sz.y = NOTES_H - MFP_SPACING ;
-    new wxStaticBox(panel, -1, _T("notes && colors"), wxPoint(LEFT_W,y), sz);
-    const int x_lab = LEFT_W+MFP_SPACING;
-    y0 = TITLE_H + 2*MFP_SPACING;
-    new wxStaticText(panel, -1, _T("Av. height:"), wxPoint(x_lab,y0+LABEL_OFFSET)) ; 
-    sz.x = RIGHT_W*3/5 ;
-    sz.y = H ;
-    x = PANEL_W - 2*MFP_SPACING - sz.x;
-    m_height = new Slider(panel, Slider_Height, 5, 1, 9, wxPoint(x,y0),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
+    wxStaticBoxSizer *right = new wxStaticBoxSizer(wxVERTICAL, this, _T("Notes && Colors"));
+    grid = new wxFlexGridSizer(2);
+    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Av. height:")));
+    m_height = new wxSlider(right->GetStaticBox(), Slider_Height, 5, 1, 9, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
     m_height->SetPageSize(1) ;
-    new wxStaticText(panel, -1, _T("Dynamic:"), wxPoint(x_lab,y0+LABEL_OFFSET+MFP_SPACING+H)) ; 
-    m_dynamic = new Slider(panel, Slider_Dynamic, 0, 0, 15,    wxPoint(x,y0+MFP_SPACING+H),sz, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
+    grid->Add(m_height);
+    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Dynamic:")));
+    m_dynamic = new wxSlider(right->GetStaticBox(), Slider_Dynamic, 0, 0, 15, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
     m_dynamic->SetPageSize(1) ;
-    sz.x = RIGHT_W/3 ;
+    grid->Add(m_dynamic);
+    right->Add(grid, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
     const wxString ends_choices[4] = { _T("(none)"), _T("line"), _T("triangle"), _T("dot")} ;
     const wxString body_choices[4] = { _T("(none)"), _T("bar"), _T("ellipse"), _T("triangle")} ;
-    x = PANEL_W - 2*MFP_SPACING - sz.x ;
-    y0 = TITLE_H + 4*MFP_SPACING;
-    new wxStaticText(panel, -1, _T("Heads:") , wxPoint(x_lab,y0+LABEL_OFFSET+2*H)) ; 
-    new wxStaticText(panel, -1, _T("Bodies:"), wxPoint(x_lab,y0+LABEL_OFFSET+3*H)) ; 
-    new wxStaticText(panel, -1, _T("Tails:") , wxPoint(x_lab,y0+LABEL_OFFSET+4*H)) ; 
-    m_head_choice = new wxChoice(panel, Control_Head, wxPoint(x,y0+2*H),sz,4,ends_choices) ;
-    m_body_choice = new wxChoice(panel, Control_Body, wxPoint(x,y0+3*H),sz,4,body_choices) ;
-    m_tail_choice = new wxChoice(panel, Control_Tail, wxPoint(x,y0+4*H),sz,4,ends_choices) ;
-
-    x = LEFT_W + MFP_SPACING + RIGHT_W/4 ;
-    y = 3*MFP_SPACING + 2*H + TITLE_H + MFP_SPACING ;
-    sz.x = RIGHT_W / 5 ;
-    sz.y = H/2 ;
-    m_head = new NoteWidget(panel, Widget_Head, wxPoint(x,H/4+y), sz) ;
-    m_body = new NoteWidget(panel, Widget_Body, wxPoint(x,H/4+y+H), sz) ;
-    m_tail = new NoteWidget(panel, Widget_Tail, wxPoint(x,H/4+y+2*H), sz) ;
-
-    y = TITLE_H + 4*MFP_SPACING + 5*H ;
-    sz.x = H*3/4 ;
-    sz.y = H ;
-    x = LEFT_W + 2*MFP_SPACING;
-    new wxButton(panel, Control_Noteborders_width, _T("-"), wxPoint(x,y), sz) ;
-    sz.x = RIGHT_W/3 ;
-    x += H;
-    m_borders = new wxCheckBox(panel, Control_Noteborders, _T("Note borders"), wxPoint(x,y), sz) ;
-    x = LEFT_W + H + (RIGHT_W - MFP_SPACING)/2 ;
-    m_borders_3d = new wxCheckBox(panel, Control_Notes_3D, _T("3D notes"), wxPoint(x,y), sz) ;
-    y = TITLE_H + 5*MFP_SPACING + 6*H ;
-    new wxStaticText(panel, -1, _T("Transpose:"), wxPoint(x_lab,y+LABEL_OFFSET)) ; 
+    grid = new wxFlexGridSizer(3);
+    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Heads:")));
+    grid->Add(m_head = new NoteWidget(right->GetStaticBox(), Widget_Head ,wxDefaultPosition,wxButton::GetDefaultSize()));
+    grid->Add(m_head_choice = new wxChoice(right->GetStaticBox(), Control_Head, wxDefaultPosition,wxDefaultSize,4,ends_choices));
+    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Bodies:")));
+    grid->Add(m_body = new NoteWidget(right->GetStaticBox(), Widget_Body, wxDefaultPosition,wxButton::GetDefaultSize())); 
+    grid->Add(m_body_choice = new wxChoice(right->GetStaticBox(), Control_Body, wxDefaultPosition,wxDefaultSize,4,body_choices));
+    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Tails:"))); 
+    grid->Add(m_tail = new NoteWidget(right->GetStaticBox(), Widget_Tail, wxDefaultPosition,wxButton::GetDefaultSize()));
+    grid->Add(m_tail_choice = new wxChoice(right->GetStaticBox(), Control_Tail, wxDefaultPosition,wxDefaultSize,4,ends_choices));
+    right->Add(grid, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
+    wxBoxSizer *noteborderbox = new wxBoxSizer(wxHORIZONTAL);
+    noteborderbox->Add(new wxButton(right->GetStaticBox(), Control_Noteborders_width, _T("-"), wxDefaultPosition, sz));
+    noteborderbox->Add(m_borders = new wxCheckBox(right->GetStaticBox(), Control_Noteborders, _T("Note borders")));
+    noteborderbox->Add(m_borders_3d = new wxCheckBox(right->GetStaticBox(), Control_Notes_3D, _T("3D notes"))) ;
+    right->Add(noteborderbox, wxSizerFlags().Center().Border(wxTOP,MFP_TEXT_SPACING));
+    wxBoxSizer *transpbox = new wxBoxSizer(wxHORIZONTAL);
+    transpbox->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Transpose:")), wxSizerFlags().Border(wxLEFT+wxTOP,MFP_TEXT_SPACING)); 
     const wxString transp_choices[12] = 
         { _T("0 (none)"),_T("+1 = -B"),_T("+2 = -A"),_T("+3 = -9"),_T("+4 = -8"),_T("+5 = -7"),
           _T("+6 = -6"),_T("+7 = -5"),_T("+8 = -4"),_T("+9 = -3"),_T("+A = -2"),_T("+B = -1") } ;
-    sz.x = RIGHT_W/3 ;
-    sz.y = H ;
-    x = PANEL_W - 2*MFP_SPACING - sz.x ;
-    m_transpose = new wxChoice(panel, Control_Transpose, wxPoint(x,y),sz, 12,transp_choices) ;
-
+    m_transpose = new wxChoice(right->GetStaticBox(), Control_Transpose, wxDefaultPosition,wxDefaultSize, 12,transp_choices);
+    transpbox->Add(m_transpose, wxSizerFlags());
+    right->Add(transpbox, wxSizerFlags().Center().Border(wxALL,MFP_TEXT_SPACING));
     // color scheme
-    x = LEFT_W + MFP_SPACING/2 ;
-    y = TITLE_H + 11*MFP_SPACING/2 + 7*H ;
-    sz.x = RIGHT_W - 2*MFP_SPACING ;
-    sz.y = PANEL_H - y - MFP_SPACING - MFP_SPACING/2 ;
-    m_scheme = new SchemeWidget(panel, wxPoint(x,y), sz) ;
+    sz.x = wxButton::GetDefaultSize().x*3;
+    sz.y = wxButton::GetDefaultSize().x*2;
+    right->Add(m_scheme = new SchemeWidget(right->GetStaticBox(), wxDefaultPosition, sz),
+        wxSizerFlags().Border(wxALL, MFP_TEXT_SPACING));
+
+    lower->Add(left);
+    lower->Add(right, wxSizerFlags(1).Border(wxLEFT+wxBOTTOM+wxRIGHT,MFP_SPACING).Expand());
+    topsizer->Add(upper);
+    topsizer->Add(lower);
+    SetSizerAndFit(topsizer);
 
     set_database(NULL) ;
 }
@@ -573,8 +514,8 @@ void MFPParamsWindow::OnLeftBorderSlider( wxCommandEvent &WXUNUSED(event) )
     else
         db->left_border = value ;
     char buf[10] ;
-    sprintf(buf, "%d", value) ;
-    m_left_val->SetValue(wxString::FromAscii(buf)) ;
+    //sprintf(buf, "%d", value) ;
+    //m_left_val->SetValue(wxString::FromAscii(buf)) ;
 }
 
 void MFPParamsWindow::OnRightBorderSlider( wxCommandEvent &WXUNUSED(event) )
@@ -587,8 +528,8 @@ void MFPParamsWindow::OnRightBorderSlider( wxCommandEvent &WXUNUSED(event) )
     else
         db->right_border = value ;
     char buf[10] ;
-    sprintf(buf, "%d", value) ;
-    m_right_val->SetValue(wxString::FromAscii(buf)) ;
+    //sprintf(buf, "%d", value) ;
+    //m_right_val->SetValue(wxString::FromAscii(buf)) ;
 }
 
 void MFPParamsWindow::OnBordersSelect( wxCommandEvent &WXUNUSED(event) )
@@ -643,27 +584,27 @@ void MFPParamsWindow::OnDistanceSlider( wxCommandEvent &WXUNUSED(event) )
 {
     if (!db) return ;
     
-    char buf[10] ;
+    //char buf[10] ;
     int value = m_distance->GetValue() ;
     switch (m_distances->GetSelection())
     {
     case 0:
         db->system_distance = value ;
-        sprintf(buf, "%d", value) ;
+        //sprintf(buf, "%d", value) ;
         break ;
     case 1:
         db->track_distance = value ;
-        sprintf(buf, "%d", value) ;
+        //sprintf(buf, "%d", value) ;
         break ;
     case 2:
         {
             float distance = (float)(value+1) / 20 ;
             db->note_distance = distance ;
-            sprintf(buf, "%.2f", distance) ;
+            //sprintf(buf, "%.2f", distance) ;
         }
         break ;
     }
-    m_distance_val->SetValue(wxString::FromAscii(buf)) ;
+    //m_distance_val->SetValue(wxString::FromAscii(buf)) ;
 }
 
 void MFPParamsWindow::OnDistanceSelect( wxCommandEvent &WXUNUSED(event) )
@@ -895,7 +836,7 @@ void MFPParamsWindow::redisplay()
 {
     //long pos ;
     /* not multiply used = "normal" */
-    Slider * normal_sliders[] = {
+    wxSlider * normal_sliders[] = {
         m_bars_per_line, m_bar_length, m_sub_bars, 
         m_height, m_dynamic, NULL /* the end */ } ;
     wxWindow * widgets[] = { 
