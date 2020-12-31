@@ -136,13 +136,13 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
   	box = new wxStaticBoxSizer(wxVERTICAL, this, _T("show"));
     grid = new wxFlexGridSizer(2);
     grid->Add(m_trackname = new wxRadioButton(box->GetStaticBox(), Control_Track_name, _T("&Track name")));
-    grid->Add(m_trackname_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_trackname_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz, wxTE_READONLY), flags);
     grid->Add(m_instrument = new wxRadioButton(box->GetStaticBox(), Control_Instrument, _T("&Instrument")));
-    grid->Add(m_instrument_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_instrument_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz, wxTE_READONLY), flags);
     grid->Add(m_device = new wxRadioButton(box->GetStaticBox(), Control_Device, _T("&Device")));
-    grid->Add(m_device_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_device_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz, wxTE_READONLY), flags);
     grid->Add(m_text = new wxRadioButton(box->GetStaticBox(), Control_Text, _T("Te&xt")));
-    grid->Add(m_text_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz), flags);
+    grid->Add(m_text_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz, wxTE_READONLY), flags);
     box->Add(grid, wxSizerFlags(1).Center().Expand());    
 
     topsizer->Add(upper, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());

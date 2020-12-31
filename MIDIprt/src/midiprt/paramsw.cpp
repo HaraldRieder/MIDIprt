@@ -84,7 +84,7 @@ void SchemeWidget::set_database(PARAMS_DB *_db)
 {
     db = _db ; 
 
-    const char *s = "(default)" ;
+    const char *s = " (default)" ;
     if ( db && db->scheme_path[0] ) 
         s = strrchr( db->scheme_path, DIRSEP ) ;
     if (!s) 
@@ -238,16 +238,16 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent) : wxDialog(parent, -1, _T("")
 //    CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 
 
     // create panel for the controls
-
-    wxSize sz;
+    const int sliderFlags = wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS;
+    wxFlexGridSizer *grid;
    	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *upper = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *lower = new wxBoxSizer(wxHORIZONTAL);
     
     // title and font controls
     wxStaticBoxSizer *titlebox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Title"));
-    sz = wxButton::GetDefaultSize();
-    sz.x *= 5;
+    wxSize sz = wxButton::GetDefaultSize();
+    sz.x *= 4;
     m_title = new wxTextCtrl(titlebox->GetStaticBox(), Control_Title, _T(""), wxDefaultPosition, sz);
     wxBoxSizer *styles = new wxBoxSizer(wxVERTICAL);
     styles->Add(m_bold = new wxCheckBox(titlebox->GetStaticBox(), Control_Bold, _T("&bold")));
@@ -263,50 +263,55 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent) : wxDialog(parent, -1, _T("")
     // left boxes
     sz = wxButton::GetDefaultSize();
     sz.x = sz.y; // quadratic buttons
-    wxBoxSizer *left = new wxBoxSizer(wxVERTICAL);
+    wxFlexGridSizer *left = new wxFlexGridSizer(1);
     // borders
     wxStaticBoxSizer *borderbox = new wxStaticBoxSizer(wxVERTICAL, this, _T("Borders in %"));
     const wxString border_choices[2] = {_T("Top / bottom:"),_T("Left / right:")} ;
     m_borders_choice = new wxChoice(borderbox->GetStaticBox(), Control_Borders, wxDefaultPosition,wxDefaultSize, 2,border_choices) ;
     m_borders_choice->SetSelection(0) ;
     wxBoxSizer *sliderbox = new wxBoxSizer(wxHORIZONTAL);
-    m_left_border = new wxSlider(borderbox->GetStaticBox(), Slider_Left_border , 0, 0, 25, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    wxSize slidersz = wxDefaultSize;
+    slidersz.x = wxButton::GetDefaultSize().x * 3/2;
+    m_left_border = new wxSlider(borderbox->GetStaticBox(), Slider_Left_border , 0, 0, 25, wxDefaultPosition,slidersz, sliderFlags) ;
     m_left_border->SetPageSize(1) ;
-    m_right_border = new wxSlider(borderbox->GetStaticBox(), Slider_Right_border, 0, 0, 25, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_INVERSE) ;
+    m_right_border = new wxSlider(borderbox->GetStaticBox(), Slider_Right_border, 0, 0, 25, wxDefaultPosition,slidersz, sliderFlags+wxSL_INVERSE) ;
     m_right_border->SetPageSize(1) ;
-    sliderbox->Add(m_left_border);
-    sliderbox->Add(m_right_border, wxSizerFlags().Border(wxLEFT,MFP_SPACING));
-    borderbox->Add(m_borders_choice, wxSizerFlags().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING).Center());
-    borderbox->Add(sliderbox, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
-    left->Add(borderbox, wxSizerFlags().Border(wxLEFT+wxBOTTOM,MFP_SPACING));
+    sliderbox->Add(m_left_border, wxSizerFlags(1).Expand().Border(wxRIGHT,MFP_SPACING));
+    sliderbox->Add(m_right_border, wxSizerFlags(1).Expand().Border(wxLEFT,MFP_SPACING));
+    borderbox->Add(m_borders_choice, wxSizerFlags().Border(wxLEFT+wxRIGHT+wxTOP,MFP_TEXT_SPACING).Center());
+    borderbox->Add(sliderbox, wxSizerFlags(1).Expand().Border(wxALL,MFP_TEXT_SPACING));
+    left->Add(borderbox, wxSizerFlags(1).Expand().Border(wxLEFT+wxBOTTOM,MFP_SPACING));
     // distances
     wxStaticBoxSizer *distbox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Distances in %"));
     const wxString dist_choices[3] = { _T("System:"), _T("Track:"), _T("Note:") } ;
     m_distances = new wxChoice(distbox->GetStaticBox(), Control_Distances, wxDefaultPosition,wxDefaultSize, 3, dist_choices) ;
     m_distances->SetSelection(0) ;
-    m_distance = new wxSlider(distbox->GetStaticBox(), Slider_Distance, 0, 0, 10000, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM) ;
-    distbox->Add(m_distances, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
-    distbox->Add(m_distance, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
-    left->Add(distbox, wxSizerFlags(1).Border(wxLEFT+wxBOTTOM,MFP_SPACING).Expand());
+    m_distance = new wxSlider(distbox->GetStaticBox(), Slider_Distance, 0, 0, 10000, wxDefaultPosition,wxDefaultSize, sliderFlags) ;
+    distbox->Add(m_distances, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING).Center());
+    distbox->Add(m_distance, wxSizerFlags(1).Expand().Border(wxLEFT+wxRIGHT+wxBOTTOM,MFP_TEXT_SPACING));
+    left->Add(distbox, wxSizerFlags(1).Expand().Border(wxLEFT+wxBOTTOM,MFP_SPACING));
     // bars
-    wxStaticBoxSizer *barsbox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Bars"));
-    wxFlexGridSizer *grid = new wxFlexGridSizer(3);
-    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Per line:"))); 
-    grid->Add(new wxButton(barsbox->GetStaticBox(), Control_Bars_width, _T("-"), wxDefaultPosition, sz));
-    m_bars_per_line = new wxSlider(barsbox->GetStaticBox(), Slider_Bars, 8, 4, 32, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    wxStaticBoxSizer *barsbox = new wxStaticBoxSizer(wxVERTICAL, this, _T("Bars"));
+    wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
+    hbox->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Per line:")), wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING).Center()); 
+    hbox->Add(new wxButton(barsbox->GetStaticBox(), Control_Bars_width, _T("-"), wxDefaultPosition, sz), wxSizerFlags().Center());
+    m_bars_per_line = new wxSlider(barsbox->GetStaticBox(), Slider_Bars, 8, 4, 32, wxDefaultPosition,wxDefaultSize, sliderFlags) ;
     m_bars_per_line->SetPageSize(1) ;
-    grid->Add(m_bars_per_line, wxSizerFlags(1).Expand());
-    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Length [1/8]:"))); 
-    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T(""))); // dummy text
-    m_bar_length = new wxSlider(barsbox->GetStaticBox(), Slider_Bar_length, 8, 4, 32, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    hbox->Add(m_bars_per_line, wxSizerFlags(1).Expand().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING));
+    barsbox->Add(hbox, wxSizerFlags(0).Expand());
+    hbox = new wxBoxSizer(wxHORIZONTAL);
+    hbox->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Length [1/8]:")), wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING).Center()); 
+    m_bar_length = new wxSlider(barsbox->GetStaticBox(), Slider_Bar_length, 8, 4, 32, wxDefaultPosition,wxDefaultSize, sliderFlags) ;
     m_bar_length->SetPageSize(1) ;
-    grid->Add(m_bar_length, wxSizerFlags(1).Expand());
-    grid->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Sub-bars:")));
-    grid->Add(new wxButton(barsbox->GetStaticBox(), Control_Subbars_width, _T("-"), wxDefaultPosition, sz));
-    m_sub_bars = new wxSlider(barsbox->GetStaticBox(), Slider_Subbars, 2, 1, 12, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS) ;
+    hbox->Add(m_bar_length, wxSizerFlags(1).Expand().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING));
+    barsbox->Add(hbox, wxSizerFlags(0).Expand());
+    hbox = new wxBoxSizer(wxHORIZONTAL);
+    hbox->Add(new wxStaticText(barsbox->GetStaticBox(), -1, _T("Sub-bars:")), wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING).Center());
+    hbox->Add(new wxButton(barsbox->GetStaticBox(), Control_Subbars_width, _T("-"), wxDefaultPosition, sz), wxSizerFlags().Center());
+    m_sub_bars = new wxSlider(barsbox->GetStaticBox(), Slider_Subbars, 2, 1, 12, wxDefaultPosition,wxDefaultSize, sliderFlags) ;
     m_sub_bars->SetPageSize(1) ;
-    grid->Add(m_sub_bars, wxSizerFlags(1).Expand());
-    barsbox->Add(grid, wxSizerFlags(1).Border(wxALL,MFP_TEXT_SPACING).Expand());
+    hbox->Add(m_sub_bars, wxSizerFlags(1).Expand().Border(wxLEFT+wxRIGHT+wxBOTTOM,MFP_TEXT_SPACING));
+    barsbox->Add(hbox, wxSizerFlags(0).Expand());
     left->Add(barsbox, wxSizerFlags(1).Border(wxLEFT+wxBOTTOM,MFP_SPACING).Expand());
     // notation type
     wxStaticBoxSizer *ntypebox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Notation type"));
@@ -320,23 +325,25 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent) : wxDialog(parent, -1, _T("")
     hlinesbox->Add(new wxButton(ntypebox->GetStaticBox(), Control_Horlines_width, _T("-"), wxDefaultPosition,sz));
     const wxString lines_choices[5] = { _T("1"), _T("2"), _T("3"), _T("4"), _T("6") } ;
     m_lines = new wxChoice(ntypebox->GetStaticBox(), Control_Horlines, wxDefaultPosition,wxDefaultSize, 5,lines_choices) ;
-    hlinesbox->Add(m_lines, wxSizerFlags().Right());
+    hlinesbox->Add(m_lines, wxSizerFlags().Border(wxLEFT+wxRIGHT,MFP_SPACING));
     grid->Add(hlinesbox, wxSizerFlags(1).Expand());
-    ntypebox->Add(grid, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
-    left->Add(ntypebox, wxSizerFlags().Border(wxLEFT+wxBOTTOM,MFP_SPACING));
+    ntypebox->Add(grid, wxSizerFlags(1).Border(wxALL,MFP_TEXT_SPACING).Expand());
+    left->Add(ntypebox, wxSizerFlags(0).Border(wxLEFT+wxBOTTOM,MFP_SPACING).Expand());
 
     // notes & color scheme
     wxStaticBoxSizer *right = new wxStaticBoxSizer(wxVERTICAL, this, _T("Notes && Colors"));
-    grid = new wxFlexGridSizer(2);
-    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Av. height:")));
-    m_height = new wxSlider(right->GetStaticBox(), Slider_Height, 5, 1, 9, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
+    hbox = new wxBoxSizer(wxHORIZONTAL);
+    hbox->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Average height:")), wxSizerFlags().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING).Center());
+    m_height = new wxSlider(right->GetStaticBox(), Slider_Height, 5, 1, 9, wxDefaultPosition,wxDefaultSize, sliderFlags) ;
     m_height->SetPageSize(1) ;
-    grid->Add(m_height);
-    grid->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Dynamic:")));
-    m_dynamic = new wxSlider(right->GetStaticBox(), Slider_Dynamic, 0, 0, 15, wxDefaultPosition,wxDefaultSize, wxSL_HORIZONTAL+wxSL_BOTTOM+wxSL_LABELS+wxSL_AUTOTICKS) ;
+    hbox->Add(m_height, wxSizerFlags(1).Expand().Border(wxRIGHT,MFP_TEXT_SPACING));
+    right->Add(hbox, wxSizerFlags(0).Expand());
+    hbox = new wxBoxSizer(wxHORIZONTAL);
+    hbox->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Dynamic:")), wxSizerFlags().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING).Center());
+    m_dynamic = new wxSlider(right->GetStaticBox(), Slider_Dynamic, 0, 0, 15, wxDefaultPosition,wxDefaultSize, sliderFlags) ;
     m_dynamic->SetPageSize(1) ;
-    grid->Add(m_dynamic);
-    right->Add(grid, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
+    hbox->Add(m_dynamic, wxSizerFlags(1).Expand().Border(wxRIGHT,MFP_TEXT_SPACING));
+    right->Add(hbox, wxSizerFlags(0).Expand());
     const wxString ends_choices[4] = { _T("(none)"), _T("line"), _T("triangle"), _T("dot")} ;
     const wxString body_choices[4] = { _T("(none)"), _T("bar"), _T("ellipse"), _T("triangle")} ;
     grid = new wxFlexGridSizer(3);
@@ -351,23 +358,23 @@ MFPParamsWindow::MFPParamsWindow(wxWindow *parent) : wxDialog(parent, -1, _T("")
     grid->Add(m_tail_choice = new wxChoice(right->GetStaticBox(), Control_Tail, wxDefaultPosition,wxDefaultSize,4,ends_choices));
     right->Add(grid, wxSizerFlags().Border(wxALL,MFP_TEXT_SPACING));
     wxBoxSizer *noteborderbox = new wxBoxSizer(wxHORIZONTAL);
-    noteborderbox->Add(new wxButton(right->GetStaticBox(), Control_Noteborders_width, _T("-"), wxDefaultPosition, sz));
-    noteborderbox->Add(m_borders = new wxCheckBox(right->GetStaticBox(), Control_Noteborders, _T("Note borders")));
-    noteborderbox->Add(m_borders_3d = new wxCheckBox(right->GetStaticBox(), Control_Notes_3D, _T("3D notes"))) ;
+    noteborderbox->Add(new wxButton(right->GetStaticBox(), Control_Noteborders_width, _T("-"), wxDefaultPosition, sz), wxSizerFlags().Border(wxLEFT+wxRIGHT,MFP_TEXT_SPACING));
+    noteborderbox->Add(m_borders = new wxCheckBox(right->GetStaticBox(), Control_Noteborders, _T("Note borders")), wxSizerFlags().Center());
+    noteborderbox->Add(m_borders_3d = new wxCheckBox(right->GetStaticBox(), Control_Notes_3D, _T("3D notes")), wxSizerFlags().Center()) ;
     right->Add(noteborderbox, wxSizerFlags().Center().Border(wxTOP,MFP_TEXT_SPACING));
     wxBoxSizer *transpbox = new wxBoxSizer(wxHORIZONTAL);
-    transpbox->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Transpose:")), wxSizerFlags().Border(wxLEFT+wxTOP,MFP_TEXT_SPACING)); 
+    transpbox->Add(new wxStaticText(right->GetStaticBox(), -1, _T("Transpose:")), wxSizerFlags().Border(wxALL,MFP_SPACING).Center()); 
     const wxString transp_choices[12] = 
         { _T("0 (none)"),_T("+1 = -B"),_T("+2 = -A"),_T("+3 = -9"),_T("+4 = -8"),_T("+5 = -7"),
           _T("+6 = -6"),_T("+7 = -5"),_T("+8 = -4"),_T("+9 = -3"),_T("+A = -2"),_T("+B = -1") } ;
     m_transpose = new wxChoice(right->GetStaticBox(), Control_Transpose, wxDefaultPosition,wxDefaultSize, 12,transp_choices);
-    transpbox->Add(m_transpose, wxSizerFlags());
+    transpbox->Add(m_transpose, wxSizerFlags().Border(wxALL,MFP_SPACING).Center());
     right->Add(transpbox, wxSizerFlags().Center().Border(wxALL,MFP_TEXT_SPACING));
     // color scheme
     sz.x = wxButton::GetDefaultSize().x*3;
     sz.y = wxButton::GetDefaultSize().x*2;
     right->Add(m_scheme = new SchemeWidget(right->GetStaticBox(), wxDefaultPosition, sz),
-        wxSizerFlags().Border(wxALL, MFP_TEXT_SPACING));
+        wxSizerFlags(1).Border(wxALL, MFP_TEXT_SPACING).Expand());
 
     lower->Add(left);
     lower->Add(right, wxSizerFlags(1).Border(wxLEFT+wxBOTTOM+wxRIGHT,MFP_SPACING).Expand());
