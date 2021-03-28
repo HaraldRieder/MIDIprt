@@ -12,7 +12,6 @@
 #include <portable.h> 
 #include <servimem.h> /* because of swap_int16(), ... */
 #include <graphic.h>
-#include <graphicf.h>
 #include "scheme.h"
 
 #include <wxVDI.h>

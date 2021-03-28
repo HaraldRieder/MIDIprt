@@ -11,7 +11,7 @@
 #define INCL_SCHEME
 
 #include <portable.h>   // from my libs
-#include <graphicf.h>
+#include <graphic.h>
 
 typedef struct
 {

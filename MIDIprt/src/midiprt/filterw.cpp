@@ -14,7 +14,7 @@ static const int FRAME_W = 400, FRAME_H = 600 ; // in pels
 #include  <wx/menuitem.h>
 #include  <wx/checklst.h>
 
-#include <graphicf.h>
+#include <graphic.h>
 #include <wxVDI.h>
 #include "filterw.h"
 

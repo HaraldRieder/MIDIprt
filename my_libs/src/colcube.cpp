@@ -5,6 +5,7 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
+#include    <portable.h>
 #include    <graphic.h>
 #include    "colcube.h"
 

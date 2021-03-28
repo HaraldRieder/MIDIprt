@@ -12,7 +12,6 @@
 
 #include <wx/datetime.h>
 #include <graphic.h>
-#include <graphicf.h>
 #include <notimtab.h>
 
 #include "draw.h"

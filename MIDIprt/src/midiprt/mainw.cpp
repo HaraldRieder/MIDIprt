@@ -26,7 +26,7 @@
 #include <set>
 #include <list>
 
-#include <graphicf.h>
+#include <graphic.h>
 #include <wxVDI.h>
 #include "profile.h"
 #include "scheme.h"

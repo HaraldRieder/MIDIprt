@@ -18,7 +18,7 @@ static const int LABEL_OFFSET = 2 ;
 #include  <wx/checklst.h>
 #include  <wx/fontdlg.h>
 
-#include <graphicf.h>
+#include <graphic.h>
 #include <wxVDI.h>
 #include "scheme.h"
 #include "paramsw.h"

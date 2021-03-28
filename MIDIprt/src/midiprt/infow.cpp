@@ -13,7 +13,7 @@
 #include  <wx/menuitem.h>
 #include  <wx/checklst.h>
 
-#include <graphicf.h>
+#include <graphic.h>
 #include <wxVDI.h>
 #include "infow.h"
 

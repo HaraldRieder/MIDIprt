@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <graphic.h>
-#include <graphicf.h>
 #include <portable.h>
 #include <diskfile.h>
 #include "profile.h"
