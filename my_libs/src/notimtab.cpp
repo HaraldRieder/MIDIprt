@@ -313,8 +313,7 @@ unsigned int fill_note_time_table
 			return next_data_overflow ;
 	} /*** <-- end while (!EOT_reached) ***/
 
-	*elements_generated = ( (INT32)current_element  - (INT32)first_element ) / 
-	                          sizeof *first_element ;
+	*elements_generated = (current_element - first_element) / sizeof *first_element ;
 	/*** return success message ***/
 	return note_time_table_filled ;
 }

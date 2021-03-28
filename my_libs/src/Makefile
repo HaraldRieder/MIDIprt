@@ -20,7 +20,7 @@ SRC=.
 
 TARGET=$(LIB)/libmy.a
 
-CSOURCES=colcube.c diskfile.c graphic.c graphicf.c midi.c notimtab.c servimem.c
+CSOURCES=colcube.c diskfile.c graphic.c midi.c notimtab.c servimem.c
 CPPSOURCES=wxVDI.cpp 
 
 # wxWidgets gtk2-unicode-release-2.8
