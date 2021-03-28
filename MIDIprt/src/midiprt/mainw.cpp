@@ -105,7 +105,7 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
     points[2] = sz.x + 80 ;
     points[3] = sz.y + 80 ;
     vsf_color   (&vdi, LBLACK) ;
-    vsf_interior(&vdi, FIS_SOLID) ;
+    vdi.fillInterior = FIS_SOLID ;
     vr_recfl    (&vdi, points) ;
 
     if (db->layout.npgs /*&& messages /* avoid redraw for garbage */) 
@@ -124,18 +124,18 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
 		short current_page = db->opts.page - 1; /* index of page to draw */
 		for (int x_offset=0; x_offset < sz.x && current_page < db->layout.npgs; x_offset+=width) {
 			/* draw background */
-			vswr_mode   (&vdi, MD_REPLACE) ;
-			vsf_interior(&vdi, FIS_HOLLOW) ;
+			vdi.writeMode = MD_REPLACE ;
+			vdi.fillInterior = FIS_HOLLOW ;
 			vsf_color   (&vdi, WHITE) ;
 			points[0] = x_offset;
 			points[1] = 0;
 			points[2] = x_offset + width;
 			points[3] = height ;
 			vsl_color    (&vdi, LRED) ;
-			vsl_type     (&vdi, SOLID) ;
+            vdi.lineType = SOLID ;
 			if (db->layout.npgs)
-				 vsf_perimeter(&vdi, 1) ;
-			else vsf_perimeter(&vdi, 0) ; /* no red line */
+				 vdi.fillPerimeter = 1 ;
+			else vdi.fillPerimeter= 0 ; /* no red line */
 			v_bar        (&vdi, points) ;
 
 			/* use points for clipping */
@@ -181,7 +181,7 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
     else if (db->filename[0] != 0)
     {
         vst_font (&vdi, (char *)"") ;        /* system font */
-        vst_color(&vdi, BLACK) ;    /* RGB not necessary, on screen there is always a palette */
+        vdi.textColor = BLACK ;    /* RGB not necessary, on screen there is always a palette */
         vst_point(&vdi, 10, &dummy, &dummy, &dummy, &dummy) ; /* out params are dummies */
         vst_alignment(&vdi, 0, 5, &dummy, &dummy) ;
         v_gtext(&vdi, 2, 2, /* + 2 because of red border line */

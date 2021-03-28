@@ -1,8 +1,6 @@
 /*****************************************************************************
   Purpose:     Implements track and channel filter window.
   Author:      Harald Rieder
-  Modified by: $Author: Harald $
-  RCS-ID:      $Id: filterw.cpp,v 1.4 2008/09/20 20:06:51 Harald Exp $
   Copyright:   (c) Harald Rieder
   Licence:     GNU General Public License V3
 *****************************************************************************/

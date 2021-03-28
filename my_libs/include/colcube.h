@@ -54,5 +54,5 @@ int get_color_from_xy(const COLOR_CUBE * cube, int x, int y) ;
 * by init_color_cube. The top left corner of the surrouding 
 * rectangle is at position (x,y).
 */
-void draw_cube(X_HANDLE xhandle, const COLOR_CUBE * cube, int x, int y) ; 
+void draw_cube(VirtualDevice * handle, const COLOR_CUBE * cube, int x, int y) ; 
 

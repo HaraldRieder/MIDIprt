@@ -18,7 +18,7 @@
 
 void draw_background 
 (
-	X_HANDLE xhandle, 	/* VDI workstation handle, extended */
+	VirtualDevice * handle, 	/* VDI workstation handle */
 	int *points,	/* points[0]:     x-value of 1. corner
    					   points[1]:     y-value of 1. corner
 	   				   points[2]:     x-value of 2. corner
@@ -29,7 +29,7 @@ void draw_background
 
 void draw_note 
 (
-	X_HANDLE xhandle, 	/* VDI workstation handle, extended */
+	VirtualDevice * handle, 	/* VDI workstation handle */
 	int *points,	/* points[0]:     x-value of 1. corner
 					   points[1]:     y-value of 1. corner
 					   points[2]:     x-value of 2. corner
@@ -73,7 +73,7 @@ typedef enum {behind, between} MARK_MODE ;
 
 void draw_lines 
 (
-	X_HANDLE xhandle, 	/* VDI workstation handle, extended */
+	VirtualDevice * handle, 	/* VDI workstation handle */
 	int  number,			/* number of lines to be drawn */
 	char first_marked, 		/* first line with special marking */
 	char d_marked, 			/* special marking each d_marked lines */

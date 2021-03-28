@@ -2,8 +2,6 @@
   Purpose:     Functions operating on the data model of the parameters 
                window.
   Author:      Harald Rieder
-  Modified by: $Author: Harald $
-  RCS-ID:      $Id: PARAMSDB.C,v 1.5 2008/09/20 20:06:39 Harald Exp $
   Copyright:   (c) Harald Rieder
   Licence:     GNU General Public License V3
 *****************************************************************************/
@@ -11,6 +9,8 @@
 #include <diskfile.h>
 #include "string.h"
 #include "paramsdb.h"
+
+using namespace std;
 
 void default_params(PARAMS_DB *db)
 {

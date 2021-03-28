@@ -15,7 +15,7 @@
 #include <graphicf.h>
 #include "scheme.h"
 
-#include <my_vdi.h>
+#include <wxVDI.h>
 #pragma pack(1)
 
 typedef struct
@@ -144,7 +144,7 @@ int save_scheme(const COLOR_SCHEME *scheme, const char *scheme_path)
 }
 
 void draw_scheme(
-    void *handle,  // wxWindows device context
+    VirtualDevice * handle,  // wxWindows device context
 	COLOR_SCHEME *scheme, int tr /*transpose*/,
     int x, int y, int w, int h,
     int dodecime_index,
@@ -241,7 +241,7 @@ void draw_scheme(
 
 	/* draw ver. lines */
 	rgb_lcolor(handle, scheme->text_color) ;
-	vsl_type (handle, SOLID) ;
+    handle->lineType = SOLID ;
 	draw_lines(handle, 2, -1, -1,
 		behind /*any mark_mode*/, NULL, NULL, 0, -1, 0, 0,
 		x_notes, y,	x_notes, y+h-1, x+w-1-x_notes, 0.0f, 1) ;

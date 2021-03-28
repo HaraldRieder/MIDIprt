@@ -14,18 +14,13 @@
 #include "trcktabl.h"
 #include "scheme.h"
  
-/* #define MAX_NOTE_HEIGHT 127 Altlast ? */
-
 /* title height = syst.dist. * TILTE_FACTOR */
 #define TITLE_FACTOR 0.33f 
 
 /* small text height =  note dist. * SMALL_TEXT_FACTOR */
 #define SMALL_TEXT_FACTOR 3.1f
 
-/*#define TITLE_HEIGHT    12*/   /* [points] */
 #define FOOTLINE_HEIGHT 10     /* [points] */
-/*#define INDEX_HEIGHT     8*/   /* [points] */
-/*#define TRACK_HEIGHT     8*/   /* [points] */
 
 /*** possible values for system type ***/
 
@@ -58,13 +53,6 @@ typedef struct
 	short first_system, last_system ; /* indeces into system table */
 } 
 PAGE_DESCRIPTOR ;
-
-/******************************************************** 
-   ATTENTION !!!!!!!!!
-   The size of a struct must stay below 32 K,
-   otherwise PURE C will calculate wrong offsets !!!!
-   => do not set the MAX_... values higher !!! 
-*********************************************************/
 
 #define MAX_PAGES    200
 #define MAX_LINES    800
@@ -123,7 +111,7 @@ FILTERED_TRACK ;
 /*******************************************************************
 */
   void draw_page(
-	VDI_HANDLE handle,
+	VirtualDevice * handle,
 	int x0, 
 	int y0, 
 	int width,			/* already zoomed */

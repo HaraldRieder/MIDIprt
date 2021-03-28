@@ -1,8 +1,6 @@
 /*****************************************************************************
   Purpose:     Color selection GUI widget (supporting functions).
   Author:      Harald Rieder
-  Modified by: $Author: Harald $
-  RCS-ID:      $Id: COLCUBE.C,v 1.5 2008/09/20 20:04:33 Harald Exp $
   Copyright:   (c) Harald Rieder
   Licence:     GNU General Public License V3
 *****************************************************************************/
@@ -11,28 +9,6 @@
 #include    "colcube.h"
 
 #define SQRT_3 17/10	/* sqrt(3) is around 1.7 */
-
-static int my_index_to_rgb(int index)
-{
-#ifdef __PUREC__
-	if (direct_color)
-		return index ;
-	return index_to_rgb(index) ;
-#else
-	return index ;
-#endif
-}
-
-static int my_rgb_to_index(int rgb)
-{
-#ifdef __PUREC__
-	if (direct_color)
-		return rgb ;
-	return rgb_to_index(rgb) ;
-#else
-	return rgb ;
-#endif
-}
 
 void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_mid)
 {
@@ -63,7 +39,7 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 				rgb = white 
 					- ((col_max * i / steps) << 5) /* green */
 					- ((col_max * j / steps) << 10 ) ; /* blue */
-			cube->red.color[i][j] = my_rgb_to_index(rgb) ;
+			cube->red.color[i][j] = rgb ;
 
 			if (black_mid)
 				rgb = ((col_max * i / steps) << 10) /* blue */
@@ -72,7 +48,7 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 				rgb = white 
 					- ((col_max * i / steps) << 10) /* blue */
 					- (col_max * j / steps) ; /* red */
-			cube->green.color[i][j] = my_rgb_to_index(rgb) ;
+			cube->green.color[i][j] = rgb ;
 				
 			if (black_mid)
 				rgb = (col_max * i / steps) /* red */
@@ -81,19 +57,18 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 				rgb = white 
 					- (col_max * i / steps) /* red */
 					- ((col_max * j / steps) << 5) ; /* green */
-			cube->blue.color[i][j] = my_rgb_to_index(rgb) ;
+			cube->blue.color[i][j] = rgb ;
 		}
 	}
 }
 
 
-static void rgb_recfl(X_HANDLE xhandle, int color, int points[4]) 
+static void rgb_recfl(VirtualDevice * handle, int color, int points[4]) 
 {
-	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
-	rgb_fcolor   (xhandle, color) ;
-	vsf_interior (handle, FIS_SOLID) ;
-	vsf_perimeter(handle, 0) ;
-	vswr_mode    (handle, MD_REPLACE) ;
+	rgb_fcolor   (handle, color) ;
+	handle->fillInterior = FIS_SOLID ;
+	handle->fillPerimeter = 0 ;
+	handle->writeMode =  MD_REPLACE ;
 	vr_recfl     (handle, points) ;	
 }
 
@@ -102,12 +77,6 @@ static long vector_product(long x1, long y1, long x2, long y2)
 {
 	return (x1 * x2 + y1 * y2) ;
 }
-
-/*static long vector_square(long x, long y)
-{
-	return (x * x + y * y) ;
-}*/
-
 
 static int get_color_from_plane(
 	const COLOR_PLANE *plane, 
@@ -161,10 +130,9 @@ int get_color_from_xy(const COLOR_CUBE * cube, int x, int y)
 }
 
 
-static void draw_plane(X_HANDLE xhandle, const COLOR_PLANE *plane, int x0, int y0)
+static void draw_plane(VirtualDevice * handle, const COLOR_PLANE *plane, int x0, int y0)
 {
 	int points[8], i,j ;
-	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 
 	for (i = 0 ; i < DIVIDER ; i++)
 	{
@@ -195,23 +163,23 @@ static void draw_plane(X_HANDLE xhandle, const COLOR_PLANE *plane, int x0, int y
 				+ (int)((long)plane->y_end1 * i     / DIVIDER)
 				+ (int)((long)plane->y_end2 * (j+1) / DIVIDER) ;
 
-			rgb_fcolor   (xhandle, plane->color[i][j]) ; 
-			vsf_perimeter(handle, 0/*no perimeter*/) ;
-			vsf_interior (handle, FIS_SOLID) ;
-			vswr_mode    (handle, MD_REPLACE) ;
+			rgb_fcolor   (handle, plane->color[i][j]) ; 
+			handle->fillPerimeter =  0/*no perimeter*/ ;
+			handle->fillInterior = FIS_SOLID ;
+			handle->writeMode = MD_REPLACE ;
 			v_fillarea   (handle, 4, points) ;
 		}
 	}
 }
 
 	
-void draw_cube(X_HANDLE xhandle, const COLOR_CUBE * cube, int x, int y) 
+void draw_cube(VirtualDevice * handle, const COLOR_CUBE * cube, int x, int y) 
 {
 	int x0 = x + cube->x0 ;
 	int y0 = y + cube->y0 ;
 	
-	draw_plane(xhandle, &(cube->red  ), x0, y0) ;
-	draw_plane(xhandle, &(cube->green), x0, y0) ;
-	draw_plane(xhandle, &(cube->blue ), x0, y0) ;
+	draw_plane(handle, &(cube->red  ), x0, y0) ;
+	draw_plane(handle, &(cube->green), x0, y0) ;
+	draw_plane(handle, &(cube->blue ), x0, y0) ;
 }
 

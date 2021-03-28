@@ -49,11 +49,7 @@ int load_scheme(COLOR_SCHEME *scheme, const char *scheme_path) ;
 	/* return: 0 = good, -1 = err, 1 = file OK but its length is wrong */
 
 void draw_scheme(
-#ifdef __PUREC__
-	INT32 xhandle, 
-#else
-    void *xhandle,  // wxWindows device context
-#endif
+    VirtualDevice * handle,  // wxWindows device context
 	COLOR_SCHEME *scheme, 
 	int transpose,
     int x, int y, int w, int h,

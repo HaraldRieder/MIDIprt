@@ -106,7 +106,7 @@ void SelectableWidget::draw(int style, int color, bool border, char *text)
   if (selected)
   {
     vsl_color(&vdi, BLACK) ;
-    vsl_type(&vdi, DOT) ;
+    vdi.lineType = DOT ;
     v_pline(&vdi, 5, points) ;
     points[0] = 1 ; 
     points[1] = 1 ; 
@@ -129,7 +129,7 @@ void SelectableWidget::draw(int style, int color, bool border, char *text)
   if (text != NULL)
   {
     int dummy ;
-    vswr_mode(&vdi, MD_TRANS) ;
+    vdi.writeMode = MD_TRANS ;
     vst_point(&vdi, 8, &dummy, &dummy, &dummy, &dummy ) ;
     vst_font(&vdi, (char *)"") ;   
     rgb_tcolor(&vdi, db->scheme.text_color) ;
@@ -882,7 +882,7 @@ void SchemeEditorFrame::OnSaveAs(wxCommandEvent& event)
                       _T(""),
                       db->file,
                       _T("Color schemes (*.par)|*.par;*.PAR"),
-                      wxSAVE|wxOVERWRITE_PROMPT);
+                      wxFC_SAVE|wxFD_OVERWRITE_PROMPT);
   dialog.SetDirectory(db->dir) ;
   dialog.SetFilterIndex(1);
   if (dialog.ShowModal() == wxID_OK)

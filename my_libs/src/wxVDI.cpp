@@ -107,16 +107,7 @@ void VirtualDevice::setPerimeterPen()
 
 //-------------- attribute functions -------------------------
 
-int vswr_mode( VDI_HANDLE handle, int mode )
-{ 
-// ATTENTION: write mode is not yet implemented, but seems not yet to
-// disturb (because MIDI File Printer uses RGBs only ?).
-
-	((VirtualDevice *)handle)->writeMode = mode ; 
-	return mode ;
-}
-
-void vs_color( VDI_HANDLE handle, int index, int *rgb_in )
+void vs_color( VirtualDevice * handle, int index, int *rgb_in )
 { 
     assert(index >= 0 && index <= 255) ;
     // VDI uses 0..1000 for RGB values.
@@ -124,165 +115,102 @@ void vs_color( VDI_HANDLE handle, int index, int *rgb_in )
 	unsigned char red   = (unsigned char)(rgb_in[0] * 0xff / 1000) ;
 	unsigned char green = (unsigned char)(rgb_in[1] * 0xff / 1000) ;
 	unsigned char blue  = (unsigned char)(rgb_in[2] * 0xff / 1000) ;
-    ((VirtualDevice *)handle)->palette[index].Set(red,green,blue) ;
+    handle->palette[index].Set(red,green,blue) ;
 }
 
-int vsl_type( VDI_HANDLE handle, int style )
+void vsl_width( VirtualDevice * handle, int width )
 { 
-	((VirtualDevice *)handle)->lineType = style ; 
-	return style ;
+	handle->lineWidth = width ; 
+	handle->pen.SetWidth(width) ;
 }
 
-int vsl_width( VDI_HANDLE handle, int width )
+void vsl_color( VirtualDevice * handle, int color )
 { 
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	vd->lineWidth = width ; 
-	vd->pen.SetWidth(width) ;
-	return width ;
+	handle->lineColor = color ; 
+	handle->pen.SetColour(handle->palette[color]) ;
 }
 
-void vsl_udsty( VDI_HANDLE handle, int style )
-{
-	((VirtualDevice *)handle)->lineUserdefStyle = style ; 
-}
-
-int vsl_color( VDI_HANDLE handle, int color )
-{ 
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	vd->lineColor = color ; 
-	vd->pen.SetColour(vd->palette[color]) ;
-	return color ;
-}
-
-int vst_color( VDI_HANDLE handle, int color )
-{ 
-	((VirtualDevice *)handle)->textColor = color ; 
-	return color ;
-}
-
-void vst_height( VDI_HANDLE handle, int height, int *char_width,
+void vst_height( VirtualDevice * handle, int height, int *char_width,
                     int *char_height, int *cell_width,
                     int *cell_height )
 {
 	static const wxString text = _("Ab") ;
-	VirtualDevice *vd = (VirtualDevice *)handle ;
 	// transform pixels to points
-	int point = vd->pixel_to_point(height, true) ;
-	if (vd->pointSize != point)
+	int point = handle->pixel_to_point(height, true) ;
+	if (handle->pointSize != point)
 	{
-		vd->pointSize = point ;
-		vd->setFont() ;
+		handle->pointSize = point ;
+		handle->setFont() ;
 	}
 	wxCoord w,h, descent, externalLeading ;
-	vd->dc->GetTextExtent(text, &w, &h, &descent, &externalLeading) ;
+	handle->dc->GetTextExtent(text, &w, &h, &descent, &externalLeading) ;
 	*char_width  = *cell_width = w/2 ;
 	*char_height = h ;
 	*cell_height = h + descent + externalLeading ;
 }
 
-int vst_point( VDI_HANDLE handle, int point, int *char_width,
+void vst_point( VirtualDevice * handle, int point, int *char_width,
                     int *char_height, int *cell_width,
                     int *cell_height )
 {
 	static const wxString text = _("Ab") ;
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	if (vd->pointSize != point)
+	if (handle->pointSize != point)
 	{
-		vd->pointSize = point ;
-		vd->setFont() ;
+		handle->pointSize = point ;
+		handle->setFont() ;
 	}
 	wxCoord w,h, descent, externalLeading ;
-	vd->dc->GetTextExtent(text, &w, &h, &descent, &externalLeading) ;
+	handle->dc->GetTextExtent(text, &w, &h, &descent, &externalLeading) ;
 	// transform pixels to points
-	*char_width  = *cell_width = vd->pixel_to_point(w) ;
-	*char_height = vd->pixel_to_point(h, true) ;
-	*cell_height = vd->pixel_to_point(h + descent + externalLeading, true) ;
-	return vd->pointSize ;
+	*char_width  = *cell_width = handle->pixel_to_point(w) ;
+	*char_height = handle->pixel_to_point(h, true) ;
+	*cell_height = handle->pixel_to_point(h + descent + externalLeading, true) ;
 }
 
-// In contrast to original VDI, here a ZIL_LOGICAL_FONT
-// is expected.
-const VDI_FONT_ID vst_font( VDI_HANDLE handle, const VDI_FONT_ID font_info )
+void vst_font( VirtualDevice * handle, const VDI_FONT_ID font_info )
 {
-/*	UI_DISPLAY *dsp = ((VirtualDevice *)handle)->dsp ;
-	return dsp->Font(font) ;*/
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	vd->font_info = wxString::FromAscii(font_info) ;
+	handle->font_info = wxString::FromAscii(font_info) ;
 	wxNativeFontInfo info ;
 	info.FromString(wxString::FromAscii(font_info)) ;
 	wxFont font ;
 	font.SetNativeFontInfo(info) ;
-	vd->dc->SetFont(font) ;
-    //return font.GetNativeFontInfoDesc().c_str() ;
-	return font_info ;
+	handle->dc->SetFont(font) ;
 }
 
-int vst_effects( VDI_HANDLE handle, int effects )
+void vst_effects( VirtualDevice * handle, int effects )
 {
-/*	UI_DISPLAY *dsp = ((VirtualDevice *)handle)->dsp ;
-	STLF_FLAGS flags = STLF_NO_FLAGS ;
-	if (effects & BOLD  )     flags |= STLF_BOLD ;
-	if (effects & ITALIC)     flags |= STLF_ITALIC ;
-	if (effects & UNDERLINED) flags |= STLF_UNDERLINED ;
-	// the other effects we do not emulate
-	dsp->CharStyle(flags) ;*/
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	if (vd->textEffects != effects)
+	if (handle->textEffects != effects)
 	{
-		vd->textEffects = effects ;
-		vd->setFont() ;
+		handle->textEffects = effects ;
+		handle->setFont() ;
 	}
-	return effects ;
 }
 
-void vst_alignment( VDI_HANDLE handle, int hor_in , int ver_in,
+void vst_alignment( VirtualDevice * handle, int hor_in , int ver_in,
                                   int *hor_out, int *ver_out ) 
 {
-	((VirtualDevice *)handle)->textAlignHor = hor_in ; 
-	((VirtualDevice *)handle)->textAlignVer = ver_in ; 
+	handle->textAlignHor = hor_in ; 
+	handle->textAlignVer = ver_in ; 
 	*hor_out = hor_in ;
 	*ver_out = ver_in ;
 }
 
-int vsf_interior( VDI_HANDLE handle, int interior )
-{
-	((VirtualDevice *)handle)->fillInterior = interior ; 
-	return interior ;
-}
-
-// In contrast to original VDI, the style index
-// will lead to a brightening of the color.
-int vsf_style( VDI_HANDLE handle, int style_index )
-{
-	((VirtualDevice *)handle)->fillStyle = style_index ; 
-	return style_index ; 
-}
-
 // In contrast to original VDI, here a RGB color value
 // and no color index is expected.
-int vsf_color( VDI_HANDLE handle, int color )
+void vsf_color( VirtualDevice * handle, int color )
 {
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	vd->fillColor = color ; 
-	vd->brush.SetColour(vd->palette[color]) ;
-    vd->pen_noPerimeter.SetColour(vd->palette[color]) ;
-	return color ;
-}
-
-int vsf_perimeter( VDI_HANDLE handle, int per_vis )
-{
-	((VirtualDevice *)handle)->fillPerimeter = per_vis ; 
-	return per_vis ;
+	handle->fillColor = color ; 
+	handle->brush.SetColour(handle->palette[color]) ;
+    handle->pen_noPerimeter.SetColour(handle->palette[color]) ;
 }
 
 //-------------- output functions -------------------------
 
-void v_pline( VDI_HANDLE handle, int count, int *pxyarray )
+void v_pline( VirtualDevice * handle, int count, int *pxyarray )
 {
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	vd->dc->SetPen(vd->pen) ;
+	handle->dc->SetPen(handle->pen) ;
 	int i ;
-	switch (vd->lineType)
+	switch (handle->lineType)
 	{
 	case DOT:
 		for (i = 0 ; i < count - 1 ; i++)
@@ -295,23 +223,23 @@ void v_pline( VDI_HANDLE handle, int count, int *pxyarray )
 			float denom = sqrt((double)(dx*dx + dy*dy)) ;
 			unit_vector.x = (float)dx/denom ;
 			unit_vector.y = (float)dy/denom ;
-			for (int j = 0 ; true ; j += (2*vd->lineWidth))
+			for (int j = 0 ; true ; j += (2*handle->lineWidth))
 			{
 				float fdx = unit_vector.x*j ;
 				float fdy = unit_vector.y*j ;
 				if ((int)fabs(fdx) > abs(dx) || (int)fabs(fdy) > abs(dy))
 					break ;
-				if (vd->lineWidth == 1)
-					vd->dc->DrawPoint(x0 + (int)fdx, y0 + (int)fdy) ;
+				if (handle->lineWidth == 1)
+					handle->dc->DrawPoint(x0 + (int)fdx, y0 + (int)fdy) ;
 				else
 				{
 					wxPoint centre(x0 + (int)fdx, y0 + (int)fdy) ; 
-					int radius = vd->lineWidth / 2 ;
+					int radius = handle->lineWidth / 2 ;
 					// the fill color must be the line color here
 					wxBrush brush;
-					brush.SetColour(vd->palette[vd->lineColor]) ;
-					vd->dc->SetBrush(brush) ;
-					vd->dc->DrawCircle(centre, radius) ;
+					brush.SetColour(handle->palette[handle->lineColor]) ;
+					handle->dc->SetBrush(brush) ;
+					handle->dc->DrawCircle(centre, radius) ;
 				}
 			}
 		}
@@ -326,7 +254,7 @@ void v_pline( VDI_HANDLE handle, int count, int *pxyarray )
 				points[i].x = pxyarray[i*2] ;
 				points[i].y = pxyarray[i*2+1] ;
 			}
-			vd->dc->DrawLines(count, points, 0,0) ;
+			handle->dc->DrawLines(count, points, 0,0) ;
 			delete [] points ; 
 		}
 		return ;
@@ -338,37 +266,34 @@ void v_pline( VDI_HANDLE handle, int count, int *pxyarray )
                               int fillStyle = wxODDEVEN_RULE) = 0;*/
 }
 
-void v_fillarea( VDI_HANDLE handle, int count, int *pxyarray )
+void v_fillarea( VirtualDevice * handle, int count, int *pxyarray )
 {
-	VirtualDevice *vd = (VirtualDevice *)handle ;
 	// inner area
 	wxPoint *points = new wxPoint[count] ;
 	for (int i = 0 ; i < count ; i++)
 		points[i] = wxPoint(pxyarray[i*2], pxyarray[i*2+1]) ;
-	vd->dc->SetBrush(vd->brush) ;
-	vd->setPerimeterPen() ;
-	vd->dc->DrawPolygon(count, points, 0,0) ;
+	handle->dc->SetBrush(handle->brush) ;
+	handle->setPerimeterPen() ;
+	handle->dc->DrawPolygon(count, points, 0,0) ;
 
 	delete points ;
 }
 
-void v_gtext( VDI_HANDLE handle, int x, int y, char *string )
+void v_gtext( VirtualDevice * handle, int x, int y, char *string )
 {
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-
 	int left, top ;
 	wxCoord w, h, dummy ;
-	vd->dc->GetTextExtent(wxString::FromAscii(string), &w, &dummy) ;
-	vd->dc->GetTextExtent(_("Wq"), &dummy, &h) ;
+	handle->dc->GetTextExtent(wxString::FromAscii(string), &w, &dummy) ;
+	handle->dc->GetTextExtent(_("Wq"), &dummy, &h) ;
 
 	// Warning: both Visual C++ and Pure C #define TA_... 
-	switch (vd->textAlignHor)
+	switch (handle->textAlignHor)
 	{
 	case /*TA_LEFT*/  0: left = x       ; break ;
 	case /*TA_CENTER*/1: left = x - w/2 ; break ;
 	case /*TA_RIGHT*/ 2: left = x - w   ; break ;
 	}
-	switch (vd->textAlignVer)
+	switch (handle->textAlignVer)
 	{
 	case /*TA_BASELINE*/0: top = y - h*3/4 ; break ; // estimated
 	case /*TA_HALF*/    1: top = y - h/2   ; break ;
@@ -377,78 +302,67 @@ void v_gtext( VDI_HANDLE handle, int x, int y, char *string )
 	case /*TA_DESCENT*/ 4: top = y - h*4/5 ; break ; // estimated
 	case /*TA_TOP*/     5: top = y         ; break ; 
 	}
-	vd->dc->SetTextForeground(vd->palette[vd->textColor]) ;
-	vd->dc->SetTextBackground(vd->brush.GetColour()) ;
-	vd->dc->DrawText(wxString::FromAscii(string), left, top) ;
+	handle->dc->SetTextForeground(handle->palette[handle->textColor]) ;
+	handle->dc->SetTextBackground(handle->brush.GetColour()) ;
+	handle->dc->DrawText(wxString::FromAscii(string), left, top) ;
 }
 
-void v_bar( VDI_HANDLE handle, int *pxyarray )
+void v_bar( VirtualDevice * handle, int *pxyarray )
 {
-	VirtualDevice *vd = (VirtualDevice *)handle ;
 	wxCoord width  = abs(pxyarray[2] - pxyarray[0]) + 1 ;
 	wxCoord height = abs(pxyarray[3] - pxyarray[1]) + 1 ;
-	vd->dc->SetBrush(vd->brush) ;
-	vd->setPerimeterPen() ;
-	vd->dc->DrawRectangle(pxyarray[0], pxyarray[1], width, height) ;
+	handle->dc->SetBrush(handle->brush) ;
+	handle->setPerimeterPen() ;
+	handle->dc->DrawRectangle(pxyarray[0], pxyarray[1], width, height) ;
 }
 
-void vr_recfl( VDI_HANDLE handle, int *pxyarray) 
+void vr_recfl( VirtualDevice * handle, int *pxyarray) 
 {
 	// draws rectangle always without perimeter
-	VirtualDevice *vd = (VirtualDevice *)handle ;
 	wxCoord width  = abs(pxyarray[2] - pxyarray[0]) + 1 ;
 	wxCoord height = abs(pxyarray[3] - pxyarray[1]) + 1 ;
-	vd->dc->SetBrush(vd->brush) ;
-	vd->dc->SetPen(*wxTRANSPARENT_PEN) ;
-	vd->dc->DrawRectangle(pxyarray[0], pxyarray[1], width, height) ;
+	handle->dc->SetBrush(handle->brush) ;
+	handle->dc->SetPen(*wxTRANSPARENT_PEN) ;
+	handle->dc->DrawRectangle(pxyarray[0], pxyarray[1], width, height) ;
 }
 
-void v_circle( VDI_HANDLE handle, int x, int y, int radius )
+void v_circle( VirtualDevice * handle, int x, int y, int radius )
 {
-	VirtualDevice *vd = (VirtualDevice *)handle ;
-	vd->dc->SetBrush(vd->brush) ;
-	vd->setPerimeterPen() ;
-	vd->dc->DrawCircle(x, y, radius) ;
+	handle->dc->SetBrush(handle->brush) ;
+	handle->setPerimeterPen() ;
+	handle->dc->DrawCircle(x, y, radius) ;
 }
 
-void v_ellipse( VDI_HANDLE handle, int x, int y, int xradius,
+void v_ellipse( VirtualDevice * handle, int x, int y, int xradius,
                    int yradius  )
 {
-  VirtualDevice *vd = (VirtualDevice *)handle ;
-  vd->dc->SetBrush(vd->brush) ;
-  vd->setPerimeterPen() ;
-  vd->dc->DrawEllipse(x-xradius, y-yradius, xradius*2+1, yradius*2+1) ;
+  handle->dc->SetBrush(handle->brush) ;
+  handle->setPerimeterPen() ;
+  handle->dc->DrawEllipse(x-xradius, y-yradius, xradius*2+1, yradius*2+1) ;
 }
 
-void v_ellarc( VDI_HANDLE handle, int x, int y, int xradius,
+void v_ellarc( VirtualDevice * handle, int x, int y, int xradius,
                   int yradius, int begang, int endang )
 {
   // draws arc line without fill area
-  VirtualDevice *vd = (VirtualDevice *)handle ;
-  vd->dc->SetPen(vd->pen) ;
+  handle->dc->SetPen(handle->pen) ;
   // the VDI function does not fill
-  vd->dc->SetBrush(*wxTRANSPARENT_BRUSH) ;
+  handle->dc->SetBrush(*wxTRANSPARENT_BRUSH) ;
   // radius and centre must be transformed to rectanlge corners
   // VDI uses 1/10 degrees angles, wx uses degrees
-  vd->dc->DrawEllipticArc(x - xradius, y - yradius, 2*xradius+1, 2*yradius+1, begang/10, endang/10) ;
+  handle->dc->DrawEllipticArc(x - xradius, y - yradius, 2*xradius+1, 2*yradius+1, begang/10, endang/10) ;
 }
 
-void v_ellpie( VDI_HANDLE handle, int x, int y, int xradius,
+void v_ellpie( VirtualDevice * handle, int x, int y, int xradius,
                   int yradius, int begang, int endang )
 {
   // draws fill area without arc line
   // note: VDI expects 1/10 degrees angles [0..3600].
-  VirtualDevice *vd = (VirtualDevice *)handle ;
-  vd->dc->SetBrush(vd->brush) ;
-  vd->dc->SetPen(*wxTRANSPARENT_PEN) ;
+  handle->dc->SetBrush(handle->brush) ;
+  handle->dc->SetPen(*wxTRANSPARENT_PEN) ;
   // radius and centre must be transformed to rectanlge corners
   // VDI uses 1/10 degrees angles, wx uses degrees
-  vd->dc->DrawEllipticArc(x - xradius, y - yradius, 2*xradius+1, 2*yradius+1, begang/10, endang/10) ;
+  handle->dc->DrawEllipticArc(x - xradius, y - yradius, 2*xradius+1, 2*yradius+1, begang/10, endang/10) ;
 }
 
-//void v_rfbox ( VDI_HANDLE handle, int *pxyarray )
-//{
-	// ???? How to emulate this ???
-//	v_bar(handle, pxyarray) ;
-//} 
 

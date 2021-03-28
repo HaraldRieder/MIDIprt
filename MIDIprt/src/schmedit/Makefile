@@ -21,7 +21,7 @@ COMMONSRC=../common
 
 TARGET=$(BIN)/schmedit
 
-CSOURCES=scheme.c
+CMNSOURCES=scheme.cpp
 CPPSOURCES=schmedit.cpp 
 LIBS=-lmy -L$(MY_LIBS)/lib `wx-config --libs`
 
@@ -30,19 +30,19 @@ CFLAGS= -I$(MY_LIBS)/include -I$(COMMONSRC) `wx-config --cppflags`
 
 # tools
 C=g++
-#LD=g++ -g -o
-LD=g++ -o
+LD=g++ -g -o
+#LD=g++ -o
 
 # with path
-COBJECTS = $(CSOURCES:%.c=$(OBJ)/%.o)
+CMNOBJECTS = $(CMNSOURCES:%.cpp=$(OBJ)/%.o)
 CPPOBJECTS = $(CPPSOURCES:%.cpp=$(OBJ)/%.o)
 
 default: dirs $(TARGET)
 
-$(TARGET): $(COBJECTS) $(CPPOBJECTS)
+$(TARGET): $(CMNOBJECTS) $(CPPOBJECTS)
 	@rm -f $@
 	@-echo "+++ creating executable $@ +++"
-	@$(LD) $(TARGET) $(COBJECTS) $(CPPOBJECTS) $(LIBS) ; 
+	@$(LD) $(TARGET) $(CMNOBJECTS) $(CPPOBJECTS) $(LIBS) ; 
 
 dirs:
 	@-if [ ! -d $(OBJ) ];then \
@@ -65,7 +65,7 @@ clean:
 fullclean: clean
 	@-rm -rf $(TARGET)
 
-$(OBJ)/%.o: $(COMMONSRC)/%.c
+$(OBJ)/%.o: $(COMMONSRC)/%.cpp
 	$(C) -c $(CFLAGS) -MMD -o $@ $<
 	@cp $(OBJ)/$*.d $(DEP)/$*.P; \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
@@ -73,12 +73,12 @@ $(OBJ)/%.o: $(COMMONSRC)/%.c
 	rm -f $(OBJ)/$*.d
 
 $(OBJ)/%.o: $(SRC)/%.cpp 
-	$(C) -c $(CFLAGS) -MMD -o $@ $<
+	$(C) -c $(CFLAGS) -I $(COMMONSRC) -MMD -o $@ $<
 	@cp $(OBJ)/$*.d $(DEP)/$*.P; \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(OBJ)/$*.d >> $(DEP)/$*.P; \
 	rm -f $(OBJ)/$*.d
 
 # include the dependency files
--include $(CSOURCES:%.c=$(DEP)/%.P)
+-include $(CMNSOURCES:%.cpp=$(DEP)/%.P)
 -include $(CPPSOURCES:%.cpp=$(DEP)/%.P)

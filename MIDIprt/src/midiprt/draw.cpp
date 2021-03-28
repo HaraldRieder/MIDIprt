@@ -22,7 +22,7 @@
 */
     void draw_track
     (
-        VDI_HANDLE handle,
+        VirtualDevice * handle,
         int *cpoints,    /* in: clipping rectangle */
         const TRACK *t,  /* in: track to draw */
         unsigned channel_filter,    /* bit mask */
@@ -117,7 +117,7 @@
 static void 
 draw_background_with_corner
 (
-    VDI_HANDLE handle,
+    VirtualDevice * handle,
     int x1,
     int y1,
     int x2,
@@ -139,7 +139,7 @@ draw_background_with_corner
     pts[4] = pts[6] = x1 ;
     pts[5] = pts[3] ;
     pts[7] = pts[1] + corner_height ;
-    vsf_perimeter(handle, 0) ;
+    handle->fillPerimeter = 0 ;
     v_fillarea(handle, 4, pts) ;
 }
 
@@ -147,7 +147,7 @@ draw_background_with_corner
 static void 
 draw_background_without_corner
 (
-    VDI_HANDLE handle,
+    VirtualDevice * handle,
     int x1,
     int y1,
     int x2,
@@ -167,7 +167,7 @@ draw_background_without_corner
 
 static void draw_footline
 (
-    VDI_HANDLE handle,
+    VirtualDevice * handle,
     int x_min,
     int x_max,
     int y,                    /* text cell bottom */
@@ -185,7 +185,6 @@ static void draw_footline
     char text[12] ; 
     char footline[120] ;
 
-/*    vst_height (handle, height, &dummy,&dummy,&dummy,&dummy) ;*/
     vst_point  (handle, height, &dummy,&dummy,&dummy,&dummy) ;
     rgb_tcolor(handle, 0) ;
         
@@ -195,25 +194,14 @@ static void draw_footline
     /* year month day */
     wxDateTime now = wxDateTime::Now();
     sprintf(text, "%d", now.GetYear());
-//    SYSTEMTIME time ;
-//    GetLocalTime(&time) ;
-//    itoa(time.wYear, text, 10) ;
     strcat(footline, text) ; 
     strcat(footline, "-") ;
     sprintf(text, "%d", now.GetMonth());
-//    itoa(time.wMonth, text, 10) ;
     strcat(footline, text) ; 
     strcat(footline, "-") ;
     sprintf(text, "%d", now.GetMonth());
-//    itoa(time.wDay, text, 10) ;
     strcat(footline, text) ; 
 
-    /* caption, version, platform */
-    //sprintf(footline + strlen(footline), 
-    //        " by %s V%s (%s)", caption, version, platform) ;
-    //vst_alignment(handle, 0, /*4*/3, &dummy, &dummy) ; /* left, char. bottom */
-    //v_gtext(handle, x_min, y, footline) ;
-        
     /* right part */
     sprintf(footline, "%d/%d", page+1, npgs) ;        
     vst_alignment(handle, 2, /*4*/3, &dummy, &dummy) ; /* right, char. bottom */
@@ -222,7 +210,7 @@ static void draw_footline
 
 
 void draw_page(
-    VDI_HANDLE handle,
+    VirtualDevice * handle,
     int x0, 
     int y0, 
     int width,            /* already zoomed */
@@ -292,7 +280,7 @@ void draw_page(
     if ( p == 0 && (y0 + title_height) >= points[1] )
     {
         rgb_tcolor(handle, 0) ;
-        vswr_mode(handle, MD_REPLACE) ;
+        handle->writeMode = MD_REPLACE ;
         vst_point(handle, title_height, &dummy, &dummy, &dummy, &dummy) ;
         vst_alignment(handle, 1, 2, &dummy, &dummy) ;
         vst_effects(handle, effects) ;
@@ -348,7 +336,7 @@ void draw_page(
                  y_min_line - extent <= points[3] )
             {
                 /* draw horizontal lines with index and shadow */
-                vsl_type     (handle, SOLID) ; 
+                handle->lineType = SOLID ;
                 vst_alignment(handle, 1, 0, &dummy, &dummy) ; /* center, baseline */
                 dots = -1 /* no dots */ ; mark_mode = behind ;
                 if      (mode == Rieder) mark_mode = between ;
@@ -368,7 +356,7 @@ void draw_page(
                     line_width) ; 
                 /* draw track name */
                 vst_alignment(handle, 0, 3, &dummy, &dummy) ;
-                vswr_mode(handle, MD_TRANS) ;
+                handle->writeMode = MD_TRANS ;
                 rgb_tcolor(handle, scheme->text_color) ;
                 {
                     char *s ;
@@ -418,7 +406,7 @@ void draw_page(
         } /* end foreach line of the system */
         
         /* draw solid vertical lines (bars) */
-        vsl_type(handle, SOLID) ; 
+        handle->lineType = SOLID ; 
         rgb_lcolor(handle, scheme->text_color) ;
         draw_lines(handle, bars_per_system + 1, -1, -1,
                mark_mode, NULL, NULL, 0, -1, 0, 0,
@@ -427,7 +415,7 @@ void draw_page(
                dx_bars, 0.0f,
                line_width_bars) ;
         /* draw bar number */
-        vswr_mode(handle, MD_TRANS) ;
+        handle->writeMode = MD_TRANS ;
         rgb_tcolor(handle, scheme->text_color) ;
         vst_alignment(handle, 2, 3, &dummy, &dummy) ;
         sprintf(text, "%d", 

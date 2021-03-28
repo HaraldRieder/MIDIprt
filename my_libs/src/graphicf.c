@@ -12,12 +12,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#if defined (__PUREC__)
-#	include <acs.h>
-#else
-//#	include <ui_dsp.hpp>	  // because of RGB macros
-#   include <my_vdi.h>
-#endif
+#include <wxVDI.h>
 #include <graphicf.h>
 #include <graphic.h>
 
@@ -30,12 +25,11 @@
 
 static void ellip 
 (
-	X_HANDLE xhandle, 
+	VirtualDevice * handle, 
 	int x0, int x1, int y, int ry, 
 	int type, int style, int color 
 ) 
 {
-    VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 	int dx = abs(x1-x0) ;
 	int rx = (int)((float)dx / 2 + 0.5) ;
 	int x_mean = (int)((float)(x0+x1) / 2 + 0.5) ;
@@ -43,7 +37,7 @@ static void ellip
 	if (rx == 0) rx++ ;
 	if (ry == 0) ry++ ;
 	
-	rgb_fstyle_fcolor(xhandle, style, color) ;
+	rgb_fstyle_fcolor(handle, style, color) ;
 	if (type & HEAD_CUT)
 		v_ellpie(handle, x0, y, dx, ry, 2700, 4500) ;
 	else if (type & TAIL_CUT)
@@ -54,8 +48,8 @@ static void ellip
 	if ((type & BORDER_FLAGS) == BORDERS_3D)
 	{
 		/* dark border */
-		vsl_type(handle, SOLID) ;
-		rgb_lcolor(xhandle, color) ;
+        handle->lineType = SOLID ;
+		rgb_lcolor(handle, color) ;
 		if (type & HEAD_CUT) 
 			v_ellarc(handle, x0, y, dx, ry, 2700, 3800);
 		else if (type & TAIL_CUT)
@@ -64,7 +58,7 @@ static void ellip
 			v_ellarc(handle, x_mean, y, rx, ry, 2000, 3800);
 
 		/* light border */ 
-		rgb_3d_ltype_lcolor(xhandle, style, color) ;
+		rgb_3d_ltype_lcolor(handle, style, color) ;
 		if (type & HEAD_CUT) 
 			v_ellarc(handle, x0, y, dx, ry, 200, 900) ;
 		else if (type & TAIL_CUT)
@@ -74,8 +68,8 @@ static void ellip
 	}
 	else if ( !(type & BORDERS_NONE) )
 	{
-		vsl_type(handle, SOLID) ;
-		rgb_lcolor(xhandle, color) ;
+        handle->lineType = SOLID ;
+		rgb_lcolor(handle, color) ;
 		if (type & HEAD_CUT) 
 			v_ellarc(handle, x0, y, dx, ry, 2700, 4500) ;
 		else if (type & TAIL_CUT)
@@ -86,35 +80,32 @@ static void ellip
 }
 
 				
-static void rect(X_HANDLE xhandle, int *points, int type, int style, int color)
+static void rect(VirtualDevice * handle, int *points, int type, int style, int color)
 {
 	int p[10] ;
-    VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 	
 	p[0] = p[6] = p[8] = points[0] ;
 	p[1] = p[3] = p[9] = points[3] ;
 	p[2] = p[4] = points[2] ;
 	p[5] = p[7] = points[1] ;
-	rgb_fstyle_fcolor(xhandle, style, color) ;
-/*	v_bar(handle, points) ; size and direct color error in original Atari VDI ?? */
-/*	v_fillarea(handle, 5, p) ; but this one is slow */
+	rgb_fstyle_fcolor(handle, style, color) ;
 	vr_recfl(handle, points) ;	/* without borders => draw self */
 
 	if ((type & BORDER_FLAGS) == BORDERS_3D)
 	{
 		/* dark border */
-		vsl_type(handle, SOLID) ;
-		rgb_lcolor(xhandle, color) ;
+        handle->lineType = SOLID ;
+		rgb_lcolor(handle, color) ;
 		v_pline(handle, 3, p) ;
 
 		/* light border */ 
-		rgb_3d_ltype_lcolor(xhandle, style, color) ;
+		rgb_3d_ltype_lcolor(handle, style, color) ;
 		v_pline(handle, 3, p+4) ;
 	}
 	else if ( !(type & BORDERS_NONE) )
 	{
-		vsl_type(handle, SOLID) ;
-		rgb_lcolor(xhandle, color) ;
+        handle->lineType = SOLID ;
+		rgb_lcolor(handle, color) ;
 		v_pline(handle, 5, p) ;
 	}
 }
@@ -122,15 +113,14 @@ static void rect(X_HANDLE xhandle, int *points, int type, int style, int color)
 
 static void tri 
 (
-	X_HANDLE xhandle, 
+	VirtualDevice * handle, 
 	int x0, int x1, int y, int dy,
 	int type, int style, int color 
 ) 
 {
 	int p[10] ;
-    VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 	
-	rgb_fstyle_fcolor(xhandle, style, color) ;
+	rgb_fstyle_fcolor(handle, style, color) ;
 	
 	p[0] = p[2] = x0 ;
 	p[4] = x1 ;
@@ -166,8 +156,8 @@ static void tri
 
 	if ((type & BORDER_FLAGS) == BORDERS_3D)
 	{
-		vsl_type(handle, SOLID) ;
-		rgb_lcolor(xhandle, color) ;
+        handle->lineType = SOLID ;
+		rgb_lcolor(handle, color) ;
 		if (x1 > x0)
 			/* dark border only at the bottom */
 			v_pline(handle, 2, p+2) ;
@@ -175,7 +165,7 @@ static void tri
 			/* dark border on the right */
 			v_pline(handle, 2, p) ;
 
-		rgb_3d_ltype_lcolor(xhandle, style, color) ;
+		rgb_3d_ltype_lcolor(handle, style, color) ;
 		if (x1 > x0)
         {
 			/* light border only on the left side */ 
@@ -193,8 +183,8 @@ static void tri
 	}
 	else if ( !(type & BORDERS_NONE) )
 	{
-		vsl_type(handle, SOLID) ;
-		rgb_lcolor(xhandle, color) ;
+        handle->lineType = SOLID ;
+		rgb_lcolor(handle, color) ;
 		if (type & TAIL_CUT)
 			v_pline(handle, 5, p) ;
 		else
@@ -205,7 +195,7 @@ static void tri
 
 void draw_note 
 (
-	X_HANDLE xhandle, 	/* VDI workstation handle, extended */
+	VirtualDevice * handle, 	/* VDI workstation handle */
 	int *points,	/* points[0]:     x-value of 1. corner
    					   points[1]:     y-value of 1. corner
 	   				   points[2]:     x-value of 2. corner
@@ -217,39 +207,38 @@ void draw_note
 	int end_color	/* fill	color ends */
 )
 {
-	const VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 	const int y_mean = (int)( (float)(points[3] + points[1]) / 2 + 0.5 ) ;
 	const int dy     = (points[3] - points[1]) >> 1 ;
 	/* avoid TAIL_CUT and HEAD_CUT evaluation when drawing the ends: */
 	const int end_type = type & BORDER_FLAGS ;	
 	
-	vswr_mode(handle, MD_REPLACE) ;
-	vsf_perimeter(handle, 0) ; /* draw perimeter self */
+	handle->writeMode = MD_REPLACE ;
+	handle->fillPerimeter = 0 ; /* draw perimeter self */
 	
 	/* draw triangle ends in the background */
 	if (type & HEAD_TRI && !(type & HEAD_CUT))
 	{
-		tri(xhandle, points[0], points[0] + (dy<<1), y_mean, dy<<1, 
+		tri(handle, points[0], points[0] + (dy<<1), y_mean, dy<<1, 
 			end_type, end_style, end_color) ; 
 	}
 	if (type & TAIL_TRI && !(type & TAIL_CUT))
 	{
-		tri(xhandle, points[2], points[2] - (dy<<1), y_mean, dy<<1, 
+		tri(handle, points[2], points[2] - (dy<<1), y_mean, dy<<1, 
 			end_type, end_style, end_color) ; 
 	}
 	/* draw note body */
 	if (type & BODY_ELLIP) 
 	{
-		ellip(xhandle, points[0], points[2], y_mean, dy * ELL_STRETCH, 
+		ellip(handle, points[0], points[2], y_mean, dy * ELL_STRETCH, 
 			type, style, color) ;
 	}
 	else if (type & BODY_RECT)
 	{
-		rect(xhandle, points, type, style, color) ;
+		rect(handle, points, type, style, color) ;
 	}
 	else if (type & BODY_TRI)
 	{
-		tri(xhandle, points[0], points[2], y_mean, dy * TRI_STRETCH, 
+		tri(handle, points[0], points[2], y_mean, dy * TRI_STRETCH, 
 			type, style, color) ;
 	}
 	/* draw line or dot ends in the foreground */
@@ -258,7 +247,7 @@ void draw_note
 		int r = dy * CIRC_SQUEEZE ;
 		if (type & HEAD_DOT)
 		{
-			ellip(xhandle, points[0]-r, points[0]+r, y_mean, r, 
+			ellip(handle, points[0]-r, points[0]+r, y_mean, r, 
 				end_type, end_style, end_color) ; 
 		}
 		else if (type & HEAD_LINE)
@@ -267,8 +256,8 @@ void draw_note
 			p[0] = p[2] = points[0] ;
 			p[1] = points[1] - dy ;
 			p[3] = points[3] + dy ;
-			vsl_type(handle, SOLID) ; 
-			rgb_lcolor(xhandle, end_color) ;
+            handle->lineType = SOLID ;
+			rgb_lcolor(handle, end_color) ;
 			v_pline(handle, 2, p) ; 
 		}
 	}
@@ -277,7 +266,7 @@ void draw_note
 		int r = dy * CIRC_SQUEEZE ;
 		if (type & TAIL_DOT)
 		{
-			ellip(xhandle, points[2]-r, points[2]+r, y_mean, r, 
+			ellip(handle, points[2]-r, points[2]+r, y_mean, r, 
 				end_type, end_style, end_color) ; 
 		}
 		else if (type & TAIL_LINE)
@@ -286,8 +275,8 @@ void draw_note
 			p[0] = p[2] = points[2] ;
 			p[1] = points[1] - dy ;
 			p[3] = points[3] + dy ;
-			vsl_type(handle, SOLID) ; 
-			rgb_lcolor(xhandle, end_color) ;
+            handle->lineType = SOLID ;
+			rgb_lcolor(handle, end_color) ;
 			v_pline(handle, 2, p) ; 
 		}
 	}
@@ -296,7 +285,7 @@ void draw_note
 
 void draw_background
 (
-	X_HANDLE xhandle, 	/* VDI workstation handle, extended */
+	VirtualDevice * handle, 	/* VDI workstation handle */
 	int *points,	/* points[0]:     x-value of 1. corner
    					   points[1]:     y-value of 1. corner
 	   				   points[2]:     x-value of 2. corner
@@ -305,23 +294,23 @@ void draw_background
 	int color		/* fill	color */
 )
 {
-	draw_note(xhandle, points, BORDERS_NONE | BODY_RECT, 
+	draw_note(handle, points, BORDERS_NONE | BODY_RECT, 
 		style, color, style, color) ;
 }
 
 	
 static void trans_pline(
-	VDI_HANDLE handle, 	/* normal VDI workstation handle */
+	VirtualDevice *  handle, 	/* VDI workstation handle */
    int n, int *points) 
 {
-	vswr_mode(handle, MD_TRANS) ;
+	handle->writeMode = MD_TRANS ;
 	v_pline(handle, n, points) ;
 }
 
 
 void draw_lines 
 (
-	X_HANDLE xhandle, 	/* VDI workstation handle, extended */
+	VirtualDevice * handle, 	/* VDI workstation handle */
 	int  number,			/* number of lines to be drawn */
 	char first_marked, 		/* first line with special marking */
 	char d_marked, 			/* special marking each d_marked lines */
@@ -341,7 +330,6 @@ void draw_lines
 	int line_width			/* in pixels */
 ) 
 {
-	VDI_HANDLE handle = (VDI_HANDLE)xhandle ;
 	int i, number_offset, k ; 
 	int points[4], dx_m = (int)(dx * d_marked / 12 + 0.5) , 
 	               dy_m = (int)(dy * d_marked / 12 + 0.5) ; 
@@ -357,7 +345,7 @@ void draw_lines
 	if (colors)
 	{
 		color = colors[(first_number + number_offset) % 11] ;
-		rgb_lcolor(xhandle, color) ;
+		rgb_lcolor(handle, color) ;
 	}
 	number_offset = -1 ;
 	
@@ -380,8 +368,8 @@ void draw_lines
 			{
 				color = colors[(first_number + number_offset) % 11] ;
 				style = styles[(first_number + number_offset) % 11] ;
-				rgb_lcolor(xhandle, color) ;
-				rgb_tcolor(xhandle, color) ;
+				rgb_lcolor(handle, color) ;
+				rgb_tcolor(handle, color) ;
 			}
 			if (first_marked == -1) 
 				trans_pline(handle, 2, points) ;
@@ -390,7 +378,7 @@ void draw_lines
 				/* mark with number */
 				if ( dx_text != INVALID_DX && dy_text != INVALID_DY )
 				{
-					vswr_mode(handle, MD_TRANS) ;
+					handle->writeMode = MD_TRANS ;
 					/* hexadec. can be used instead of dodec. here because max. is 127
 					   128/12 < 12, hence one dodec. digit is sufficient */
 					sprintf(buff, "%X", first_number + number_offset);
@@ -405,7 +393,7 @@ void draw_lines
 						/* mark non-dotted, rectangle behind line */
 						points[0] += dx_m ; points[1] += dy_m ; points[2] -= dx_m ; points[3] -= dy_m ; 
 						if (style > IP_HOLLOW) 
-							draw_background(xhandle, points, style, color) ;
+							draw_background(handle, points, style, color) ;
 						points[0] -= dx_m ; points[1] -= dy_m ; points[2] += dx_m ; points[3] += dy_m ; 
 					}
 					else 
@@ -415,12 +403,12 @@ void draw_lines
 						{
 							points[0] += dx_int ; 
 							points[1] += dy_int ;
-							draw_background(xhandle, points, style, color) ;
+							draw_background(handle, points, style, color) ;
 							points[0] -= dx_int ; 
 							points[1] -= dy_int ;
 						}
 					}
-					rgb_lcolor(xhandle, color) ;
+					rgb_lcolor(handle, color) ;
 					trans_pline(handle, 2, points) ;					
 				}
 				else 
@@ -437,10 +425,10 @@ void draw_lines
 						points[2] = points[0] + x_width - (dx_m << 1) ;
 						points[3] = points[1] + y_width - (dy_m << 1) ;
 						if (style > IP_HOLLOW)
-							draw_background(xhandle, points, style, color) ;
+							draw_background(handle, points, style, color) ;
 					
 						points[0] -= dx_m ; points[1] -= dy_m ; points[2] += dx_m ; points[3] += dy_m ; 
-						rgb_lcolor(xhandle, color) ;
+						rgb_lcolor(handle, color) ;
 						trans_pline(handle, 2, points) ;					
 					}
 				}
@@ -452,7 +440,6 @@ void draw_lines
 }
 
 
-#ifndef __PUREC__
 INT32 RGB_15to24(UINT16 in) 
 {
 	int red   = five_to_eight_bits( in & RGB_RED ) ;
@@ -468,5 +455,4 @@ INT16 RGB_24to15(UINT32 in)
 	int blue  = eight_to_five_bits( GetBValue(in) ) ;
 	return (blue << 10) | (green << 5) | red ;
 }
-#endif
 

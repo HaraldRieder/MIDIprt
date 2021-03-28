@@ -18,12 +18,7 @@
 	#define max(A,B) (((A) > (B)) ? (A) : (B))
 #endif
 
-#if defined (__PUREC__)
-#	include <acstype.h>
-#	ifndef UBYTE
-		typedef unsigned char UBYTE ;
-#	endif
-#elif defined (__PALM__)
+#if defined (__PALM__)
 #include <PalmOS.h>
 #	ifndef INT32 
 		typedef Int32 INT32 ;
@@ -66,25 +61,6 @@
 
 #define isxdigit(c) ((c>='a'&&c<='f')||(c>='A'&&c<='F')||(c>='0'&&c<='9'))
 
-/*static Char *strpbrk(const Char *src, const Char *breaks)
-{
-  Char *ret = NULL ;
-  UInt16 len = StrLen(breaks) ;
-  UInt16 i ;
-  for (i = 0 ; i < len ; i++)
-  {
-    Char *found_here = StrChr(src, breaks[i]) ;
-    if (found_here)
-    {
-      if (!ret)
-        ret = found_here ;
-      else if (ret > found_here)
-        ret = found_here ;
-    }
-  }
-  return ret ; fehlerhaft ?
-}*/
-
 #else // wxWindows
 # ifdef __GNUG__
 #  include <stdint.h>
@@ -111,12 +87,6 @@
 # endif
 # ifndef UBYTE
     typedef unsigned char UBYTE ;
-# endif
-# ifndef FALSE
-#  define FALSE 0
-# endif
-# ifndef TRUE
-#  define TRUE 1
 # endif
 #endif
 
