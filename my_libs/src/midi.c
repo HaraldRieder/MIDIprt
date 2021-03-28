@@ -1,16 +1,10 @@
 /*****************************************************************************
   Purpose:     MIDI file functions and functions for the MIDI serial interface
   Author:      Harald Rieder
-  Modified by: $Author: Harald $
-  RCS-ID:      $Id: MIDI.C,v 1.12 2008/09/20 20:04:33 Harald Exp $
   Copyright:   (c) Harald Rieder
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
-#if defined (__PUREC__)
-# include <tos.h>
-# define MIDI 3
-#endif
 #if !defined (__PALM__)
 # include <string.h>
 # include <ctype.h>
@@ -59,16 +53,9 @@ UBYTE serial_in(void)
   return byte ;
 }
 
-/*void Midiws(UInt32 last_index, const UBYTE *to_send)
-{
-  UInt32 i ;
-  for (i = 0 ; i <= last_index ; i++)
-    midi_out(to_send[i]) ;
-}*/
-
 #endif
 
-#if defined (__PUREC__) || defined (__PALM__)
+#if defined (__PALM__)
 
 void note_on(UBYTE channel, UBYTE note, UBYTE dynamic) 
 {
