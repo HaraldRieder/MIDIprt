@@ -81,7 +81,6 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
 
     wxSize sz ;
     GetVirtualSize(&sz.x, &sz.y) ;
-    //dc.BeginDrawing() ;
     VirtualDevice vdi(&dc) ;
 
     int points[4] ;
@@ -104,9 +103,9 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
     points[1] = 0 ;
     points[2] = sz.x + 80 ;
     points[3] = sz.y + 80 ;
-    vsf_color   (&vdi, LBLACK) ;
+    vdi.setFillColor(LBLACK);
     vdi.fillInterior = FIS_SOLID ;
-    vr_recfl    (&vdi, points) ;
+    vdi.drawFilledRect(points);
 
     if (db->layout.npgs /*&& messages /* avoid redraw for garbage */) 
     {
@@ -126,17 +125,17 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
 			/* draw background */
 			vdi.writeMode = MD_REPLACE ;
 			vdi.fillInterior = FIS_HOLLOW ;
-			vsf_color   (&vdi, WHITE) ;
+			vdi.setFillColor(WHITE);
 			points[0] = x_offset;
 			points[1] = 0;
 			points[2] = x_offset + width;
 			points[3] = height ;
-			vsl_color    (&vdi, LRED) ;
+			vdi.setLineColor(LRED);
             vdi.lineType = SOLID ;
 			if (db->layout.npgs)
 				 vdi.fillPerimeter = 1 ;
 			else vdi.fillPerimeter= 0 ; /* no red line */
-			v_bar        (&vdi, points) ;
+			vdi.drawBar(points);
 
 			/* use points for clipping */
 			int x_start, y_start ;
@@ -180,15 +179,13 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
     }
     else if (db->filename[0] != 0)
     {
-        vst_font (&vdi, (char *)"") ;        /* system font */
+        vdi.setFont((char *)"") ;  /* system font */
         vdi.textColor = BLACK ;    /* RGB not necessary, on screen there is always a palette */
-        vst_point(&vdi, 10, &dummy, &dummy, &dummy, &dummy) ; /* out params are dummies */
-        vst_alignment(&vdi, 0, 5, &dummy, &dummy) ;
-        v_gtext(&vdi, 2, 2, /* + 2 because of red border line */
+        vdi.setTextPoint(10);
+        vdi.setTextAlignment(0, 5);
+        vdi.drawText(2, 2, /* + 2 because of red border line */
             (char *)"Nothing to draw. (Did you switch all tracks off ?)") ;
     }
-
-    //dc.EndDrawing() ;
 }
 
 /*void MFPDrawingArea::OnMouseMove(wxMouseEvent &event)

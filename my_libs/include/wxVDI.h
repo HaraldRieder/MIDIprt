@@ -19,19 +19,18 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+
+typedef char * VDI_FONT_ID ;// wxWindows: native font info string
 
 class VirtualDevice  
 {
 public:
 	VirtualDevice(wxDC *dc);
 	~VirtualDevice();
+
 
 	/**
 	* Calculates point size (1/72 inch) of specified pixel number.
@@ -51,6 +50,28 @@ public:
 	* for the fill area is chosen for the pen.
 	*/
 	void setPerimeterPen();
+    
+    void setLineWidth(int width);
+    void setLineColor(int color_index);
+    void setTextHeight(int height, int *char_width);
+    void setTextPoint(int point);
+    void setFont(const VDI_FONT_ID font);
+    void setTextEffects(int effect);
+    void setTextAlignment(int hor_in, int vert_in);
+    void setFillColor(int color_index);
+    void setColor(int index, int *rgb_in);
+
+
+    /****** Output definitions **********************************************/
+    void drawBar(int *pxyarray);
+    void drawPolygon(int count, int *pxyarray); 
+    void drawFilledRect(int *pxyarray);
+    void drawFilledArea(int count, int *pxyarray);
+    void drawCircle(int x, int y, int radius);
+    void drawEllipse(int x, int y, int xradius, int yradius);
+    void drawEllArc(int x, int y, int xradius, int yradius, int begang, int endang);
+    void drawEllPie(int x, int y, int xradius, int yradius, int begang, int endang);
+    void drawText(int x, int y, char *string);
 
 	wxDC *dc;
 	int writeMode;
@@ -94,41 +115,6 @@ public:
         are compiled as C and by files that are compiled as C++ !
 */
 
-typedef char * VDI_FONT_ID ;// wxWindows: native font info string
-
-/****** Control definitions *********************************************/
-
-//#define RC 2               /* RC coordinate system, by Mad Harry */
-//#define NDC 0              /* NDC coordinate system, by Mad Harry */
-
-/****** Output definitions **********************************************/
-
-void    v_pline( VirtualDevice * handle, int count, int *pxyarray ); 
-void    v_gtext( VirtualDevice * handle, int x, int y, char *string );
-void    v_bar( VirtualDevice * handle, int *pxyarray );
-void    v_circle( VirtualDevice * handle, int x, int y, int radius );
-void    v_ellpie( VirtualDevice * handle, int x, int y, int xradius,
-                  int yradius, int begang, int endang );
-void    v_ellipse( VirtualDevice * handle, int x, int y, int xradius,
-                   int yradius  );
-void    v_rfbox ( VirtualDevice * handle, int *pxyarray );
-void    v_fillarea( VirtualDevice * handle, int count, int *pxyarray );
-void    v_pmarker( VirtualDevice * handle, int count, int *pxyarray );
-void    v_cellarray( VirtualDevice * handle, int *pxyarray, int row_length,
-                     int el_used, int num_rows, int wrt_mode,
-                     int *colarray );
-void    v_contourfill( VirtualDevice * handle, int x, int y, int index );
-void    vr_recfl( VirtualDevice * handle, int *pxyarray );
-void    v_arc( VirtualDevice * handle, int x, int y, int radius,
-               int begang, int endang );
-void    v_pieslice( VirtualDevice * handle, int x, int y, int radius,
-                    int begang, int endang );
-void    v_ellarc( VirtualDevice * handle, int x, int y, int xradius,
-                  int yradius, int begang, int endang );
-void    v_rbox  ( VirtualDevice * handle, int *pxyarray );
-void    v_justified( VirtualDevice * handle,int x, int y, char *string,
-                     int length, int word_space,
-                     int char_space );
 
 /****** Attribute definitions *****************************************/
 
@@ -251,29 +237,5 @@ void    v_justified( VirtualDevice * handle,int x, int y, char *string,
 #define TA_TOP			5
 #endif
 
-
-/******************************************************************************/
-
-
-void    vsl_width( VirtualDevice * handle, int width );
-void    vsl_color( VirtualDevice * handle, int color_index );
-void    vst_height( VirtualDevice * handle, int height, int *char_width,
-                    int *char_height, int *cell_width,
-                    int *cell_height );
-void    vst_point( VirtualDevice * handle, int point, int *char_width,
-                    int *char_height, int *cell_width,
-                    int *cell_height );
-void    vst_font( VirtualDevice * handle, const VDI_FONT_ID font );
-void    vst_effects( VirtualDevice * handle, int effect );
-void    vst_alignment( VirtualDevice * handle, int hor_in, int vert_in,
-                       int *hor_out, int *vert_out );
-void    vsf_color( VirtualDevice * handle, int color_index );
-void    vs_color( VirtualDevice * handle, int index, int *rgb_in );
-void    vsl_ends( VirtualDevice * handle, int beg_style, int end_style );
-int     vsm_type( VirtualDevice * handle, int symbol );
-int     vsm_height( VirtualDevice * handle, int height );
-int     vsm_color( VirtualDevice * handle, int color_index );
-int     vst_rotation( VirtualDevice * handle, int angle );
-void    vsf_udpat( VirtualDevice * handle, int *pfill_pat, int planes );
 
 #endif 

@@ -23,13 +23,13 @@ void rgb_fstyle_fcolor(VirtualDevice * handle, int style, int color)
 {
     int rgb[3] ;
     style_and_int16_to_rgb_array(style, color, rgb) ;
-    vs_color (handle, DC_INDEX, rgb) ;
+    handle->setColor(DC_INDEX, rgb) ;
     color = DC_INDEX ;
     style = IP_SOLID ;
 	if (!style) handle->fillInterior = FIS_HOLLOW ;
 	else        handle->fillInterior = FIS_PATTERN ;
 	handle->fillStyle = style ;
-	vsf_color(handle, color) ;
+	handle->setFillColor(color);
 }
 
 
@@ -70,11 +70,10 @@ void rgb_3d_ltype_lcolor(VirtualDevice *  handle, int style, int color)
     if (style < 0)
         style = 0 ; 
     style_and_int16_to_rgb_array(style, color, rgb) ;
-    vs_color (handle, DC_INDEX, rgb) ;
-    color = DC_INDEX ;
+    handle->setColor(DC_INDEX, rgb);
     handle->lineUserdefStyle = 0xFFFF ;
     handle->lineType = USERLINE ;
-	vsl_color(handle, color) ;
+	handle->setLineColor(DC_INDEX) ;
 }
 
 
@@ -98,28 +97,27 @@ void rgb_fcolor(VirtualDevice * handle, int color)
 {
     int rgb[3] ;
     int16_to_rgb_array(color, rgb) ;
-    vs_color (handle, DC_INDEX, rgb) ;
+    handle->setColor(DC_INDEX, rgb) ;
     color = DC_INDEX ;
-	vsf_color(handle, color) ;
+	handle->setFillColor(color);
 }
 
 
 void rgb_lcolor(VirtualDevice * handle, int color)
 {
     int rgb[3] ;
-    int16_to_rgb_array(color, rgb) ;
-    vs_color (handle, DC_INDEX, rgb) ;
-    color = DC_INDEX ;
-	vsl_color(handle, color) ;
+    int16_to_rgb_array(color, rgb);
+    handle->setColor(DC_INDEX, rgb);
+	handle->setLineColor(DC_INDEX);
 }
 
 
 void rgb_tcolor(VirtualDevice * handle, int color)
 {
     int rgb[3] ;
-    int16_to_rgb_array(color, rgb) ;
-    vs_color (handle, DC_INDEX, rgb) ;
-	handle->textColor = DC_INDEX ;
+    int16_to_rgb_array(color, rgb);
+    handle->setColor(DC_INDEX, rgb);
+	handle->textColor = DC_INDEX;
 }
 
 /******** auxiliary procedures *********/
@@ -140,11 +138,11 @@ static void ellip
 	
 	rgb_fstyle_fcolor(handle, style, color) ;
 	if (type & HEAD_CUT)
-		v_ellpie(handle, x0, y, dx, ry, 2700, 4500) ;
+		handle->drawEllPie(x0, y, dx, ry, 2700, 4500) ;
 	else if (type & TAIL_CUT)
-		v_ellpie(handle, x1, y, dx, ry, 900, 2700) ;
+		handle->drawEllPie(x1, y, dx, ry, 900, 2700) ;
 	else 
-		v_ellipse(handle, x_mean, y, rx, ry) ;
+		handle->drawEllipse(x_mean, y, rx, ry) ;
 
 	if ((type & BORDER_FLAGS) == BORDERS_3D)
 	{
@@ -152,31 +150,31 @@ static void ellip
         handle->lineType = SOLID ;
 		rgb_lcolor(handle, color) ;
 		if (type & HEAD_CUT) 
-			v_ellarc(handle, x0, y, dx, ry, 2700, 3800);
+			handle->drawEllArc(x0, y, dx, ry, 2700, 3800);
 		else if (type & TAIL_CUT)
-			v_ellarc(handle, x1, y, dx, ry, 2000, 2700);
+			handle->drawEllArc(x1, y, dx, ry, 2000, 2700);
 		else
-			v_ellarc(handle, x_mean, y, rx, ry, 2000, 3800);
+			handle->drawEllArc(x_mean, y, rx, ry, 2000, 3800);
 
 		/* light border */ 
 		rgb_3d_ltype_lcolor(handle, style, color) ;
 		if (type & HEAD_CUT) 
-			v_ellarc(handle, x0, y, dx, ry, 200, 900) ;
+			handle->drawEllArc(x0, y, dx, ry, 200, 900) ;
 		else if (type & TAIL_CUT)
-			v_ellarc(handle, x1, y, dx, ry, 900, 2000) ;
+			handle->drawEllArc(x1, y, dx, ry, 900, 2000) ;
 		else
-			v_ellarc(handle, x_mean, y, rx, ry, 200, 2000);
+			handle->drawEllArc(x_mean, y, rx, ry, 200, 2000);
 	}
 	else if ( !(type & BORDERS_NONE) )
 	{
         handle->lineType = SOLID ;
 		rgb_lcolor(handle, color) ;
 		if (type & HEAD_CUT) 
-			v_ellarc(handle, x0, y, dx, ry, 2700, 4500) ;
+			handle->drawEllArc(x0, y, dx, ry, 2700, 4500) ;
 		else if (type & TAIL_CUT)
-			v_ellarc(handle, x1, y, dx, ry, 900, 2700) ;
+			handle->drawEllArc(x1, y, dx, ry, 900, 2700) ;
 		else
-			v_ellarc(handle, x_mean, y, rx, ry, 0, 3600);
+			handle->drawEllArc(x_mean, y, rx, ry, 0, 3600);
 	}
 }
 
@@ -190,24 +188,24 @@ static void rect(VirtualDevice * handle, int *points, int type, int style, int c
 	p[2] = p[4] = points[2] ;
 	p[5] = p[7] = points[1] ;
 	rgb_fstyle_fcolor(handle, style, color) ;
-	vr_recfl(handle, points) ;	/* without borders => draw self */
+	handle->drawFilledRect(points);	/* without borders => draw self */
 
 	if ((type & BORDER_FLAGS) == BORDERS_3D)
 	{
 		/* dark border */
         handle->lineType = SOLID ;
 		rgb_lcolor(handle, color) ;
-		v_pline(handle, 3, p) ;
+		handle->drawPolygon(3, p) ;
 
 		/* light border */ 
 		rgb_3d_ltype_lcolor(handle, style, color) ;
-		v_pline(handle, 3, p+4) ;
+		handle->drawPolygon(3, p+4) ;
 	}
 	else if ( !(type & BORDERS_NONE) )
 	{
         handle->lineType = SOLID ;
 		rgb_lcolor(handle, color) ;
-		v_pline(handle, 5, p) ;
+		handle->drawPolygon(5, p) ;
 	}
 }
 
@@ -232,7 +230,7 @@ static void tri
 		p[5] = y ;
 		p[6] = p[0] ;
 		p[7] = p[1] ;
-		v_fillarea(handle, 3, p) ;
+		handle->drawFilledArea(3, p) ;
 	}
 	else if (type & TAIL_CUT)
 	{
@@ -243,7 +241,7 @@ static void tri
 		p[7] = y - (dy >> 1) ;
 		p[8] = p[0] ;
 		p[9] = p[1] ;
-		v_fillarea(handle, 4, p) ;
+		handle->drawFilledArea(4, p) ;
 	}
 	else
 	{
@@ -252,7 +250,7 @@ static void tri
 		p[5] = y ;
 		p[6] = p[0] ;
 		p[7] = p[1] ;
-		v_fillarea(handle, 3, p) ;
+		handle->drawFilledArea(3, p);
 	}
 
 	if ((type & BORDER_FLAGS) == BORDERS_3D)
@@ -261,25 +259,25 @@ static void tri
 		rgb_lcolor(handle, color) ;
 		if (x1 > x0)
 			/* dark border only at the bottom */
-			v_pline(handle, 2, p+2) ;
+			handle->drawPolygon(2, p+2) ;
 		else if (!(type & TAIL_CUT))
 			/* dark border on the right */
-			v_pline(handle, 2, p) ;
+			handle->drawPolygon(2, p) ;
 
 		rgb_3d_ltype_lcolor(handle, style, color) ;
 		if (x1 > x0)
         {
 			/* light border only on the left side */ 
 			 if (!(type & HEAD_CUT))
-                 v_pline(handle, 2, p) ;
+                 handle->drawPolygon(2, p) ;
         }
 		else
 		{
 			/* light border only on top */
 			if (type & TAIL_CUT)
-				v_pline(handle, 2, p+6) ;
+				handle->drawPolygon(2, p+6) ;
 			else
-				v_pline(handle, 2, p+4) ;
+				handle->drawPolygon(2, p+4) ;
 		}
 	}
 	else if ( !(type & BORDERS_NONE) )
@@ -287,9 +285,9 @@ static void tri
         handle->lineType = SOLID ;
 		rgb_lcolor(handle, color) ;
 		if (type & TAIL_CUT)
-			v_pline(handle, 5, p) ;
+			handle->drawPolygon(5, p) ;
 		else
-			v_pline(handle, 4, p) ;
+			handle->drawPolygon(4, p) ;
 	}
 }				
 
@@ -359,7 +357,7 @@ void draw_note
 			p[3] = points[3] + dy ;
             handle->lineType = SOLID ;
 			rgb_lcolor(handle, end_color) ;
-			v_pline(handle, 2, p) ; 
+			handle->drawPolygon(2, p) ; 
 		}
 	}
 	if ( !(type & TAIL_CUT) )
@@ -378,7 +376,7 @@ void draw_note
 			p[3] = points[3] + dy ;
             handle->lineType = SOLID ;
 			rgb_lcolor(handle, end_color) ;
-			v_pline(handle, 2, p) ; 
+			handle->drawPolygon(2, p) ; 
 		}
 	}
 }
@@ -405,7 +403,7 @@ static void trans_pline(
    int n, int *points) 
 {
 	handle->writeMode = MD_TRANS ;
-	v_pline(handle, n, points) ;
+	handle->drawPolygon(n, points) ;
 }
 
 
@@ -450,7 +448,7 @@ void draw_lines
 	}
 	number_offset = -1 ;
 	
-	vsl_width(handle, line_width|1) ;
+	handle->setLineWidth(line_width|1);
 	for (i = 0 ; i < number ; i ++ )
 	{
 		points[0] = (int)(dx * i + 0.5) + x_start ; 
@@ -484,9 +482,9 @@ void draw_lines
 					   128/12 < 12, hence one dodec. digit is sufficient */
 					sprintf(buff, "%X", first_number + number_offset);
 					/* itoa(first_number + number_offset, buff, 11) ; */
-					v_gtext( handle, points[0] + dx_text, points[1] + dy_text, buff) ;
+					handle->drawText(points[0] + dx_text, points[1] + dy_text, buff);
 				}        
-				if (style == IP_HOLLOW) vsl_width(handle, (line_width * 2)|1) ;
+				if (style == IP_HOLLOW) handle->setLineWidth((line_width * 2)|1) ;
 				if (number_dots <= 0)
 				{
 					if (mode == behind)
@@ -534,7 +532,7 @@ void draw_lines
 					}
 				}
 				/* reset line width */
-				vsl_width(handle, line_width|1) ;
+				handle->setLineWidth(line_width|1);
 			}
 		}
 	}

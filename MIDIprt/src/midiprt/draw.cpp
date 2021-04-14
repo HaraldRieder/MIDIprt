@@ -139,7 +139,7 @@ draw_background_with_corner
     pts[5] = pts[3] ;
     pts[7] = pts[1] + corner_height ;
     handle->fillPerimeter = 0 ;
-    v_fillarea(handle, 4, pts) ;
+    handle->drawFilledArea(4, pts);
 }
 
 
@@ -180,11 +180,10 @@ static void draw_footline
     int height                /* text height  */
 )
 {
-    int dummy ;
     char text[12] ; 
     char footline[120] ;
 
-    vst_point  (handle, height, &dummy,&dummy,&dummy,&dummy) ;
+    handle->setTextPoint(height);
     rgb_tcolor(handle, 0) ;
         
     /*** left part ***/
@@ -203,8 +202,8 @@ static void draw_footline
 
     /* right part */
     sprintf(footline, "%d/%d", page+1, npgs) ;        
-    vst_alignment(handle, 2, /*4*/3, &dummy, &dummy) ; /* right, char. bottom */
-    v_gtext(handle, x_max, y, footline) ;
+    handle->setTextAlignment(2, /*4*/3); /* right, char. bottom */
+    handle->drawText(x_max, y, footline);
 }
 
 
@@ -249,7 +248,7 @@ void draw_page(
     const SYSTEM_DESCRIPTOR *syst ;
     const LINE_DESCRIPTOR   *line ;     /* shortcut only */
     int s,l ;                /* system and line indeces */
-    int index_width, dots, dummy ;
+    int index_width, dots;
     char text[10] ; 
 
     int x_min = x0 + (int)(lt->x_min * width) ;
@@ -273,23 +272,22 @@ void draw_page(
     if (p < 0 || p >= lt->npgs)
         return ;
 
-    vst_font (handle, font_id) ;
+    handle->setFont(font_id);
 
     /* draw title */
     if ( p == 0 && (y0 + title_height) >= points[1] )
     {
         rgb_tcolor(handle, 0) ;
         handle->writeMode = MD_REPLACE ;
-        vst_point(handle, title_height, &dummy, &dummy, &dummy, &dummy) ;
-        vst_alignment(handle, 1, 2, &dummy, &dummy) ;
-        vst_effects(handle, effects) ;
-        v_gtext(handle, (x_min + x_max)/2, y_min, (char *)title) ;
+        handle->setTextPoint(title_height);
+        handle->setTextAlignment(1, 2);
+        handle->setTextEffects(effects);
+        handle->drawText((x_min + x_max)/2, y_min, (char *)title);
     }
-    vst_effects(handle, 0) ;
+    handle->setTextEffects(0);
 
     /* draw note system(s) */
-    vst_height(handle, small_text_height, 
-               &index_width, &dummy, &dummy, &dummy) ;
+    handle->setTextHeight(small_text_height, &index_width) ;
     /* reserve a litte bit more space: */
     index_width = index_width * 4 / 3 ;
 
@@ -336,7 +334,7 @@ void draw_page(
             {
                 /* draw horizontal lines with index and shadow */
                 handle->lineType = SOLID ;
-                vst_alignment(handle, 1, 0, &dummy, &dummy) ; /* center, baseline */
+                handle->setTextAlignment(1, 0); /* center, baseline */
                 dots = -1 /* no dots */ ; mark_mode = behind ;
                 if      (mode == Rieder) mark_mode = between ;
                 else if (mode == Beyreuther)
@@ -354,7 +352,7 @@ void draw_page(
                     0.0f, - lt->dy_line * height, /* from lowest to highest */
                     line_width) ; 
                 /* draw track name */
-                vst_alignment(handle, 0, 3, &dummy, &dummy) ;
+                handle->setTextAlignment(0, 3);
                 handle->writeMode = MD_TRANS ;
                 rgb_tcolor(handle, scheme->text_color) ;
                 {
@@ -366,11 +364,10 @@ void draw_page(
                     case TR_TEXT:   s = ft[line->track].text       ; break ;
                     default:        s = ft[line->track].name       ; 
                     }
-                    v_gtext(handle, x_min_lines, y_min_line - dy_small_text, 
-                            s ? s : (char*)"") ;
+                    handle->drawText(x_min_lines, y_min_line - dy_small_text, s ? s : (char*)"");
                 }
                 /* draw notes of the current track */
-                vsl_width(handle, line_width_notes|1) ;
+                handle->setLineWidth(line_width_notes|1) ;
                 draw_track(handle, points, track + line->track,
                            ft[line->track].ch_filter,    
                            x_min_lines, x_max, y_max_line, 
@@ -416,10 +413,10 @@ void draw_page(
         /* draw bar number */
         handle->writeMode = MD_TRANS ;
         rgb_tcolor(handle, scheme->text_color) ;
-        vst_alignment(handle, 2, 3, &dummy, &dummy) ;
+        handle->setTextAlignment(2, 3);
         sprintf(text, "%d", 
           (int)((syst->min_time/lt->time_per_system + 1) * bars_per_system));
-        v_gtext(handle, x_max, y_min_lines - dy_small_text, text) ;
+        handle->drawText(x_max, y_min_lines - dy_small_text, text);
 
     } /* end foreach system of the page */
 

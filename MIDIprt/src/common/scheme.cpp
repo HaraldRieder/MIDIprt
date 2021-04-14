@@ -225,7 +225,7 @@ void draw_scheme(
 	
 	/* draw notes */
 	/* 1/2 of the 1 note width reserve space for dot ends on the left: */
-	vsl_width(handle, 1) ;
+	handle->setLineWidth(1) ;
 	for (i = 0 ; i < 12 ; i++)
 	{
 		points[0] = x_notes + dx_notes / 2 + (int)(dx_notes * i + 0.5) ;

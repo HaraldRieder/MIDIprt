@@ -134,7 +134,7 @@ void NoteWidget::OnPaint(wxPaintEvent& WXUNUSED(event))
     int points[4] = { 0,0, sz.x-1,sz.y-1 } ;
     int type = 0 ;
 
-    vsl_width(&vdi, 1) ;
+    vdi.setLineWidth(1);
 
     /* the note ends may be twice as high as the body */
     points[1] += (sz.y >> 2) ;    

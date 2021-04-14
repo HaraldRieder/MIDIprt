@@ -66,11 +66,11 @@ void init_color_cube(COLOR_CUBE * cube, int ob_width, int ob_height, int black_m
 
 static void rgb_recfl(VirtualDevice * handle, int color, int points[4]) 
 {
-	rgb_fcolor   (handle, color) ;
+	rgb_fcolor(handle, color) ;
 	handle->fillInterior = FIS_SOLID ;
 	handle->fillPerimeter = 0 ;
 	handle->writeMode =  MD_REPLACE ;
-	vr_recfl     (handle, points) ;	
+	handle->drawFilledRect(points);
 }
 
 
@@ -168,7 +168,7 @@ static void draw_plane(VirtualDevice * handle, const COLOR_PLANE *plane, int x0,
 			handle->fillPerimeter =  0/*no perimeter*/ ;
 			handle->fillInterior = FIS_SOLID ;
 			handle->writeMode = MD_REPLACE ;
-			v_fillarea   (handle, 4, points) ;
+			handle->drawFilledArea(4, points);
 		}
 	}
 }

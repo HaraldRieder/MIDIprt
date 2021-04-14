@@ -33,7 +33,7 @@ static const int SPACING = 10 ;
 
 #pragma warning( disable : 4786 ) // otherwise too many warnings because of <set> compiliation
 #include <set>
-#include <graphicf.h>
+#include <graphic.h>
 #include <colcube.h>
 #include <wxVDI.h>
 #include "scheme.h"
@@ -93,7 +93,6 @@ void SelectableWidget::select(bool _select)
 void SelectableWidget::draw(int style, int color, bool border, char *text)
 {
   wxPaintDC dc(this);
-  //dc.BeginDrawing() ;
   VirtualDevice vdi(&dc) ;
 
   int points[10], type = BODY_RECT ;
@@ -105,9 +104,9 @@ void SelectableWidget::draw(int style, int color, bool border, char *text)
 
   if (selected)
   {
-    vsl_color(&vdi, BLACK) ;
+    vdi.setLineColor(BLACK);
     vdi.lineType = DOT ;
-    v_pline(&vdi, 5, points) ;
+    vdi.drawPolygon(5, points);
     points[0] = 1 ; 
     points[1] = 1 ; 
     points[2] = GetSize().GetWidth() - 2 ; 
@@ -128,15 +127,13 @@ void SelectableWidget::draw(int style, int color, bool border, char *text)
   // draw text
   if (text != NULL)
   {
-    int dummy ;
     vdi.writeMode = MD_TRANS ;
-    vst_point(&vdi, 8, &dummy, &dummy, &dummy, &dummy ) ;
-    vst_font(&vdi, (char *)"") ;   
+    vdi.setTextPoint(8);
+    vdi.setFont((char *)"");
     rgb_tcolor(&vdi, db->scheme.text_color) ;
-    vst_alignment(&vdi, 1, 2, &dummy, &dummy) ;
-    v_gtext(&vdi, GetSize().GetWidth()/2, GetSize().GetHeight()/2, text) ;
+    vdi.setTextAlignment(1, 2);
+    vdi.drawText(GetSize().GetWidth()/2, GetSize().GetHeight()/2, text) ;
   }
-  //dc.EndDrawing() ;
 }
 
 /** dodecime owner drawn objects */
@@ -604,7 +601,7 @@ void SchemeEditorFrame::InitMenu()
     m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_SAVEAS, _T("Save &as..."), _T("Save scheme to another color scheme file"), wxITEM_NORMAL));
     m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_REVERT, _T("&Revert to saved..."), _T("Reload from disk and loose changes"), wxITEM_NORMAL));
     m_file_menu->AppendSeparator();
-    m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_EXIT, _T("&Quit"), _T("Quit "TITLE), wxITEM_NORMAL));
+    m_file_menu->Append(new wxMenuItem(m_file_menu, wxID_EXIT, _T("&Quit"), _T("Quit " TITLE), wxITEM_NORMAL));
     m_file_menu->Enable(wxID_SAVE, false);
     m_file_menu->Enable(wxID_REVERT, false);
 
