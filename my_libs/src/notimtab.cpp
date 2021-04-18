@@ -75,7 +75,11 @@ static char *create_text(const unsigned char* data, size_t len)
 	char *text = (char*) malloc (len+1) ;
 	if (text) 
 	{
-		memcpy (text, data, len) ;
+		//memcpy (text, data, len) ;
+        // copy only printable characters
+        for (int i = 0; i < len; i++) {
+            text[i] = data[i]>=0x20 ? data[i] : '?';
+        }
 		text[len] = 0 ;
 	}
 	return text ;
@@ -313,7 +317,7 @@ unsigned int fill_note_time_table
 			return next_data_overflow ;
 	} /*** <-- end while (!EOT_reached) ***/
 
-	*elements_generated = (current_element - first_element) / sizeof *first_element ;
+	*elements_generated = current_element - first_element;
 	/*** return success message ***/
 	return note_time_table_filled ;
 }

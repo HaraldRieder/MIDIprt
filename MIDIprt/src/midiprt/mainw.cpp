@@ -980,8 +980,8 @@ void MFPMainFrame::do_open_file(const char * pathname)
                 wxMessageDialog err(this, _T("Out of memory!"), _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
                 err.ShowModal() ;
             }
-            unload_file() ;
-            return ; 
+            unload_file();
+            return; 
     }
     
     /* in any case file is no longer needed in RAM */

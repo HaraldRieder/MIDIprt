@@ -24,7 +24,7 @@ CSOURCES=colcube.c diskfile.c graphic.c midi.c notimtab.c servimem.c
 CPPSOURCES=wxVDI.cpp 
 
 # wxWidgets gtk2-unicode-release-2.8
-CFLAGS= -I../include `wx-config --cppflags` -fpermissive
+CFLAGS= -I../include `wx-config --cppflags` -fpermissive -g 
 
 # tools
 C=g++
