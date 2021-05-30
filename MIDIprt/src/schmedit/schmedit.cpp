@@ -646,17 +646,21 @@ SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db,
     CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 
 
     // create the controls
+    const wxSizerFlags left_right_border = wxSizerFlags().Border(wxLEFT+wxRIGHT,SPACING);
+    const wxSizerFlags left_right_bottom_border = wxSizerFlags().Border(wxLEFT+wxRIGHT+wxBOTTOM,SPACING);
+    const wxSizerFlags center = wxSizerFlags().Center();
+    
    	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *upper = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *lower = new wxBoxSizer(wxHORIZONTAL);
     wxSize sz = wxButton::GetDefaultSize();
-    sz.x /= 2;
+    sz.x = sz.x*2/3;
     
     wxStaticBoxSizer *dodecbox = new wxStaticBoxSizer(wxVERTICAL, this, _T("dodec"));
-    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_all , _T("all"), wxDefaultPosition, sz));
-    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_rot , _T("rot."), wxDefaultPosition, sz));
-    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_swap , _T("swap"), wxDefaultPosition, sz));
-    dodecbox->Add(new wxStaticText(dodecbox->GetStaticBox(), -1, _T("View:")));
+    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_all , _T("all"), wxDefaultPosition, sz), center);
+    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_rot , _T("rot."), wxDefaultPosition, sz), center);
+    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_swap , _T("swap"), wxDefaultPosition, sz), center);
+    dodecbox->Add(new wxStaticText(dodecbox->GetStaticBox(), -1, _T("View:")), wxSizerFlags().Center().Border(wxTOP,SPACING));
     const wxString dodec_names[N_DODECIMES] =
     {
         _T("0"),_T("1"),_T("2"),_T("3"),_T("4"),
@@ -664,13 +668,19 @@ SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db,
     } ;
     wxChoice * choice = new wxChoice(dodecbox->GetStaticBox(), Control_Dodec_select, wxDefaultPosition, sz, 11, dodec_names) ;
     choice->SetSelection(0) ;
-    dodecbox->Add(choice);
+    dodecbox->Add(choice, wxSizerFlags().Center().Border(wxBOTTOM,SPACING));
     wxFlexGridSizer *dodecgrid = new wxFlexGridSizer(2/*columns*/);
     for (unsigned i = 0 ; i < N_DODECIMES ; i++)
     {
-        dodecgrid->Add(new wxStaticText(dodecbox->GetStaticBox(), -1, dodec_names[i]));
+        dodecgrid->Add(new wxStaticText(dodecbox->GetStaticBox(), -1, dodec_names[i]), left_right_border);
         m_dodec[i] = new DodecimeWidget(db, i, dodecbox->GetStaticBox(), wxDefaultPosition, sz);
-        dodecgrid->Add(m_dodec[i]);
+        wxSizerFlags flags;
+        switch(i) {
+          //case 0: flags = wxSizerFlags().Border(wxRIGHT+wxTOP,SPACING); break;
+          case N_DODECIMES-1: flags = wxSizerFlags().Border(wxRIGHT+wxBOTTOM,SPACING); break;
+          default: flags = wxSizerFlags().Border(wxRIGHT,SPACING);
+        }
+        dodecgrid->Add(m_dodec[i], flags);
     }
     dodecbox->Add(dodecgrid);
     upper->Add(dodecbox);
@@ -680,40 +690,41 @@ SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db,
     
     // the scheme
     wxSize schemeSize;
-    schemeSize.x = schemeSize.y = wxButton::GetDefaultSize().x * 4;
+    schemeSize.x = wxButton::GetDefaultSize().x * 5;
+    schemeSize.y = wxButton::GetDefaultSize().y * 11;
     m_scheme = new SchemeWidget(_db, this, wxDefaultPosition, schemeSize);
     // the bars, between dodecime and note static lines, above the scheme
     wxSize barsSize;
     barsSize.x = barsSize.y = wxButton::GetDefaultSize().x;
     m_bars = new BarsWidget(m_scheme, _db, this, wxDefaultPosition, barsSize) ;
-    right_upper->Add(m_bars);
+    right_upper->Add(m_bars, wxSizerFlags().Bottom().Border(wxLEFT+wxRIGHT,SPACING));
 
     // create controls for notes
     // button size shall be the same as calculated for dodecime buttons
     wxStaticBoxSizer *notebox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("note"));
     wxBoxSizer *noteselectors = new wxBoxSizer(wxVERTICAL);
-    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_all , _T("all"), wxDefaultPosition,sz));
-    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_75  , _T("7+5") , wxDefaultPosition,sz));
-    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_66  , _T("6+6") , wxDefaultPosition,sz));
-    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_rot , _T("rot."), wxDefaultPosition,sz));
-    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_swap, _T("swap"), wxDefaultPosition,sz));
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_all , _T("all"), wxDefaultPosition,sz), left_right_border);
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_75  , _T("7+5") , wxDefaultPosition,sz), left_right_border);
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_66  , _T("6+6") , wxDefaultPosition,sz), left_right_border);
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_rot , _T("rot."), wxDefaultPosition,sz), left_right_border);
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_swap, _T("swap"), wxDefaultPosition,sz), left_right_bottom_border);
     notebox->Add(noteselectors);
     // controls for note ends
     wxStaticBoxSizer *endsbox = new wxStaticBoxSizer(wxVERTICAL, notebox->GetStaticBox(), _T("ends"));
-    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_all , _T("all") , wxDefaultPosition,sz));
-    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_rot , _T("rot."), wxDefaultPosition,sz));
-    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_swap, _T("swap"), wxDefaultPosition,sz));
-    notebox->Add(endsbox);
+    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_all , _T("all") , wxDefaultPosition,sz), left_right_border);
+    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_rot , _T("rot."), wxDefaultPosition,sz), left_right_border);
+    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_swap, _T("swap"), wxDefaultPosition,sz), left_right_bottom_border);
+    notebox->Add(endsbox, left_right_bottom_border);
     // controls for note bodies
     wxStaticBoxSizer *bodybox = new wxStaticBoxSizer(wxVERTICAL, notebox->GetStaticBox(), _T("body"));
-    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_all , _T("all") , wxDefaultPosition,sz));
-    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_rot , _T("rot."), wxDefaultPosition,sz));
-    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_swap, _T("swap"), wxDefaultPosition,sz));
-    notebox->Add(bodybox);
+    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_all , _T("all") , wxDefaultPosition,sz), left_right_border);
+    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_rot , _T("rot."), wxDefaultPosition,sz), left_right_border);
+    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_swap, _T("swap"), wxDefaultPosition,sz), left_right_bottom_border);
+    notebox->Add(bodybox, left_right_bottom_border);
     right_upper->Add(notebox);
-    right->Add(right_upper);
+    right->Add(right_upper, left_right_bottom_border);
 
-    right->Add(m_scheme);
+    right->Add(m_scheme, left_right_bottom_border);
     // background is drawn inside scheme
     int w = schemeSize.x/2 - 6 ;
     int h = schemeSize.y*11/24 - 5 ;
@@ -744,7 +755,7 @@ SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db,
     for (unsigned k = IP_HOLLOW ; k <= IP_SOLID ; k++)
     {
         m_style[k] = new StyleWidget(k, m_scheme, fillstyles->GetStaticBox(), wxDefaultPosition, sz);
-        fillstyles->Add(m_style[k]);
+        fillstyles->Add(m_style[k], k == IP_SOLID ? left_right_bottom_border : left_right_border);
     }
     lower->Add(m_lightCube);
     lower->Add(fillstyles);
