@@ -12,7 +12,7 @@
 // window position and size
 static const int FRAME_W = 480, FRAME_H = 720 ; // in pels
 
-// widths and heights in percent of the panel width and heights
+// widths and heights in percent of the client size
 // (will be transformed to pels later)
 static int DODEC_W = 21 ;
 static int DODEC_H = 66 ;
@@ -178,7 +178,7 @@ void DodecimeWidget::OnPaint(wxPaintEvent& WXUNUSED(event))
 class BackgroundWidget: public SelectableWidget
 {
 public:
-    BackgroundWidget(SchemeEditorData *db, wxWindow *parent, const wxPoint& pos, const wxSize& size);
+  BackgroundWidget(SchemeEditorData *db, wxWindow *parent, const wxPoint& pos, const wxSize& size);
   virtual void setColor(int color) ;
   virtual void setStyle(int style) ;
   void setSchemeBars(wxWindow *scheme, wxWindow *bars) { schemeWidget = scheme ; barsWidget = bars ; }
@@ -226,13 +226,13 @@ void BackgroundWidget::setStyle(int style)
 class BarsWidget: public SelectableWidget
 {
 public:
-    BarsWidget(wxWindow *scheme, SchemeEditorData *db, wxWindow *parent, const wxPoint& pos, const wxSize& size);
+  BarsWidget(wxWindow *scheme, SchemeEditorData *db, wxWindow *parent, const wxPoint& pos, const wxSize& size);
   virtual void setColor(int color) ;
   virtual void setStyle(int WXUNUSED(style)) { } /**< there is no text style up to now */
 private:
   wxWindow * schemeWidget ;
-    void OnPaint(wxPaintEvent& event);
-    DECLARE_EVENT_TABLE()
+  void OnPaint(wxPaintEvent& event);
+  DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(BarsWidget, wxWindow)
@@ -611,6 +611,22 @@ void SchemeEditorFrame::InitMenu()
     SetMenuBar(menu_bar);
 }
 
+/* WINDOW LAYOUT
+  
+ topsizer vert.-------------------------------------------------
+ | upper hor.
+ |   dodecbox | right vert.-------------------------------------
+ |            |   right_upper hor. 
+ |            |      Bars | notebox hor.
+ |            |               noteselectors | endsbox | bodybox
+ |            | ------------------------------------------------
+ |            |   Scheme
+ |--------------------------------------------------------------
+ | lower hor.
+ |   lightCube | fillstyles | darkCube
+  --------------------------------------------------------------
+ 
+*/ 
 /** main frame constructor */
 SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db, 
      wxFrame *frame, const wxString & title, const wxPoint & pos, const wxSize & size)
@@ -629,138 +645,114 @@ SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db,
     // create the status line
     CreateStatusBar(1/*fields*/,0/*without resizing grip*/); 
 
-    // create panel for the controls
-    int PANEL_W, PANEL_H ;
-    DoGetClientSize(&PANEL_W, &PANEL_H) ;
-
-    wxPanel *panel = new wxPanel(this, -1, wxPoint(0, 0), 
-                                  wxSize(PANEL_W, PANEL_H), wxTAB_TRAVERSAL);
-
-    // make all relative widths and heights absolute
-    DODEC_W = DODEC_W * PANEL_W / 100 ;
-    DODEC_H = DODEC_H * PANEL_H / 100 ;
-
-    // create controls for dodecimes
-    DODEC_W = DODEC_W - SPACING ;
-    new wxStaticBox(panel, -1, _T("dodec"), wxPoint(SPACING/2, SPACING/2), wxSize(DODEC_W-SPACING, DODEC_H-SPACING));
-    int w = DODEC_W - 3 * SPACING ;
-    int lines = 17 ;
-    int h = (DODEC_H - 3 * SPACING)/lines ; // of one "line" (control)
-    const wxSize sz(w,h) ;
-    int x = SPACING * 3/2;
-    int y = SPACING * 5/2 ;
+    // create the controls
+   	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *upper = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *lower = new wxBoxSizer(wxHORIZONTAL);
+    wxSize sz = wxButton::GetDefaultSize();
+    sz.x /= 2;
     
-    new wxButton(panel, Control_Dodec_all , _T("all") , wxPoint(x,y)    , sz) ;
-    new wxButton(panel, Control_Dodec_rot , _T("rot."), wxPoint(x,y+h)  , sz) ;
-    new wxButton(panel, Control_Dodec_swap, _T("swap"), wxPoint(x,y+2*h), sz) ;
-    new wxStaticText(panel, -1, _T("View:"), wxPoint(x,y+3*h+2), sz) ;
+    wxStaticBoxSizer *dodecbox = new wxStaticBoxSizer(wxVERTICAL, this, _T("dodec"));
+    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_all , _T("all"), wxDefaultPosition, sz));
+    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_rot , _T("rot."), wxDefaultPosition, sz));
+    dodecbox->Add(new wxButton(dodecbox->GetStaticBox(), Control_Dodec_swap , _T("swap"), wxDefaultPosition, sz));
+    dodecbox->Add(new wxStaticText(dodecbox->GetStaticBox(), -1, _T("View:")));
     const wxString dodec_names[N_DODECIMES] =
     {
         _T("0"),_T("1"),_T("2"),_T("3"),_T("4"),
         _T("5"),_T("6"),_T("7"),_T("8"),_T("9"),_T("A")
     } ;
-    wxChoice * choice = new wxChoice(panel, Control_Dodec_select, wxPoint(x,y+4*h), sz, 11, dodec_names) ;
+    wxChoice * choice = new wxChoice(dodecbox->GetStaticBox(), Control_Dodec_select, wxDefaultPosition, sz, 11, dodec_names) ;
     choice->SetSelection(0) ;
-    wxSize half_sz(sz.GetWidth()/2, sz.GetHeight()) ;
+    dodecbox->Add(choice);
+    wxFlexGridSizer *dodecgrid = new wxFlexGridSizer(2/*columns*/);
     for (unsigned i = 0 ; i < N_DODECIMES ; i++)
     {
-      int y_i = y+(16-i)*h - SPACING/2 ;
-      new wxStaticText(panel, -1, dodec_names[i], wxPoint(x,y_i), half_sz) ;
-      m_dodec[i] = 
-        new DodecimeWidget(db, i, panel, wxPoint(x+SPACING/2+half_sz.GetWidth(),y_i), half_sz);
+        dodecgrid->Add(new wxStaticText(dodecbox->GetStaticBox(), -1, dodec_names[i]));
+        m_dodec[i] = new DodecimeWidget(db, i, dodecbox->GetStaticBox(), wxDefaultPosition, sz);
+        dodecgrid->Add(m_dodec[i]);
     }
+    dodecbox->Add(dodecgrid);
+    upper->Add(dodecbox);
+    
+    wxBoxSizer *right = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *right_upper = new wxBoxSizer(wxHORIZONTAL);
+    
+    // the scheme
+    wxSize schemeSize;
+    schemeSize.x = schemeSize.y = wxButton::GetDefaultSize().x * 4;
+    m_scheme = new SchemeWidget(_db, this, wxDefaultPosition, schemeSize);
+    // the bars, between dodecime and note static lines, above the scheme
+    wxSize barsSize;
+    barsSize.x = barsSize.y = wxButton::GetDefaultSize().x;
+    m_bars = new BarsWidget(m_scheme, _db, this, wxDefaultPosition, barsSize) ;
+    right_upper->Add(m_bars);
 
     // create controls for notes
     // button size shall be the same as calculated for dodecime buttons
-    int NOTE_W = sz.GetWidth() * 3/*buttons*/ + SPACING * 7 ; 
-    int NOTE_H = sz.GetHeight() * 5/*buttons*/ + SPACING + SPACING * 3/2;
-    x = PANEL_W - NOTE_W - SPACING/2 ;
-    new wxStaticBox( panel, -1, _T("note"), wxPoint(x, SPACING/2), wxSize(NOTE_W, NOTE_H));
-    x += SPACING ;
-    y = SPACING * 5/2 ;
-    new wxButton(panel, Control_Note_all , _T("all") , wxPoint(x,y                 ), sz) ;
-    new wxButton(panel, Control_Note_75  , _T("7+5") , wxPoint(x,y+  sz.GetHeight()), sz) ;
-    new wxButton(panel, Control_Note_66  , _T("6+6") , wxPoint(x,y+2*sz.GetHeight()), sz) ;
-    new wxButton(panel, Control_Note_rot , _T("rot."), wxPoint(x,y+3*sz.GetHeight()), sz) ;
-    new wxButton(panel, Control_Note_swap, _T("swap"), wxPoint(x,y+4*sz.GetHeight()), sz) ;
-
+    wxStaticBoxSizer *notebox = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("note"));
+    wxBoxSizer *noteselectors = new wxBoxSizer(wxVERTICAL);
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_all , _T("all"), wxDefaultPosition,sz));
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_75  , _T("7+5") , wxDefaultPosition,sz));
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_66  , _T("6+6") , wxDefaultPosition,sz));
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_rot , _T("rot."), wxDefaultPosition,sz));
+    noteselectors->Add(new wxButton(notebox->GetStaticBox(), Control_Note_swap, _T("swap"), wxDefaultPosition,sz));
+    notebox->Add(noteselectors);
     // controls for note ends
-    x = PANEL_W - NOTE_W + SPACING + sz.GetWidth() ;
-    y = SPACING*3/2 + sz.GetHeight()/2 ;
-    h = sz.GetHeight() * 3/*buttons*/ + SPACING + SPACING * 3/2;
-    new wxStaticBox(panel, -1, _T("ends"), wxPoint(x,y), wxSize(sz.GetWidth() + SPACING*2, h)) ;
-    x += SPACING ;
-    y += SPACING*2 ;
-    new wxButton(panel, Control_Ends_all , _T("all") , wxPoint(x,y)                 , sz) ;
-    new wxButton(panel, Control_Ends_rot , _T("rot."), wxPoint(x,y+sz.GetHeight())  , sz) ;
-    new wxButton(panel, Control_Ends_swap, _T("swap"), wxPoint(x,y+2*sz.GetHeight()), sz) ;
-
+    wxStaticBoxSizer *endsbox = new wxStaticBoxSizer(wxVERTICAL, notebox->GetStaticBox(), _T("ends"));
+    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_all , _T("all") , wxDefaultPosition,sz));
+    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_rot , _T("rot."), wxDefaultPosition,sz));
+    endsbox->Add(new wxButton(endsbox->GetStaticBox(), Control_Ends_swap, _T("swap"), wxDefaultPosition,sz));
+    notebox->Add(endsbox);
     // controls for note bodies
-    x += (sz.GetWidth() + SPACING*3/2) ;
-    y = SPACING*3/2 + sz.GetHeight()/2 ;
-    h = sz.GetHeight() * 3/*buttons*/ + SPACING + SPACING * 3/2;
-    new wxStaticBox(panel, -1, _T("body"), wxPoint(x,y), wxSize(sz.GetWidth() + SPACING*2, h)) ;
-    x += SPACING ;
-    y += SPACING*2 ;
-    new wxButton(panel, Control_Body_all , _T("all") , wxPoint(x,y)                 , sz) ;
-    new wxButton(panel, Control_Body_rot , _T("rot."), wxPoint(x,y+sz.GetHeight())  , sz) ;
-    new wxButton(panel, Control_Body_swap, _T("swap"), wxPoint(x,y+2*sz.GetHeight()), sz) ;
+    wxStaticBoxSizer *bodybox = new wxStaticBoxSizer(wxVERTICAL, notebox->GetStaticBox(), _T("body"));
+    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_all , _T("all") , wxDefaultPosition,sz));
+    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_rot , _T("rot."), wxDefaultPosition,sz));
+    bodybox->Add(new wxButton(bodybox->GetStaticBox(), Control_Body_swap, _T("swap"), wxDefaultPosition,sz));
+    notebox->Add(bodybox);
+    right_upper->Add(notebox);
+    right->Add(right_upper);
 
-    // the scheme
-    int SCHEME_X = DODEC_W + SPACING/2 ;
-    int SCHEME_Y = NOTE_H + SPACING ;
-    int SCHEME_W = PANEL_W - DODEC_W - SPACING ;
-    int SCHEME_H = DODEC_H - NOTE_H - SPACING*3/2 ;
-    m_scheme = new SchemeWidget(_db, panel, wxPoint(SCHEME_X,SCHEME_Y), wxSize(SCHEME_W,SCHEME_H));
+    right->Add(m_scheme);
     // background is drawn inside scheme
-    {
-      int w = SCHEME_W/2 - 6 ;
-      int h = SCHEME_H*11/24 - 5 ;
-      wxWindow * gray = new wxPanel(m_scheme, -1, wxPoint(3,2), wxSize(w,h)/*, wxTAB_TRAVERSAL*/);
-      m_background = new BackgroundWidget(_db, gray, wxPoint(2,2), wxSize(w-4,h-4)) ; 
-    }
-    w = SCHEME_W / (N_NOTES*4) ;
-    h = SCHEME_H / N_NOTES ;
+    int w = schemeSize.x/2 - 6 ;
+    int h = schemeSize.y*11/24 - 5 ;
+    wxWindow * gray = new wxPanel(m_scheme, -1, wxPoint(3,2), wxSize(w,h));
+    m_background = new BackgroundWidget(_db, gray, wxPoint(2,2), wxSize(w-4,h-4)); 
+    w = schemeSize.x / (N_NOTES*4) ;
+    h = schemeSize.y / N_NOTES ;
     for (unsigned j = 0 ; j < N_NOTES ; j++)
     {
-        x = j * 4 * SCHEME_W / (N_NOTES*4) ;
-        y = (11-j) * SCHEME_H / N_NOTES ;
+        int x = j * 4 * schemeSize.x / (N_NOTES*4) ;
+        int y = (11-j) * schemeSize.y / N_NOTES ;
         m_head[j] = new EndsWidget(_db, j, m_scheme, wxPoint(x    ,y), wxSize(w  ,h)) ;
         m_body[j] = new BodyWidget(_db, j, m_scheme, wxPoint(x+w  ,y), wxSize(2*w,h)) ;
         m_tail[j] = new EndsWidget(_db, j, m_scheme, wxPoint(x+3*w,y), wxSize(w  ,h)) ;
-    m_head[j]->setOther(m_tail[j]) ;
-    m_tail[j]->setOther(m_head[j]) ;
+        m_head[j]->setOther(m_tail[j]) ;
+        m_tail[j]->setOther(m_head[j]) ;
     }
-
-    // the bars, between dodecime and note static lines, above the scheme
-    w = h = PANEL_W - DODEC_W - NOTE_W - 2*SPACING ;
-    m_bars = new BarsWidget(m_scheme, _db, panel, wxPoint(SCHEME_X+1, SCHEME_Y-h-1), wxSize(w-1,h-1)) ;
     m_background->setSchemeBars(m_scheme, m_bars) ;
 
-    // color cubes, one light, one dark
-    w = PANEL_W/2 ;
-    h = PANEL_H - DODEC_H ;
-    y = DODEC_H ; 
-    m_lightCube = new CubeWidget(m_scheme, panel, wxPoint(-w/10, y), wxSize(w,h)) ;
-    m_darkCube  = new CubeWidget(m_scheme, panel, wxPoint(PANEL_W/2+w/10, y), wxSize(w,h), true) ;
+    upper->Add(right);
 
-    // fill style selection buttons
-    //w = PANEL_W*2/12 ;
-    w = PANEL_W/12 ; // narrower because of strange overlap with CubWidget on Linux
-    h -= SPACING ;
-    x = PANEL_W/2-PANEL_W/24 ;
-    new wxStaticBox(panel, -1, _T("fill"), wxPoint(x, y+SPACING/2), wxSize(w, h));
-    h -= SPACING * 2 ;
-    h /= (IP_SOLID+1) ;
-    w -= SPACING ;
-    x += SPACING/2 ;
-    y += SPACING*2 ;
+    // color cubes, one light, one dark
+    wxSize cubeSize;
+    cubeSize.x = cubeSize.y = wxButton::GetDefaultSize().x*3;
+    m_lightCube = new CubeWidget(m_scheme, this, wxDefaultPosition,cubeSize);
+    m_darkCube  = new CubeWidget(m_scheme, this, wxDefaultPosition,cubeSize,true) ;
+    wxStaticBoxSizer *fillstyles = new wxStaticBoxSizer(wxVERTICAL, this, _T("fill"));
     for (unsigned k = IP_HOLLOW ; k <= IP_SOLID ; k++)
     {
-      int y_k = y + k * h ;
-      // add to panel, style box does not accept wxWindow widgets
-      m_style[k] = new StyleWidget(k, m_scheme, panel, wxPoint(x,y_k), wxSize(w,h)) ;
+        m_style[k] = new StyleWidget(k, m_scheme, fillstyles->GetStaticBox(), wxDefaultPosition, sz);
+        fillstyles->Add(m_style[k]);
     }
+    lower->Add(m_lightCube);
+    lower->Add(fillstyles);
+    lower->Add(m_darkCube);
+ 
+    topsizer->Add(upper);
+    topsizer->Add(lower);
+    SetSizerAndFit(topsizer);
 
     currentDodec(db->current_dodecime) ;
 
