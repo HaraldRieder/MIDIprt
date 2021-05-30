@@ -614,7 +614,7 @@ void SchemeEditorFrame::InitMenu()
 /** main frame constructor */
 SchemeEditorFrame::SchemeEditorFrame(SchemeEditorData *_db, 
      wxFrame *frame, const wxString & title, const wxPoint & pos, const wxSize & size)
-: wxFrame(frame, -1, title, pos, size, wxMINIMIZE_BOX|wxCAPTION|wxSYSTEM_MENU), db(_db)
+: wxFrame(frame, -1, title, pos, size, wxMINIMIZE_BOX|wxCAPTION|wxSYSTEM_MENU|wxCLOSE_BOX), db(_db)
 {
     // set the icon
 //#ifdef _WINDOWS    
