@@ -38,7 +38,7 @@ CPPOBJECTS = $(CPPSOURCES:%.cpp=$(OBJ)/%.o)
 
 default: dirs $(TARGET)
 
-$(TARGET): $(CMNOBJECTS) $(CPPOBJECTS)
+$(TARGET): $(CMNOBJECTS) $(CPPOBJECTS) $(MY_LIBS)/lib/*.a
 	@rm -f $@
 	@-echo "+++ creating executable $@ +++"
 	@$(LD) $(TARGET) $(CMNOBJECTS) $(CPPOBJECTS) $(LIBS) ; 
