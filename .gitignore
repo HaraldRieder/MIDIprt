@@ -7,4 +7,10 @@
 /target
 **/*.rs.bk
 Cargo.lock
+**/*.PAR
+**/*.par
+**/*.mi$
+MIDIprt/schmedit
+my_libs/lib/*.a
+my_libs/lib/*.lib
 
