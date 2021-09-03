@@ -303,7 +303,7 @@ void VirtualDevice::drawFilledRect(int *pxyarray)
 	wxCoord width  = abs(pxyarray[2] - pxyarray[0]) + 1 ;
 	wxCoord height = abs(pxyarray[3] - pxyarray[1]) + 1 ;
 	dc->SetBrush(brush) ;
-	dc->SetPen(*wxTRANSPARENT_PEN) ;
+	dc->SetPen(pen_noPerimeter) ; 
 	dc->DrawRectangle(pxyarray[0], pxyarray[1], width, height) ;
 }
 
@@ -337,7 +337,7 @@ void VirtualDevice::drawEllPie(int x, int y, int xradius, int yradius, int began
   // draws fill area without arc line
   // note: VDI expects 1/10 degrees angles [0..3600].
   dc->SetBrush(brush) ;
-  dc->SetPen(*wxTRANSPARENT_PEN) ;
+  dc->SetPen(pen_noPerimeter) ;
   // radius and centre must be transformed to rectanlge corners
   // VDI uses 1/10 degrees angles, wx uses degrees
   dc->DrawEllipticArc(x - xradius, y - yradius, 2*xradius+1, 2*yradius+1, begang/10, endang/10) ;
