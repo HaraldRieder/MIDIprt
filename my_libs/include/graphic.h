@@ -13,6 +13,7 @@
 
 #ifndef GRAPHIC_H
 #define GRAPHIC_H 
+#include <cstdint>
 
 /* paper formats in micrometers */
 #define DIN_A4_WIDTH     210000.0f
