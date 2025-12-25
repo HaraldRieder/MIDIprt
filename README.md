@@ -6,3 +6,4 @@
 * Visualize tempo changes, ritardandos, etc.
 * Embed about-me picture in the program code
 * Problem with Umlauts in file names (when OS uses UTF-8 encoding)
+* Warnings about unknown wx flags on program start
