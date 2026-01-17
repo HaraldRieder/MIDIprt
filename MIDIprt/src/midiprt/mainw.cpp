@@ -1342,7 +1342,7 @@ void MFPMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
   wxTextCtrl * headline = new wxTextCtrl(splash, -1, _T(""), 
       wxPoint(lrborder,25), sz, wxTE_READONLY | wxTE_CENTRE) ;
   wxFont font = *wxNORMAL_FONT ;
-  font.SetWeight(wxBOLD) ;
+  font.SetWeight(wxFONTWEIGHT_BOLD) ;
   font.SetPointSize(font.GetPointSize() + 2) ;
   headline->SetFont(font) ;
   headline->AppendText(caption);

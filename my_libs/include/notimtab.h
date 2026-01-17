@@ -56,7 +56,7 @@ typedef struct
 
 	/*** MIDI meta events: ***/
 	
-	int sequence_number ;	/* of format 0 or 1 file, number of sequence in format 2 file, or -1 */
+	INT32 sequence_number ;	/* of format 0 or 1 file, number of sequence in format 2 file, or -1 */
 	
 	char *text ;			/* only the 1. text event found */
 	char *copyright ;		/* should occur in 1. track only */
@@ -68,17 +68,17 @@ typedef struct
 	char *program_name ;	/* only the 1. program name found */
 	char *device_name ;		/* device to be used for track */
 
-	long tempo ;			/* in microseconds, only the 1. found, or -1 */
+	INT32 tempo ;			/* in microseconds, only the 1. found, or -1 */
 	/* SMPTE offset not supported here */
 
 	/* time signature: */
-	int numerator ;			/* e.g. 6 for 6/8, or -1 */
-	int denominator ;		/* power of 2 already expanded, e.g. 3 in file => 2^3 = 8 here, or -1 */
+	INT32 numerator ;		/* e.g. 6 for 6/8, or -1 */
+	INT32 denominator ;		/* power of 2 already expanded, e.g. 3 in file => 2^3 = 8 here, or -1 */
 	/* metronome clicks and ??? not supported */
 
 	/* key signature */
-	int key ;		/* already chromatic: 0..11, 0 is C, or -1 */
-	int minor ;	/* not zero if minor, or -1 */
+	INT32 key ;				/* already chromatic: 0..11, 0 is C, or -1 */
+	INT32 minor ;			/* not zero if minor, or -1 */
 }
 TRACK_INFO ;
 

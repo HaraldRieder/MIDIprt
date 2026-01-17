@@ -130,7 +130,7 @@ void init_info_from_tracks(
         if (!db->tempo[0] && track_table[i].track_info.tempo >= 0)
         {
             /* microseconds => milliseconds */
-            sprintf(db->tempo, "%ld", track_table[i].track_info.tempo / 1000) ;
+            sprintf(db->tempo, "%d", track_table[i].track_info.tempo / 1000) ;
         }
         if (!db->time[0] && 
             track_table[i].track_info.numerator   >= 0 && 

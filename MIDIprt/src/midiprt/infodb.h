@@ -20,7 +20,7 @@ typedef struct
 	MIDI_FILE_HEADER midi_header ;
 	char key  [6] ;	/* e.g. "0 maj" or "1 min" */
 	char time [6] ;	/* e.g. "17/16" */
-	char tempo[6] ; /* milliseconds */
+	char tempo[9] ; /* milliseconds */
 	char *copyright ;
 } 
 INFO_DB ;
