@@ -88,7 +88,9 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
     m_track_slider = new wxSlider(box->GetStaticBox(), Slider_Track, 0,0,10, 
         wxDefaultPosition, wxDefaultSize, 
         wxSL_HORIZONTAL+wxSL_LABELS);
-    box->Add(m_track_slider, wxSizerFlags().Center().Border(wxLEFT+wxRIGHT, MFP_SPACING).Expand());
+	// wxEXPAND shall not be used together with any wxALIGN flags
+	// default wxALIGN flags must be suppressed explicitly
+    box->Add(m_track_slider, wxSizerFlags().Align(0).Border(wxLEFT+wxRIGHT, MFP_SPACING).Expand());
     m_show_track = new wxCheckBox(box->GetStaticBox(), Control_Show_track, _T("&show track"));
     box->Add(m_show_track, flags);
     wxBoxSizer *buttons = new wxBoxSizer(wxHORIZONTAL);
@@ -141,7 +143,7 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
     grid->Add(m_device_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz, wxTE_READONLY), flags);
     grid->Add(m_text = new wxRadioButton(box->GetStaticBox(), Control_Text, _T("Te&xt")));
     grid->Add(m_text_txt = new wxTextCtrl(box->GetStaticBox(), -1, _T(""), wxDefaultPosition, sz, wxTE_READONLY), flags);
-    box->Add(grid, wxSizerFlags(1).Center().Expand());    
+    box->Add(grid, wxSizerFlags(1).Align(0).Expand()); // wxEXPAND shall not be used together with any wxALIGN flags   
 
     topsizer->Add(upper, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());
     topsizer->Add(box, wxSizerFlags().Border(wxALL, MFP_SPACING).Expand());

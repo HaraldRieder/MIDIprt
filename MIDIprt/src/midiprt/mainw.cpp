@@ -1328,7 +1328,7 @@ void MFPMainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
   if (!bitmap.LoadFile(_T("midiprt.bmp"), wxBITMAP_TYPE_BMP))
       return ;
 
-  int lrborder = 90 ; // left/right
+  int lrborder = 80 ; // left/right
   wxSplashScreen* splash = new wxSplashScreen(bitmap,
          wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
          30000, NULL, -1, wxDefaultPosition, wxDefaultSize,
