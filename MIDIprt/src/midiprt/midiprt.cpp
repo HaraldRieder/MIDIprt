@@ -7,6 +7,7 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
+#include <wx/display.h>
 #include <wx/html/htmlwin.h>
 
 #include "version.h"
@@ -43,13 +44,13 @@ static void open_window_on_pos(wxWindow *wi, const wxPoint & pos, bool open)
 {
 	if (wi == NULL)
 		return ;
-	wxScreenDC screen ;
-	wxSize sz = screen.GetSize() ;
+	wxDisplay display;
+	wxRect drect = display.GetGeometry();
 	wxRect rect ;
-	rect.x = (int)((float)(pos.x) / 1000 * sz.x + 0.5) ;
-	rect.y = (int)((float)(pos.y) / 1000 * sz.y + 0.5) ;
-	rect.x = min(sz.x - 32, max(-32, rect.x)) ;
-	rect.y = min(sz.y - 32, max(  0, rect.y)) ;
+	rect.x = (int)((float)(pos.x) / 1000 * drect.width + 0.5) ;
+	rect.y = (int)((float)(pos.y) / 1000 * drect.height + 0.5) ;
+	rect.x = min(drect.width - 32, max(-32, rect.x)) ;
+	rect.y = min(drect.height - 32, max(  0, rect.y)) ;
 	rect.width = rect.height = -1 ;
 	wi->SetSize(rect) ;
 	if (open)
@@ -62,11 +63,11 @@ static void fwrite_window_pos(FILE *file, wxTopLevelWindow *wi, const char *name
 {
 	if (wi == NULL)
 		return ;
-	wxScreenDC screen ;
-	wxSize sz = screen.GetSize() ;
+	wxDisplay display;
+	wxRect drect = display.GetGeometry();
 	wxPoint pos = wi->GetPosition() ;
-	float left   = (float)pos.x * 1000 / sz.x + 0.5 ;
-	float top    = (float)pos.y * 1000 / sz.y + 0.5 ;
+	float left   = (float)pos.x * 1000 / drect.width + 0.5 ;
+	float top    = (float)pos.y * 1000 / drect.height + 0.5 ;
 	fprintf(file, "left%s = %i\n", name, (int)left) ;
 	fprintf(file, "top%s  = %i\n", name, (int)top ) ;
 	fprintf(file, "open%s = %s\n", name, wi->IsShown() ? "yes" : "no") ;

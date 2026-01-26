@@ -6,4 +6,4 @@
 * Visualize tempo changes, ritardandos, etc.
 * Embed about-me picture in the program code
 * Problem with Umlauts in file names (when OS uses UTF-8 encoding)
-* Main window size not remembered? Always opens small.
+* left/top windows positions not remembered, always = 0 (.MIDI_PRT.CFG and .MIDI_PRT.MI$)

@@ -78,7 +78,7 @@ private:
     void OnZoomSlider       (wxCommandEvent& event);
     void OnPageSlider       (wxCommandEvent& event);
     void OnTimer            (wxTimerEvent& event);
-    void OnKeys                (wxCommandEvent& event); /**< accelerator key handler */
+    void OnKeys             (wxCommandEvent& event); /**< accelerator key handler */
 
     static wxString default_profile ; /**< path to default profile */
 

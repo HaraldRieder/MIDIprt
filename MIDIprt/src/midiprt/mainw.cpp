@@ -15,6 +15,7 @@
 #endif
 #include <errno.h>
 
+#include <wx/display.h>
 #include <wx/filedlg.h>
 #include <wx/metafile.h>
 #include <wx/print.h>
@@ -995,19 +996,19 @@ void MFPMainFrame::do_open_file(const char * pathname)
 //    if (!db->opts.has_toolbar)
 //        do_hide_toolbar(wi) ;
 
-    wxScreenDC screen ;
-    wxSize sz = screen.GetSize() ;
+	wxDisplay display;
+	wxRect drect = display.GetGeometry();
     wxRect rect ;
-    rect.x      = (int)((float)(db.opts.left  ) / 1000 * sz.x + 0.5) ;
-    rect.y      = (int)((float)(db.opts.top   ) / 1000 * sz.y + 0.5) ;
-    rect.width  = (int)((float)(db.opts.right ) / 1000 * sz.x + 0.5) - rect.x + 1 ;
-    rect.height = (int)((float)(db.opts.bottom) / 1000 * sz.y + 0.5) - rect.y + 1 ;
-        
+    rect.x      = (int)((float)(db.opts.left  ) / 1000 * drect.width + 0.5) ;
+    rect.y      = (int)((float)(db.opts.top   ) / 1000 * drect.height + 0.5) ;
+    rect.width  = (int)((float)(db.opts.right ) / 1000 * drect.width + 0.5) - rect.x + 1 ;
+    rect.height = (int)((float)(db.opts.bottom) / 1000 * drect.height + 0.5) - rect.y + 1 ;
+    
     /* correct possible inplausible values from file */
-    rect.x = wxMin(sz.x - 32, wxMax(-32, rect.x)) ;
-    rect.y = wxMin(sz.y - 32, wxMax(  0, rect.y)) ;
-    rect.height = wxMax(200, rect.height) ;
-    rect.width  = wxMax(200, rect.width ) ;
+    rect.x = wxMin(drect.width - 32, wxMax(-32, rect.x)) ;
+    rect.y = wxMin(drect.height - 32, wxMax(  0, rect.y)) ;
+    rect.height = wxMax(400, rect.height) ;
+    rect.width  = wxMax(400, rect.width ) ;
 
     SetSize(rect) ;
 
@@ -1179,15 +1180,15 @@ void MFPMainFrame::OnMoveTo( wxCommandEvent &WXUNUSED(event) )
 
 void MFPMainFrame::update_pos()
 {
-    wxScreenDC screen ;
-    wxSize sz = screen.GetSize() ;
+	wxDisplay display;
+	wxRect drect = display.GetGeometry();
     wxRect rect = GetRect() ;
 
     db.opts.is_open = !IsIconized() ;
-    db.opts.left  = (int)((float)rect.x * 1000 / sz.x + 0.5) ;
-    db.opts.top   = (int)((float)rect.y * 1000 / sz.y + 0.5) ;
-    db.opts.right = (int)((float)(rect.x + rect.width  - 1) * 1000 / sz.x + 0.5) ;
-    db.opts.bottom= (int)((float)(rect.y + rect.height - 1) * 1000 / sz.y + 0.5) ;
+    db.opts.left  = (int)((float)rect.x * 1000 / drect.width + 0.5) ;
+    db.opts.top   = (int)((float)rect.y * 1000 / drect.height + 0.5) ;
+    db.opts.right = (int)((float)(rect.x + rect.width  - 1) * 1000 / drect.width + 0.5) ;
+    db.opts.bottom= (int)((float)(rect.y + rect.height - 1) * 1000 / drect.height + 0.5) ;
 }
 
 void MFPMainFrame::do_write_profile()
@@ -1253,6 +1254,8 @@ void MFPMainFrame::OnRevertToSaved( wxCommandEvent &WXUNUSED(event) )
 
 void MFPMainFrame::OnSaveAsDefault( wxCommandEvent &WXUNUSED(event) )
 {
+	update_pos() ;
+	
     if ( write_profile(
             default_profile.ToAscii(), apppath.ToAscii(),
             &(db.params), 
