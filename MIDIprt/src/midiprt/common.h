@@ -20,7 +20,6 @@
 #include "profile.h"
 
 #define UP_DOWN_SCROLL_PIXELS 20
-#define DEFAULT_PROFILE_NAME "MIDI_PRT.MI$"
 #define HELP_DIRECTORY "HELP"
 #define SCHEMES_DIRECTORY "SCHEMES"
 

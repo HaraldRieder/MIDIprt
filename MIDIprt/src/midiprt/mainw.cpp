@@ -586,7 +586,7 @@ MFPMainFrame::MFPMainFrame(const char * midifile) : wxFrame(NULL, -1, _T(MFP_TIT
     incarnation_list.push_back(this) ;
     current_window = this ;
 
-    default_profile = wxGetHomeDir() + _T(DIRSEP) + _T("." DEFAULT_PROFILE_NAME) ; 
+    default_profile = wxGetHomeDir() + _T(DIRSEP) + _T("." MFP_DEFAULT_PROFILE) ; 
 
     // set the icon
     SetIcon(wxIcon(apppath + _T(DIRSEP) + _T("midiprt.ico")));
