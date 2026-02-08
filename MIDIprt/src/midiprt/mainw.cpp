@@ -1183,7 +1183,9 @@ void MFPMainFrame::update_pos()
 	wxDisplay display;
 	wxRect drect = display.GetGeometry();
     wxRect rect = GetRect() ;
-
+    // On Wayland we don't get x and y position any more as it was the case on X11.
+    // On Wayland x=y=0.
+    // display.GetGeometry() might stop working in the future?
     db.opts.is_open = !IsIconized() ;
     db.opts.left  = (int)((float)rect.x * 1000 / drect.width + 0.5) ;
     db.opts.top   = (int)((float)rect.y * 1000 / drect.height + 0.5) ;
