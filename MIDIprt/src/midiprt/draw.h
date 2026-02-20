@@ -96,10 +96,10 @@ typedef struct
 	TR_INFOTYPE select ;
 
 	/* all strings are only read by filter window */
-	char *name ;  
-	char *device ;
-	char *instrument ;
-	char *text ;
+	wxString name;
+	wxString device;
+	wxString instrument;
+	wxString text;
 
 	int filter ;   /* bit mask: (0 or DISABLED) + (0 = off or 1 = on) */
 	unsigned int channels ;  /* 16 bits for MIDI channels: which contain events ? */
@@ -118,26 +118,26 @@ FILTERED_TRACK ;
 	int height,
 	int *points,		/* clipping */ 
 	int pixel_height,	/* in micrometers */
-	const TRACK track[],	/* the data to draw... */
-	const FILTERED_TRACK ft[],	
+	const std::vector<TRACK> & track,	/* the data to draw... */
+	const std::vector<FILTERED_TRACK> & ft,	
 	const LAYOUT *lt,			/* with this layout... */
 	int p,					    /* index of page to draw */
-	VDI_FONT_ID font_id,	/* font for all textes */
+	const wxString & font,	/* font for all textes */
 	int pts,		/* font height in points */  
 	int effects,	/* text effects for title only */
 	int foot_pts,	/* font height of footline in points */ 
-	const char *title,
-	const char *filename,	/* for footline ... */
+	const wxString & title,
+	const wxString & filename,	/* for footline ... */
 	long filesize,
-	const char *caption,
-	const char *version,
-	const char *platform,
+	const wxString & caption,
+	const wxString & version,
+	const wxString & platform,
     int av_height,		/* relative, 5..6 is normal */
 	int maxdynscale,    /* n, max of the following parameter: */
 	int dynscale,		/* 0 .. n */        
 	int mode,			/* Rieder, Beyreuther, Mix */
 	int type,			/* of note (e.g. with tail, etc.) */
-	COLOR_SCHEME *scheme,
+	COLOR_SCHEME & scheme,
 	int transpose,      /* 0 .. 11 of note styles and colors in COLOR_SCHEME */
 	char bars_per_system,
 	char sub_bars,
@@ -145,7 +145,7 @@ FILTERED_TRACK ;
 	int line_width_bars,
 	int line_width_sub_bars,
 	int line_width_notes
-	) ;
+  ) ;
 /*
  *	Possible notation modes:
  */
@@ -167,9 +167,8 @@ FILTERED_TRACK ;
 		float track_distance,
 		float note_distance,
 		char  hor_lines,			/* per dodecime */
-		int   ntrks,				/* dimension of the 3 following arrays */
-		const FILTERED_TRACK ft[],
-		const TRACK track_table[],	/* from MIDI file */
+		const std::vector<FILTERED_TRACK> & ft,
+		const std::vector<TRACK> & track_table, /* from MIDI file */
 		TIME  max_time,				/* occuring in all tracks */
 		TIME  time_per_system		/* in ticks */
 	) ;

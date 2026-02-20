@@ -13,80 +13,74 @@
 #include "common.h" 
 
 
-int mm_to_pixel(const char *mm, int pixel_size)
+int mm_to_pixel(const wxString & mm, int pixel_size)
     /* convert number of millimeters to number of pixels */
     /* pixel_size must be in micrometers */
     /* input must be a 3-char. string like "0.5" or "1.2" */
 {
     int pixel = 0 ;
     
-    if (mm && mm[0] && mm[1] && mm[2])
-        pixel = (1000 * (mm[0]-'0') + 100 * (mm[2]-'0'))/pixel_size ;
+    if (mm.length() >= 3)
+        pixel = (1000 * (mm[0]-'0') + 100 * (mm[2]-'0'))/pixel_size ; // TODO
     
     return (pixel | 1) ; /* make odd */
 }
 
-void abspath(char *absolute, const char *path, const char *dir)
+void abspath(wxString & absolute, const wxString & path, const wxString & dir)
     /* prefix path with dir, if path is not absolute, and
-       store into absolute, which must be long at least 
-       strlen(dir)+strlen(path)+1. dir must end with '\' . */ 
+       store into absolute. dir must end with a slash. */ 
 {
 #if defined (_WINDOWS)
-    if (!strchr(path, ':'))
+    if (!path.Contains(_T(":")))
 #else
-    if (path[0] != DIRSEP)
+    if (!path.StartsWith(_T(DIRSEP)))
 #endif
     {
         /* no drive letter included, this is a relative path */
-        strcpy(absolute, dir) ; /* with terminating DIRSEP */
-        strcat(absolute, path) ;
+        absolute = dir; /* with terminating DIRSEP */
+        absolute.append(path);
     }
     else
         /* already absolute path */
-        strcpy(absolute, path) ;
+        absolute = path;
 }
 
 
-void relpath(char *relative, const char *path, const char *dir) 
-    /* remove dir from path if contained therein and store into relative,
-       which must be long enough (at least strlen(path)+1) */
+void relpath(wxString & relative, const wxString & path, const wxString & dir) 
+    /* remove dir from path if contained therein and store into relative */
 { 
 #if defined (_WINDOWS) 
-    if (strchr(path, ':'))
+    if (path.Contains(_T(":")))
 #else
-    if (path[0] != '/')
+    if (!path.StartsWith(_T(DIRSEP)))
 #endif
     {
         /* drive letter included, this is an absolute path */
-        int len = (int)strlen(dir) ;
-#if defined (_WINDOWS)
-        if ( strnicmp(path, dir, len) == 0 )
-#else
-        if ( strncmp(path, dir, len) == 0 )
-#endif
+        if ( path.StartsWith(dir) )
         {
-            /* dir is the first part of path => compress */
-            strcpy(relative, path + len) ;
+            /* dir is the first part of path => cut */
+            relative = path.Mid(dir.Len());
             return ;
         }
     }
-    strcpy(relative, path) ;
+    relative = path;
 }
 
 
-const char * make_title(
-    const char * title,        /* as loaded from profile */
-    const char * path        /* of MIDI file */
+const wxString make_title(
+    const wxString & title,  /* as loaded from profile */
+    const wxString & path    /* of MIDI file */
 )
 {
-    static const char err_title[] = "Error: make_title() called without title and without path!" ;
+    static const wxString err_title = _T("Error: make_title() called without title and without path!");
 
-    if (title && *title) return title ;
+    if (!title.empty()) return title ;
 
-    if (path && *path)
+    if (!path.empty())
     {
-        const char *s = strrchr(path, DIRSEP) ;
-        if (s) return (s + 1) ;    /* cut away path */
+        std::string::size_type pos = path.rfind(_T(DIRSEP));
+        if (pos != std::string::npos)
+            return path.substr(pos + 1);
         return path ;    /* is already pure filename */
     }
 
@@ -104,58 +98,51 @@ TIME time_per_system(int ticks_per_quarter, int eighths_per_bar, int bars_per_li
 }
 
 
-void init_info_from_tracks(
-    INFO_DB *db, 
-    const TRACK track_table[],
-    unsigned number_tracks)
+void init_info_from_tracks(INFO_DB *db, const std::vector<TRACK> & track_table)
 {
-    unsigned i ;
-
-    db->key[0] = db->tempo[0] = db->time[0] = 0 ;
-    db->copyright = 0 ;
+    db->key = wxString(_T(""));
+    db->tempo = wxString(_T(""));
+    db->time = wxString(_T(""));
+    db->copyright = wxString(_T(""));
     
-    for (i = 0 ; i < number_tracks ; i++)
+    for (unsigned i = 0 ; i < track_table.size() ; i++)
     {
-        if (!db->key[0] && track_table[i].track_info.key >= 0)
+        if (db->key.empty() && track_table[i].track_info.key >= 0)
         {
-            const char *type = "" ;
+            wxString type;
             switch (track_table[i].track_info.minor)
             {
-            case 0: type = "maj" ; break ;
-            case 1: type = "min" ; break ;
+            case 0: type = _T("maj") ; break ;
+            case 1: type = _T("min") ; break ;
             }
-            sprintf(db->key, "%X %s", 
-                track_table[i].track_info.key, type) ;
+            db->key = wxString::Format(_T("%X "), track_table[i].track_info.key);
+            db->key.append(type);
         }
-        if (!db->tempo[0] && track_table[i].track_info.tempo >= 0)
+        if (db->tempo.empty() && track_table[i].track_info.tempo >= 0)
         {
             /* microseconds => milliseconds */
-            sprintf(db->tempo, "%d", track_table[i].track_info.tempo / 1000) ;
+            db->tempo = wxString::Format(_T("%d") , track_table[i].track_info.tempo / 1000);
         }
-        if (!db->time[0] && 
+        if (db->time.empty() && 
             track_table[i].track_info.numerator   >= 0 && 
             track_table[i].track_info.denominator >= 0)
         {
-            sprintf(db->time, "%d/%d", 
-                track_table[i].track_info.numerator,
-                track_table[i].track_info.denominator) ;
+            db->time = wxString::Format(_T("%d") , track_table[i].track_info.numerator);
+            db->time.append(_T("/"));
+            db->time.append(wxString::Format(_T("%d") , track_table[i].track_info.denominator));
         }
-        if (!db->copyright && track_table[i].track_info.copyright)
+        if (db->copyright.empty())
             db->copyright = track_table[i].track_info.copyright ;
     }
 }
 
 
-void init_params_from_tracks(
-    PARAMS_DB *db, 
-    const TRACK track_table[],
-    unsigned number_tracks)
+void init_params_from_tracks(PARAMS_DB *db, const std::vector<TRACK> & track_table)
 {
-    unsigned i ;
     default_params(db) ;
     
     /* search tracks for very first time signature and init bar length */
-    for (i = 0 ; i < number_tracks ; i++)
+    for (unsigned i = 0 ; i < track_table.size() ; i++)
     {
         /* n/d time signature */
         const int n = track_table[i].track_info.numerator ;
@@ -169,7 +156,7 @@ void init_params_from_tracks(
         }
     }
     /* search tracks for very first key signature and init bar length */
-    for (i = 0 ; i < number_tracks ; i++)
+    for (unsigned i = 0 ; i < track_table.size() ; i++)
     {
         if (track_table[i].track_info.key >= 0)
         {
@@ -180,12 +167,10 @@ void init_params_from_tracks(
 }    
 
 
-void init_filter_from_tracks(
-    FILTER_DB *db, 
-    const TRACK track_table[])
+void init_filter_from_tracks(FILTER_DB *db, const std::vector<TRACK> & track_table)
 {
-    unsigned i ;
-    for (i = 0 ; i < db->number_tracks ; i++)
+    int i ;
+    for (i = 0 ; i < track_table.size() ; i++)
     {
         db->track[i].name       = track_table[i].track_info.track_name ;
         db->track[i].device     = track_table[i].track_info.device_name ;
@@ -193,11 +178,11 @@ void init_filter_from_tracks(
         db->track[i].text       = track_table[i].track_info.text ;
         
         db->track[i].select = TR_INSTR ;
-        if (!db->track[i].instrument) 
+        if (db->track[i].instrument.empty()) 
         {
-            if      (db->track[i].name  ) db->track[i].select = TR_NAME ;
-            else if (db->track[i].device) db->track[i].select = TR_DEVICE ;
-            else if (db->track[i].text  ) db->track[i].select = TR_TEXT ;
+            if      (!db->track[i].name  .empty()) db->track[i].select = TR_NAME ;
+            else if (!db->track[i].device.empty()) db->track[i].select = TR_DEVICE ;
+            else if (!db->track[i].text  .empty()) db->track[i].select = TR_TEXT ;
         }
         
         db->track[i].channels =
@@ -209,13 +194,13 @@ void init_filter_from_tracks(
 }    
 
 
-TIME get_max_time( int number_tracks, const TRACK track_table[], const FILTERED_TRACK ft[] )
+TIME get_max_time( const std::vector<TRACK> & track_table, const std::vector<FILTERED_TRACK> & ft )
     /* search the highest time of all events of all enabled tracks */
 {
     TIME max_time = 0, track_max_time ;
     int i ;
 
-    for (i = 0 ; i < number_tracks ; i++)
+    for (i = 0 ; i < ft.size() ; i++)
         if (ft[i].filter == 1)
         {
             track_max_time = 

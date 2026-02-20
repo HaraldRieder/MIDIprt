@@ -108,7 +108,7 @@ void MFPInfoWindow::redisplay()
 	/* enter filename into window info line */
 	wxString title(_T("File Info")) ;
 	if (db)
-		title.append(_T(" - ")).append(wxString::FromAscii(db->filename)) ;
+		title.append(_T(" - ")).append(db->filename);
 	SetTitle(title) ;
 
 	if (!db)
@@ -132,16 +132,10 @@ void MFPInfoWindow::redisplay()
 		m_midi_file_type->Enable() ;
 		m_number_of_tracks->Enable() ;
 
-		char buf[20] ;
-
-		sprintf(buf, "%li", db->filesize /* in units of Byte */) ;
-		m_file_size->SetLabel(wxString::FromAscii(buf)) ;
-		sprintf(buf, "%li", db->transformed_size /* in units of Byte */) ;
-		m_transformed_size->SetLabel(wxString::FromAscii(buf)) ;
-		sprintf(buf, "%i", db->midi_header.midi_file_type) ;
-		m_midi_file_type->SetLabel(wxString::FromAscii(buf)) ;
-		sprintf(buf, "%i", db->midi_header.number_tracks) ;
-		m_number_of_tracks->SetLabel(wxString::FromAscii(buf)) ;
+		m_file_size       ->SetLabel(wxString::Format(_T("%li"), db->filesize)); /* in units of Byte */
+		m_transformed_size->SetLabel(wxString::Format(_T("%li"), db->transformed_size));
+		m_midi_file_type  ->SetLabel(wxString::Format(_T("%i"),  db->midi_header.midi_file_type));
+		m_number_of_tracks->SetLabel(wxString::Format(_T("%i"),  db->midi_header.number_tracks));
 
 		if (db->midi_header.smpte > 0)
 		{
@@ -149,10 +143,8 @@ void MFPInfoWindow::redisplay()
 			m_smpte->Enable() ;
 			m_ticks_per_frame->Enable() ;
 			m_ticks_per_beat->Disable() ;
-			sprintf(buf, "%i", db->midi_header.smpte) ;
-			m_smpte->SetLabel(wxString::FromAscii(buf)) ;
-			sprintf(buf, "%i", db->midi_header.ticks_per_frame) ;
-			m_ticks_per_frame->SetLabel(wxString::FromAscii(buf)) ;
+			m_smpte          ->SetLabel(wxString::Format(_T("%i"), db->midi_header.smpte));
+			m_ticks_per_frame->SetLabel(wxString::Format(_T("%i"), db->midi_header.ticks_per_frame));
 		}
 		else 
 		{
@@ -160,33 +152,32 @@ void MFPInfoWindow::redisplay()
 			m_smpte->Disable() ;
 			m_ticks_per_frame->Disable() ;
 			m_ticks_per_beat->Enable() ;
-			sprintf(buf, "%i", db->midi_header.ticks_per_beat) ;
-			m_ticks_per_beat->SetLabel(wxString::FromAscii(buf)) ;
+			m_ticks_per_beat->SetLabel(wxString::Format(_T("%i"), db->midi_header.ticks_per_beat));
 		}
-		if (db->tempo[0] == 0)
+		if (db->tempo.empty())
 		     m_tempo->Disable() ;
 		else m_tempo->Enable() ;
-		if (db->key[0] == 0)
+		if (db->key.empty())
 		     m_key->Disable() ;
 		else m_key->Enable() ;
-		if (db->time[0] == 0)
+		if (db->time.empty())
 		     m_time->Disable() ;
 		else m_time->Enable() ;
 		
-		m_tempo->SetLabel(wxString::FromAscii(db->tempo)) ;
-		m_key  ->SetLabel(wxString::FromAscii(db->key  )) ;
-		m_time ->SetLabel(wxString::FromAscii(db->time )) ;
+		m_tempo->SetLabel(db->tempo);
+		m_key  ->SetLabel(db->key  );
+		m_time ->SetLabel(db->time );
 
 		if (true)
 		{
-			if (db->copyright == NULL)
+			if (db->copyright.empty())
 			{
 				m_copyright_notice->SetValue(_T("no copyright notice")) ;
 				m_copyright_notice->Disable() ;
 			}
 			else
 			{
-				m_copyright_notice->SetValue(wxString::FromAscii(db->copyright)) ;
+				m_copyright_notice->SetValue(db->copyright);
 				m_copyright_notice->Enable() ;
 			}
 		}

@@ -27,23 +27,13 @@ COLOR_SCHEME ;
 void default_scheme(COLOR_SCHEME *s) ;
 	/* inits scheme with some reasonable values */
 	
-//void rgb_to_index_scheme(COLOR_SCHEME *s) ;
-//	/* convert the scheme's colors to indices (color palette) */
-//	/* if the screen mode is direct color, this function does nothing, 
-//	   i.e. colors are always 15 bit RGB values */
-	   
-//void index_to_rgb_scheme(COLOR_SCHEME *s) ;
-//	/* convert the scheme's colors to 15 bit RGBs */
-//	/* if the screen mode is direct color, this function does nothing, 
-//	   i.e. colors are always 15 bit RGB values */
-	   
-int save_scheme(const COLOR_SCHEME *scheme, const char *scheme_path) ;
+int save_scheme(const COLOR_SCHEME *scheme, const wxString & scheme_path) ;
 	/* save scheme to file "scheme_path" */
 	/* Intel to Motorola conversion and 24 bits to 15 bits RGB
 	   conversion are performed when necessary. */
 	/* return: 0 = good, -1 = err */
 	
-int load_scheme(COLOR_SCHEME *scheme, const char *scheme_path) ;
+int load_scheme(COLOR_SCHEME *scheme, const wxString & scheme_path) ;
 	/* load scheme from disk */
 	/* Conversions are performed inverse save_scheme(), when necessary. */
 	/* return: 0 = good, -1 = err, 1 = file OK but its length is wrong */

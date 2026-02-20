@@ -15,6 +15,7 @@
 #include "scheme.h"
 
 #include <wxVDI.h>
+#include <wx/file.h>
 #pragma pack(1)
 
 typedef struct
@@ -99,45 +100,39 @@ static void copy_to_scheme_file(SCHEME_FILE *sf, const COLOR_SCHEME *_s)
 }
 
 
-int load_scheme(COLOR_SCHEME *scheme, const char *scheme_path)
+int load_scheme(COLOR_SCHEME *scheme, const wxString & scheme_path)
 {
 	size_t read_bytes ;
 	char buff[sizeof(SCHEME_FILE) + 1] ;
-	FILE *file ;
 
-	if (!scheme_path || !*scheme_path)
+	if (scheme_path.empty())
 		return -1 ;
 
-	if ( file = fopen(scheme_path, "rb"), file )
+	wxFile file;
+	if ( file.Open(scheme_path) )
 	{
-		read_bytes = fread(buff,1,sizeof(buff),file) ;
+		ssize_t read_bytes = file.Read(buff, sizeof(SCHEME_FILE));
 		if ( read_bytes == sizeof(SCHEME_FILE) )
-		{
-			buff[sizeof(buff)-1] = 0 ; /* allow strcpy() of last struct member */
 			copy_to_scheme(scheme, (SCHEME_FILE *)buff) ;
-		}
-		else if ( ferror(file) )
-		     return -1 ;
-		else return 1 ; /* wrong format */ ;
-		return fclose(file) ;
+		else 
+            return 1 ; /* wrong format */ ;
+        return 0 ;
 	}
 	return -1 ;
 }
 
-int save_scheme(const COLOR_SCHEME *scheme, const char *scheme_path)
+int save_scheme(const COLOR_SCHEME *scheme, const wxString & scheme_path)
 {
 	SCHEME_FILE sf ;
-	FILE *file = fopen(scheme_path, "wb") ;
-	
-	if ( file )
+    wxFile file; 
+	if ( file.Open(scheme_path, wxFile::write) )
 	{
 		copy_to_scheme_file(&sf, scheme) ;
-		if ( fwrite(&sf, sizeof(sf), 1, file) != 1 ) /* 1 scheme written ? */
+        if ( !file.Write(&sf, sizeof(sf)) ) /* scheme written ? */
 		{
-			fclose(file) ;
 			return -1 ;
 		}
-		return fclose(file) ;
+		return 0 ;
 	}
 	return -1 ;
 }

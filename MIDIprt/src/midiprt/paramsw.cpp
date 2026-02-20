@@ -84,12 +84,12 @@ void SchemeWidget::set_database(PARAMS_DB *_db)
 {
     db = _db ; 
 
-    const char *s = " (default)" ;
-    if ( db && db->scheme_path[0] ) 
-        s = strrchr( db->scheme_path, DIRSEP ) ;
-    if (!s) 
-      s = db->scheme_path ;
-    m_text->SetLabel(wxString(_T(" "))+wxString::FromAscii(s+1)+_T(" ")) ;
+    wxString s = _T(" (default)");
+    if ( db && !db->scheme_path.empty() ) {
+        size_t pos = db->scheme_path.rfind(_T(DIRSEP));
+        s = pos == std::string::npos ? db->scheme_path : db->scheme_path.substr(pos + 1);
+    }
+    m_text->SetLabel(wxString(_T(" ")) + s + _T(" ")) ;
 
     Refresh() ;
 }
@@ -99,8 +99,8 @@ void SchemeWidget::OnSchemeSelect( wxMouseEvent &WXUNUSED(event) )
     if (db == NULL) return ;
 
     wxString path ;
-    if ( db->scheme_path[0] ) 
-        path = wxString::FromAscii(db->scheme_path) ;
+    if ( !db->scheme_path.empty() ) 
+        path = db->scheme_path;
     else
         /* init path */
         path = apppath + _T(SCHEMES_DIRECTORY) + _T(DIRSEP) ;
@@ -109,7 +109,7 @@ void SchemeWidget::OnSchemeSelect( wxMouseEvent &WXUNUSED(event) )
     dialog.SetDirectory(path);
     if ( dialog.ShowModal() == wxID_OK )
     {
-        do_load_scheme(db, dialog.GetPath().ToAscii()) ;
+        do_load_scheme(db, dialog.GetPath()) ;
         set_database(db) ;
     }
 }
@@ -418,7 +418,7 @@ void MFPParamsWindow::ShowLineWidthMenu(wxCommandEvent& event)
 //    for (int i = Popup_01 ; i <= Popup_20 ; i++)
 //        menu.Enable(i, true) ;
 
-    char *s = NULL ;
+    wxString & s = db->line_width;
 
     switch (event.GetId())
     {
@@ -432,7 +432,7 @@ void MFPParamsWindow::ShowLineWidthMenu(wxCommandEvent& event)
     int current ;
     for (current = Popup_01 ; current <= Popup_20 ; current++)
     {
-        if (strstr(menu.GetLabel(current).ToAscii(), s) != NULL)
+        if (menu.GetLabel(current).Contains(s))
         {
             menu.Check(current, true) ;
             break ;
@@ -446,8 +446,7 @@ void MFPParamsWindow::ShowLineWidthMenu(wxCommandEvent& event)
     if (m_popup_id == -1)
         return ;
 
-    strncpy(s, menu.GetLabel(m_popup_id).ToAscii(), LINE_WIDTH_STRLEN) ;
-    s[LINE_WIDTH_STRLEN] = 0 ; 
+    s = menu.GetLabel(m_popup_id).substr(0, LINE_WIDTH_STRLEN);
 }
 
 void MFPParamsWindow::OnLineWidthMenu(wxCommandEvent& event)
@@ -462,8 +461,7 @@ void MFPParamsWindow::OnLineWidthMenu(wxCommandEvent& event)
 void MFPParamsWindow::OnTitleEdit(wxCommandEvent& WXUNUSED(event))
 {
     if (db == NULL) return ;
-    strncpy(db->title, m_title->GetValue().ToAscii(), sizeof(db->title)-1) ;
-    db->title[sizeof(db->title)-1] = 0 ;
+    db->title = m_title->GetValue();
 }
 
 void MFPParamsWindow::OnFont( wxCommandEvent &WXUNUSED(event) )
@@ -471,7 +469,7 @@ void MFPParamsWindow::OnFont( wxCommandEvent &WXUNUSED(event) )
     if (!db) return ;
 
     wxNativeFontInfo info ;
-    info.FromString(wxString::FromAscii(db->font)) ;
+    info.FromString(db->font);
     wxFont font;
     font.SetNativeFontInfo(info) ;
     wxFontData data;
@@ -490,8 +488,7 @@ void MFPParamsWindow::OnFont( wxCommandEvent &WXUNUSED(event) )
     if (dialog.ShowModal() == wxID_OK)
     {
         wxFontData retData = dialog.GetFontData();
-        strncpy(db->font, retData.GetChosenFont().GetNativeFontInfoDesc().ToAscii(), sizeof(db->font)-1) ;
-        db->font[sizeof(db->font)-1] = 0 ;
+        db->font = retData.GetChosenFont().GetNativeFontInfoDesc();
         db->points = retData.GetChosenFont().GetPointSize() ;
     }
     //else: cancelled by the user, don't change the font
@@ -521,8 +518,6 @@ void MFPParamsWindow::OnLeftBorderSlider( wxCommandEvent &WXUNUSED(event) )
     else
         db->left_border = value ;
     char buf[10] ;
-    //sprintf(buf, "%d", value) ;
-    //m_left_val->SetValue(wxString::FromAscii(buf)) ;
 }
 
 void MFPParamsWindow::OnRightBorderSlider( wxCommandEvent &WXUNUSED(event) )
@@ -535,8 +530,6 @@ void MFPParamsWindow::OnRightBorderSlider( wxCommandEvent &WXUNUSED(event) )
     else
         db->right_border = value ;
     char buf[10] ;
-    //sprintf(buf, "%d", value) ;
-    //m_right_val->SetValue(wxString::FromAscii(buf)) ;
 }
 
 void MFPParamsWindow::OnBordersSelect( wxCommandEvent &WXUNUSED(event) )
@@ -611,7 +604,6 @@ void MFPParamsWindow::OnDistanceSlider( wxCommandEvent &WXUNUSED(event) )
         }
         break ;
     }
-    //m_distance_val->SetValue(wxString::FromAscii(buf)) ;
 }
 
 void MFPParamsWindow::OnDistanceSelect( wxCommandEvent &WXUNUSED(event) )
@@ -692,7 +684,7 @@ void MFPParamsWindow::OnHorlinesSelect( wxCommandEvent &WXUNUSED(event) )
     if (db == NULL) return ;
     
     wxString s = m_lines->GetStringSelection() ;
-    db->horizontal_lines = atoi(s.ToAscii()) ;
+    db->horizontal_lines = wxAtoi(s);
 
     m_scheme->Refresh() ;
 }
@@ -857,7 +849,7 @@ void MFPParamsWindow::redisplay()
     /* enter filename into window info line */
     wxString title(_T("Parameters")) ;
     if (db)
-        title.append(_T(" - ")).append(wxString::FromAscii(db->filename)) ;
+        title.append(_T(" - ")).append(db->filename);
     SetTitle(title) ;
 
     if (!db)
@@ -874,14 +866,15 @@ void MFPParamsWindow::redisplay()
     
         for (i = 0 ; normal_sliders[i] ; i++) 
             normal_sliders[i]->Enable() ;
-        if ( !db->title[0] )
+        if ( db->title.empty() )
         {
             /* init with file name */
-            strcpy(db->title, db->filename) ;
-            s = strrchr(db->title, '.') ;
-            if (s) *s = 0 ;        /* cut away extension */
+            db->title = db->filename;
+            std::string::size_type pos = db->title.rfind(_T("."));
+            if (pos != std::string::npos) 
+                db->title = db->title.substr(0, pos); /* cut away extension */
         }
-        m_title->SetValue(wxString::FromAscii(db->title)) ;
+        m_title->SetValue(db->title);
         
         /* set slider positions */
         m_bars_per_line->SetValue(db->bars_per_line) ;

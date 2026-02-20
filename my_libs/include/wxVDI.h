@@ -23,8 +23,6 @@
     #include "wx/wx.h"
 #endif
 
-typedef char * VDI_FONT_ID ;// wxWindows: native font info string
-
 class VirtualDevice  
 {
 public:
@@ -55,7 +53,7 @@ public:
     void setLineColor(int color_index);
     void setTextHeight(int height, int *char_width);
     void setTextPoint(int point);
-    void setFont(const VDI_FONT_ID font);
+    void setFont(const wxString & font);
     void setTextEffects(int effect);
     void setTextAlignment(int hor_in, int vert_in);
     void setFillColor(int color_index);
@@ -71,7 +69,7 @@ public:
     void drawEllipse(int x, int y, int xradius, int yradius);
     void drawEllArc(int x, int y, int xradius, int yradius, int begang, int endang);
     void drawEllPie(int x, int y, int xradius, int yradius, int begang, int endang);
-    void drawText(int x, int y, char *string);
+    void drawText(int x, int y, const wxString & string);
 
 	wxDC *dc;
 	int writeMode;

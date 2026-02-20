@@ -20,8 +20,8 @@ SRC=.
 
 TARGET=$(LIB)/libmy.a
 
-CSOURCES=colcube.c diskfile.c graphic.c midi.c notimtab.c servimem.c
-CPPSOURCES=wxVDI.cpp 
+CSOURCES=
+CPPSOURCES=wxVDI.cpp colcube.cpp graphic.cpp midi.cpp notimtab.cpp servimem.cpp
 
 # wxWidgets gtk2-unicode-release-2.8
 CFLAGS= -I../include `wx-config --cppflags` -fpermissive -g 

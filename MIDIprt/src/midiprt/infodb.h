@@ -14,14 +14,14 @@
 
 typedef struct
 {
-	char *filename;	/* for window info line */
+	wxString filename;	/* for window info line */
 	long filesize;
 	long transformed_size;
 	MIDI_FILE_HEADER midi_header ;
-	char key  [6] ;	/* e.g. "0 maj" or "1 min" */
-	char time [6] ;	/* e.g. "17/16" */
-	char tempo[9] ; /* milliseconds */
-	char *copyright ;
+	wxString key;	/* e.g. "0 maj" or "1 min" */
+	wxString time;	/* e.g. "17/16" */
+	wxString tempo; /* milliseconds */
+	wxString copyright;
 } 
 INFO_DB ;
 

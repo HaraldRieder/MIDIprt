@@ -108,10 +108,8 @@ MFPFilterWindow::MFPFilterWindow(wxWindow *parent)
     sz.x = sz.y; // quadratic buttons
     for (unsigned i = 0 ; i < 16 ; i++)
     {
-        char buf[3] ;
-        sprintf(buf, "%X", i) ;
         m_channels[i] = new wxToggleButton(box->GetStaticBox(), 
-                Control_Channel_toggle + i, wxString::FromAscii(buf), wxDefaultPosition, sz);
+                Control_Channel_toggle + i, wxString::Format(_T("%X"), i), wxDefaultPosition, sz);
         // compact block of quadratic buttons, spacing around the block but not between buttons
         int direction = i < 8 ? wxTOP : wxBOTTOM;
         switch (i) {
@@ -175,10 +173,10 @@ void MFPFilterWindow::OnTrackSlider( wxCommandEvent &WXUNUSED(event) )
     
     db->current_track = m_track_slider->GetValue() ;
     {
-        m_trackname_txt ->SetValue(wxString::FromAscii(db->track[db->current_track].name      )) ;
-        m_device_txt    ->SetValue(wxString::FromAscii(db->track[db->current_track].device    )) ;
-        m_instrument_txt->SetValue(wxString::FromAscii(db->track[db->current_track].instrument)) ;
-        m_text_txt      ->SetValue(wxString::FromAscii(db->track[db->current_track].text      )) ;
+        m_trackname_txt ->SetValue(db->track[db->current_track].name);
+        m_device_txt    ->SetValue(db->track[db->current_track].device);
+        m_instrument_txt->SetValue(db->track[db->current_track].instrument);
+        m_text_txt      ->SetValue(db->track[db->current_track].text) ;
     }
     update_channel_buttons() ;
     update_on_off_buttons () ;
@@ -199,7 +197,7 @@ void MFPFilterWindow::OnAllTracksOn( wxCommandEvent &WXUNUSED(event) )
 {
     if (!db) return ;
     
-    for (unsigned i = 0 ; i < db->number_tracks ; i++)
+    for (unsigned i = 0 ; i < db->track.size() ; i++)
         if ( !(db->track[i].filter & DISABLED) )
             db->track[i].filter = TRUE ;
     update_on_off_buttons() ;
@@ -210,7 +208,7 @@ void MFPFilterWindow::OnAllTracksOff( wxCommandEvent &WXUNUSED(event) )
 {
     if (!db) return ;
     
-    for (unsigned i = 0 ; i < db->number_tracks ; i++)
+    for (unsigned i = 0 ; i < db->track.size() ; i++)
         if ( !(db->track[i].filter & DISABLED) )
             db->track[i].filter = FALSE ;
     update_on_off_buttons() ;
@@ -377,7 +375,7 @@ void MFPFilterWindow::redisplay()
     /* enter filename into window info line */
     wxString title(_T("Filter")) ;
     if (db)
-        title.append(_T(" - ")).append(wxString::FromAscii(db->filename)) ;
+        title.append(_T(" - ")).append(db->filename) ;
     SetTitle(title) ;
 
     if (!db)
@@ -392,14 +390,14 @@ void MFPFilterWindow::redisplay()
     else
     {
         /* set slider positions */
-        m_track_slider->SetRange(0, db->number_tracks - 1) ;
+        m_track_slider->SetRange(0, db->track.size() - 1) ;
         m_track_slider->SetValue(db->current_track) ;
         m_track_slider->Enable() ;
 
-        m_trackname ->Enable() ; m_trackname_txt ->SetValue(wxString::FromAscii(db->track[db->current_track].name      )) ;
-        m_device    ->Enable() ; m_device_txt    ->SetValue(wxString::FromAscii(db->track[db->current_track].device    )) ;
-        m_instrument->Enable() ; m_instrument_txt->SetValue(wxString::FromAscii(db->track[db->current_track].instrument)) ;
-        m_text      ->Enable() ; m_text_txt      ->SetValue(wxString::FromAscii(db->track[db->current_track].text      )) ;
+        m_trackname ->Enable() ; m_trackname_txt ->SetValue(db->track[db->current_track].name);
+        m_device    ->Enable() ; m_device_txt    ->SetValue(db->track[db->current_track].device);
+        m_instrument->Enable() ; m_instrument_txt->SetValue(db->track[db->current_track].instrument);
+        m_text      ->Enable() ; m_text_txt      ->SetValue(db->track[db->current_track].text);
     }
     update_channel_buttons() ;
     update_on_off_buttons () ;

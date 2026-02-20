@@ -11,6 +11,7 @@
 #ifndef INC_NOTIMTAB
 #define INC_NOTIMTAB
 
+#include <wx/string.h>
 #include "servimem.h"
 #include "midi.h"
 
@@ -31,9 +32,7 @@ time table element size
 must be packed to its minimum possible size. 
 ------------------------------------------------*/
 
-#ifndef __PUREC__
-#	pragma pack(1)
-#endif
+#pragma pack(1)
 
 typedef struct 
 {
@@ -45,9 +44,7 @@ typedef struct
 } 
 NOTE_TIME_TABLE_ELEMENT ;
 
-#ifndef __PUREC__
-#	pragma pack()
-#endif
+#pragma pack()
 
 typedef struct
 {
@@ -58,15 +55,15 @@ typedef struct
 	
 	INT32 sequence_number ;	/* of format 0 or 1 file, number of sequence in format 2 file, or -1 */
 	
-	char *text ;			/* only the 1. text event found */
-	char *copyright ;		/* should occur in 1. track only */
-	char *track_name ;		/* or sequence name if in format 0 file or in the 1. track */
-	char *instrument_name ;	/* per track, possible at different times ? */
-	char *lyric ;			/* only the 1. lyric event found */
-	char *marker ;			/* only the 1. text marker found */
-	char *cue_point ;		/* only the 1. description found */
-	char *program_name ;	/* only the 1. program name found */
-	char *device_name ;		/* device to be used for track */
+	wxString text ;			    /* only the 1. text event found */
+	wxString copyright ;		/* should occur in 1. track only */
+	wxString track_name ;		/* or sequence name if in format 0 file or in the 1. track */
+	wxString instrument_name ;	/* per track, possible at different times ? */
+	wxString lyric ;			/* only the 1. lyric event found */
+	wxString marker ;			/* only the 1. text marker found */
+	wxString cue_point ;		/* only the 1. description found */
+	wxString program_name ;	    /* only the 1. program name found */
+	wxString device_name ;		/* device to be used for track */
 
 	INT32 tempo ;			/* in microseconds, only the 1. found, or -1 */
 	/* SMPTE offset not supported here */
@@ -83,11 +80,7 @@ typedef struct
 TRACK_INFO ;
 
 
-void init_track_info(TRACK_INFO *track_info) ;
-	/* init nearly all values to unknow (NULL or -1) */
-
-void free_track_info(TRACK_INFO *track_info) ;
-	/* frees the allocated char strings */
+void init_track_info(TRACK_INFO & track_info) ;
 
 unsigned int fill_note_time_table
 (

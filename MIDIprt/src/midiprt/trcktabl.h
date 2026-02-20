@@ -30,20 +30,18 @@ TRACK ;
 #define TRANSFORM_INVALID_FILE_FORMAT -2
 
 int make_track_table(
-	const unsigned char *data,   /* copy of file in RAM */
+	const unsigned char *data, /* copy of file in RAM */
 	long  size,             /* of file in bytes */
 	int   number_tracks,    /* in MIDI file */
-	TRACK *track_table[],   /* out: array of TRACK */
+	std::vector<TRACK> & track_table, /* out: array of TRACK */
 	long *transformed_size /* out: size of track table */
 ) ;
-
-void free_track_table(TRACK table[]) ;
 
 int get_min_max
 /*** find lowest and highest notes in specified time interval
      of the specified track t ***/
 (
-	const TRACK *t,	    /* track data to search */
+	const TRACK & t,    /* track data to search */
 	const UINT16 channel_filter, /* bit mask: which channels to consider */
 	TIME  min_time,		/* where to start search */
 	TIME  max_time,		/* where to stop search */

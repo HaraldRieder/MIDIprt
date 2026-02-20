@@ -11,6 +11,7 @@
 #define MFPMAINWINDOW_H
 
 #include <wx/printdlg.h>
+#include <wx/config.h>
 
 #include "slider.h"
 #include "infow.h"
@@ -19,8 +20,6 @@
 #include "common.h"
 
 extern PROFILED_OPTIONS options ;
-extern FILE * config_file ;
-
 
 class MFPDrawingArea ;
 
@@ -29,7 +28,7 @@ class MFPMainFrame : public wxFrame
 {
 public:
 
-  MFPMainFrame(const char * midifile);
+  MFPMainFrame(const wxString & midifile);
   ~MFPMainFrame();
 
 	/**
@@ -97,7 +96,7 @@ private:
     * @param pathname of file to load
     * @return true if loaded successfully 
     */
-    bool load_file(const char *pathname) ;
+    bool load_file(const wxString & pathname) ;
 
     /**
     * Consistently cleans up file info in db.
@@ -109,7 +108,7 @@ private:
     * window consistently.
     * @param pathname to load, gets into db.filename and db.pathname
     */
-    void do_open_file(const char * pathname) ;
+    void do_open_file(const wxString &pathname) ;
 
     /**
     * Makes file and profile menus consistent with data.

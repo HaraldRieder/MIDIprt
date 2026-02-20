@@ -23,7 +23,7 @@
     (
         VirtualDevice * handle,
         int *cpoints,    /* in: clipping rectangle */
-        const TRACK *t,  /* in: track to draw */
+        const TRACK & t, /* in: track to draw */
         unsigned channel_filter,    /* bit mask */
         int x_min, int x_max, /* drawing to be spread between x_min and x_max */
         int y,           /* y value where to draw note_of_y */
@@ -55,9 +55,9 @@
     int original_type = type, index /* for style and color arrays */ ;
 
     /* draw all notes between minimum and maximum time */
-    n = get_element(t->first_element, t->elements_generated, min_time) ;
+    n = get_element(t.first_element, t.elements_generated, min_time) ;
     if (!n) return ;
-    while ( (n < t->first_element + t->elements_generated) && 
+    while ( (n < t.first_element + t.elements_generated) && 
             (n->time <= max_time) ) 
     {
         if (channel_filter & (0x1 << n->channel))
@@ -215,26 +215,26 @@ void draw_page(
     int height,
     int *points,        /* clipping */ 
     int pixel_height,    /* in micrometers */
-    const TRACK track[],        /* the data to draw... */
-    const FILTERED_TRACK ft[],
+    const std::vector<TRACK> & track,        /* the data to draw... */
+    const std::vector<FILTERED_TRACK> & ft,
     const LAYOUT *lt,            /* with this layout... */
     int p,                        /* index of page to draw */
-    VDI_FONT_ID font_id,    /* font for all textes */
+    const wxString & font,    /* font for all textes */
     int pts,        /* font height of title in points */  
     int effects,    /* text effects for title only */
     int foot_pts,    /* font height of footline in points */ 
-    const char *title,
-    const char *filename,    /* for footline ... */
+    const wxString & title,
+    const wxString & filename,    /* for footline ... */
     long filesize,
-    const char *caption,
-    const char *version,
-    const char *platform,
+    const wxString & caption,
+    const wxString & version,
+    const wxString & platform,
     int note_height,    /* relative units */
     int note_maxdynscale,/* n */ 
     int note_dynscale,   /* 0 .. n */ 
     int mode,            /* Rieder, Beyreuther, Mix */
     int type,            /* of note (e.g. with tail, etc.) */
-    COLOR_SCHEME *scheme,
+    COLOR_SCHEME & scheme,
     int transpose,
     char bars_per_system,
     char sub_bars,
@@ -272,7 +272,7 @@ void draw_page(
     if (p < 0 || p >= lt->npgs)
         return ;
 
-    handle->setFont(font_id);
+    handle->setFont(font);
 
     /* draw title */
     if ( p == 0 && (y0 + title_height) >= points[1] )
@@ -282,7 +282,7 @@ void draw_page(
         handle->setTextPoint(title_height);
         handle->setTextAlignment(1, 2);
         handle->setTextEffects(effects);
-        handle->drawText((x_min + x_max)/2, y_min, (char *)title);
+        handle->drawText((x_min + x_max)/2, y_min, title);
     }
     handle->setTextEffects(0);
 
@@ -309,13 +309,13 @@ void draw_page(
             draw_background_without_corner (handle, 
                 x_min, y_min_background,
                 x_max, y_max_background,
-                scheme->back_style, scheme->back_color) ;
+                scheme.back_style, scheme.back_color) ;
         else
             draw_background_with_corner (handle, 
                 x_min, y_min_background,
                 x_max, y_max_background,
                 index_width, small_text_height/2, /* corner */
-                scheme->back_style, scheme->back_color) ;
+                scheme.back_style, scheme.back_color) ;
 
         /* draw track lines */
         for (l = syst->first_line ; l <= syst->last_line ; l++)
@@ -344,7 +344,7 @@ void draw_page(
                     line->first_modulo_0, 
                     lt->hor_lines,
                     mark_mode, 
-                    scheme->dodecime_style, scheme->dodecime_color, 
+                    scheme.dodecime_style, scheme.dodecime_color, 
                     (line->note_of_y + 11)/12, dots,
                     - index_width/2, 0,
                     x_min_lines, y_max_line, 
@@ -354,9 +354,9 @@ void draw_page(
                 /* draw track name */
                 handle->setTextAlignment(0, 3);
                 handle->writeMode = MD_TRANS ;
-                rgb_tcolor(handle, scheme->text_color) ;
+                rgb_tcolor(handle, scheme.text_color) ;
                 {
-                    char *s ;
+                    wxString s;
                     switch ( ft[line->track].select )
                     {
                     case TR_INSTR:  s = ft[line->track].instrument ; break ;
@@ -364,11 +364,11 @@ void draw_page(
                     case TR_TEXT:   s = ft[line->track].text       ; break ;
                     default:        s = ft[line->track].name       ; 
                     }
-                    handle->drawText(x_min_lines, y_min_line - dy_small_text, s ? s : (char*)"");
+                    handle->drawText(x_min_lines, y_min_line - dy_small_text, s);
                 }
                 /* draw notes of the current track */
                 handle->setLineWidth(line_width_notes|1) ;
-                draw_track(handle, points, track + line->track,
+                draw_track(handle, points, track[line->track],
                            ft[line->track].ch_filter,    
                            x_min_lines, x_max, y_max_line, 
                            - lt->dy_note * height,
@@ -378,14 +378,14 @@ void draw_page(
                            lt->dy_note * height * note_height / 4,
                            note_maxdynscale, note_dynscale, 
                            type, 
-                           scheme->note_style     , scheme->note_color, 
-                           scheme->note_style_ends, scheme->note_color_ends,
+                           scheme.note_style     , scheme.note_color, 
+                           scheme.note_style_ends, scheme.note_color_ends,
                            transpose) ;
                 if (mode != Beyreuther)
                 {
                     /* draw dashed vertical lines (sub-bars), transparent/color-mixed */
                     rgb_udsty_lcolor(handle, /*0x2222*/ 0x4924, 
-                        scheme->text_color, scheme->back_color) ;
+                        scheme.text_color, scheme.back_color) ;
                     draw_lines(handle, 
                         (bars_per_system * sub_bars) + 1, -1, -1,
                         mark_mode, NULL, NULL, 0, -1, 0, 0,
@@ -403,7 +403,7 @@ void draw_page(
         
         /* draw solid vertical lines (bars) */
         handle->lineType = SOLID ; 
-        rgb_lcolor(handle, scheme->text_color) ;
+        rgb_lcolor(handle, scheme.text_color) ;
         draw_lines(handle, bars_per_system + 1, -1, -1,
                mark_mode, NULL, NULL, 0, -1, 0, 0,
                x_min_lines, y_min_lines, 
@@ -412,7 +412,7 @@ void draw_page(
                line_width_bars) ;
         /* draw bar number */
         handle->writeMode = MD_TRANS ;
-        rgb_tcolor(handle, scheme->text_color) ;
+        rgb_tcolor(handle, scheme.text_color) ;
         handle->setTextAlignment(2, 3);
         sprintf(text, "%d", 
           (int)((syst->min_time/lt->time_per_system + 1) * bars_per_system));
@@ -467,9 +467,8 @@ int page_layouter
     float track_distance,
     float note_distance,
     char  hor_lines,                /* per dodecime */
-    int   ntrks,                    /* dimension of the 3 following arrays */
-    const FILTERED_TRACK ft[],    
-    const TRACK track_table[],        /* from MIDI file */
+    const std::vector<FILTERED_TRACK> & ft,
+    const std::vector<TRACK> & track_table, /* from MIDI file */
     TIME  max_time,                    /* occuring in all tracks */
     TIME  time_per_system            /* in ticks */
 )
@@ -523,7 +522,7 @@ int page_layouter
     lt->time_per_system = time_per_system ;
 
     /* get first and last active tracks */
-    while (i < ntrks) 
+    while (i < ft.size()) 
     {
         if (ft[i].filter == 1) /* 1 = on and not disabled */
         {
@@ -580,7 +579,7 @@ int page_layouter
                 if ( ft[t].filter == 1 )
                 {
                     line->track = t ;
-                    if ( get_min_max( track_table + t,
+                    if ( get_min_max( track_table[t],
                                 ft[t].ch_filter, 
                                 time, time + lt->time_per_system,
                                 &(line->min_note), 

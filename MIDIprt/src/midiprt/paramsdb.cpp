@@ -6,7 +6,6 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
-#include <diskfile.h>
 #include "string.h"
 #include "paramsdb.h"
 
@@ -14,7 +13,7 @@ using namespace std;
 
 void default_params(PARAMS_DB *db)
 {
-	db->title[0] = 0 ;
+	db->title = _T("") ;
 	db->left_border  = db->right_border = 
 	db->lower_border = db->upper_border = 0 ;
 
@@ -35,14 +34,11 @@ void default_params(PARAMS_DB *db)
 	
 	db->note_type = BODY_RECT ;
 
-	db->font[0] = 0 ;
+	db->font    = _T("") ;
 	db->points  = 18; /* 18 points for the title */
 	db->effects = 0 ; /* normal */
 
-	strcpy(db->line_width        , DEFAULT_LINE_WIDTH) ;
-	strcpy(db->bar_line_width    , DEFAULT_LINE_WIDTH) ;
-	strcpy(db->sub_bar_line_width, DEFAULT_LINE_WIDTH) ;
-	strcpy(db->note_line_width   , DEFAULT_LINE_WIDTH) ;
+	db->line_width = db->bar_line_width = db->sub_bar_line_width = db->note_line_width = _T(DEFAULT_LINE_WIDTH);
 		
 	default_scheme(&(db->scheme)) ;
 }
@@ -73,15 +69,15 @@ void validate(PARAMS_DB *db)
 }
 
 
-void do_load_scheme(PARAMS_DB *db, const char *path) 
+void do_load_scheme(PARAMS_DB *db, const wxString & path) 
 {
   	if ( load_scheme(&(db->scheme), path) == 0 )
   	{
-   		strcpy(db->scheme_path, path) ;
+   		db->scheme_path = path;
    	}
    	else 
    	{
    		default_scheme(&(db->scheme)) ;
-   		db->scheme_path[0] = 0 ;
+   		db->scheme_path = _T("") ;
    	}
 }

@@ -10,6 +10,7 @@
 #ifndef INC_FILTERDB_H
 #define INC_FILTERDB_H 1
 
+#include <vector>
 #include "draw.h"
 
 #ifndef DISABLED
@@ -19,16 +20,13 @@
 
 typedef struct
 {
-	char *filename ;
-
-	unsigned number_tracks ;   /* dimension for the following array */
-	FILTERED_TRACK *track ;
-	
+	wxString filename;
+	std::vector<FILTERED_TRACK> track;
 	/* private: */	
 	int current_track ;	
 }
 FILTER_DB ;
 
-unsigned set_number_tracks(FILTER_DB *db, unsigned n) ;
+void set_number_tracks(FILTER_DB *db, unsigned n);
 
 #endif /* include blocker */

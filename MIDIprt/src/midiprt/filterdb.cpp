@@ -10,22 +10,9 @@
 #include <malloc.h>
 #include "filterdb.h"
 
-unsigned set_number_tracks(FILTER_DB *db, unsigned n) 
+void set_number_tracks(FILTER_DB *db, unsigned n) 
 {
 	db->current_track = 0 ;
-	db->number_tracks = n ;
-	
-	if (db->track) 
-		free(db->track) ;
-	if (!n)
-		return 1 ;	/* good */
-
-	db->track = (FILTERED_TRACK *)calloc(n, sizeof(FILTERED_TRACK)) ;
-	if ( !db->track )
-	{
-		set_number_tracks(db, 0) ;
-		return 0 ;
-	}
-	return 1 ;	
+	db->track = std::vector<FILTERED_TRACK>(n, FILTERED_TRACK());
 }
 

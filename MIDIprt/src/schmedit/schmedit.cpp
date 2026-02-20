@@ -90,7 +90,7 @@ void SelectableWidget::select(bool _select)
   Refresh() ;
 }
 
-void SelectableWidget::draw(int style, int color, bool border, char *text)
+void SelectableWidget::draw(int style, int color, bool border, const wxString & text)
 {
   wxPaintDC dc(this);
   VirtualDevice vdi(&dc) ;
@@ -125,11 +125,11 @@ void SelectableWidget::draw(int style, int color, bool border, char *text)
   draw_note(&vdi, points, type, style, color, 0,0) ;
 
   // draw text
-  if (text != NULL)
+  if (!text.empty())
   {
     vdi.writeMode = MD_TRANS ;
     vdi.setTextPoint(8);
-    vdi.setFont((char *)"");
+    vdi.setFont(_T(""));
     rgb_tcolor(&vdi, db->scheme.text_color) ;
     vdi.setTextAlignment(1, 2);
     vdi.drawText(GetSize().GetWidth()/2, GetSize().GetHeight()/2, text) ;
@@ -521,7 +521,7 @@ private:
   * Loads scheme file and shows error messages if necessary.
   * @return true if loaded successfully 
   */
-  bool load_scheme(const char * path) ;
+  bool load_scheme(const wxString & path) ;
 
   /**
   * Called to guarantee that the user does not loose changes.
@@ -782,14 +782,13 @@ void SchemeEditorFrame::unload_scheme()
   default_scheme(&scheme_on_disk) ;
 
   if ( !db->path.empty() )
-    ::load_scheme(&scheme_on_disk, db->path.ToAscii()) ;
+    ::load_scheme(&scheme_on_disk, db->path) ;
   if ( memcmp(&scheme_on_disk, &(db->scheme), sizeof(scheme_on_disk)) )
   {
     /* different from disk */
     wxString msg = _T("Save changed scheme to file ?\n") ;
     msg.append(db->path) ;
-    wxMessageDialog quest(this, msg.c_str(), 
-      _T("Question"), wxYES_NO|wxYES_DEFAULT|wxICON_QUESTION ) ;
+    wxMessageDialog quest(this, msg,  _T("Question"), wxYES_NO|wxYES_DEFAULT|wxICON_QUESTION ) ;
     if (quest.ShowModal() == wxID_YES)
     {
       wxCommandEvent dummy ;
@@ -803,21 +802,21 @@ void SchemeEditorFrame::unload_scheme()
   }
 }
 
-bool SchemeEditorFrame::load_scheme(const char * path)
+bool SchemeEditorFrame::load_scheme(const wxString & path)
 {
   wxString msg ;
   switch (::load_scheme(&(db->scheme), path))
   {
   case 1:
     {
-      msg.append(wxString::FromAscii(path)).append(_T("\nis not a valid scheme file!")) ;
+      msg.append(path).append(_T("\nis not a valid scheme file!")) ;
       wxMessageDialog err(this, msg, _T("Error"), wxCANCEL|wxICON_ERROR ) ;
       err.ShowModal() ;
     }
     return false ;
   case -1:
     {
-      msg.append(_T("Could not open\n")).append(wxString::FromAscii(path)) ;
+      msg.append(_T("Could not open\n")).append(path);
       wxMessageDialog err(this, msg, _T("Error"), wxCANCEL|wxICON_ERROR ) ;
       err.ShowModal() ;
     }
@@ -848,7 +847,7 @@ void SchemeEditorFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
   if (db->dir.empty())
     db->dir = wxGetHomeDir() ;
   dialog.SetDirectory(db->dir);
-  if ( dialog.ShowModal() == wxID_OK && load_scheme(dialog.GetPath().ToAscii()) )
+  if ( dialog.ShowModal() == wxID_OK && load_scheme(dialog.GetPath()) )
   {
     db->dir  = dialog.GetDirectory() ;
     db->path = dialog.GetPath() ;
@@ -866,7 +865,7 @@ void SchemeEditorFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 
 void SchemeEditorFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
-  if (save_scheme(&(db->scheme), db->path.ToAscii()) != 0)
+  if (save_scheme(&(db->scheme), db->path) != 0)
   {
     wxString msg ;
     msg.append(_T("Could not write scheme file\n")).append(db->path) ;
@@ -896,13 +895,12 @@ void SchemeEditorFrame::OnSaveAs(wxCommandEvent& event)
 
 void SchemeEditorFrame::OnRevertToSaved(wxCommandEvent& WXUNUSED(event))
 {
-  wxString msg ;
-  msg.append(_T("Reload\n")).append(db->path).append(_T("\nand loose changes ?"))  ;
-  wxMessageDialog quest(this, msg.c_str(), 
-    _T("Question"), wxYES_NO|wxNO_DEFAULT|wxICON_QUESTION ) ;
+  wxString msg;
+  msg.append(_T("Reload\n")).append(db->path).append(_T("\nand loose changes ?"));
+  wxMessageDialog quest(this, msg, _T("Question"), wxYES_NO|wxNO_DEFAULT|wxICON_QUESTION);
   if (quest.ShowModal() == wxID_YES)
   {
-    load_scheme(db->path.ToAscii()) ;
+    load_scheme(db->path);
   }
 }
 

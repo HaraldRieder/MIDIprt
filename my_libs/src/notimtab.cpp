@@ -8,15 +8,10 @@
   Licence:     GNU General Public License V3
 *****************************************************************************/
 
-#if defined (__PUREC__)
-#	include <portable.h>
-#	include <acs.h>        /* because of NULL, Ax_malloc(), ... */
-#else 
-#   include <malloc.h>
-#	define TRUE  1
-#	define FALSE 0
-#endif
-#include <string.h>     /* because of memcmp(), ... */
+//#include <malloc.h>
+#define TRUE  1
+#define FALSE 0
+//#include <string.h>     /* because of memcmp(), ... */
 
 #include <servimem.h>
 #include <notimtab.h>
@@ -70,18 +65,13 @@
 }
 
 
-static char *create_text(const unsigned char* data, size_t len)
+static wxString create_text(const unsigned char* data, size_t len)
 {
-	char *text = (char*) malloc (len+1) ;
-	if (text) 
-	{
-		//memcpy (text, data, len) ;
-        // copy only printable characters
-        for (int i = 0; i < len; i++) {
-            text[i] = data[i]>=0x20 ? data[i] : '?';
-        }
-		text[len] = 0 ;
-	}
+    // copy only printable characters
+    wxString text;
+    for (int i = 0; i < len; i++) {
+        text.append(data[i]>=0x20 ? (char)(data[i]) : '?');
+    }
 	return text ;
 }
 
@@ -90,28 +80,13 @@ static char *create_text(const unsigned char* data, size_t len)
 /***********  PUBLISHED INTERFACE (PIF)  **************************/
 /******************************************************************/
 
-void init_track_info(TRACK_INFO *ti) 
+void init_track_info(TRACK_INFO & ti) 
 {
-	ti->sequence_number = -1 ;
-
-	ti->text = ti->copyright = ti->track_name =	ti->instrument_name =
-	ti->lyric =	ti->marker = ti->cue_point = ti->program_name =
-	ti->device_name = NULL ;
-
-	ti->tempo =	ti->numerator =	ti->denominator = ti->key =	ti->minor = -1 ;
-}
-
-void free_track_info(TRACK_INFO *ti) 
-{
-	if (ti->text)            free(ti->text) ;
-	if (ti->copyright)       free(ti->copyright) ;
-	if (ti->track_name)      free(ti->track_name) ;
-	if (ti->instrument_name) free(ti->instrument_name) ;
-	if (ti->lyric)           free(ti->lyric) ;
-	if (ti->marker)          free(ti->marker) ;
-	if (ti->cue_point)       free(ti->cue_point) ;
-	if (ti->program_name)    free(ti->program_name) ;
-	if (ti->device_name)     free(ti->device_name) ;
+	ti.sequence_number = -1 ;
+	ti.text = ti.copyright = ti.track_name = ti.instrument_name =
+   	ti.lyric = ti.marker = ti.cue_point = ti.program_name =
+	ti.device_name = _T("") ;
+	ti.tempo = ti.numerator = ti.denominator = ti.key =	ti.minor = -1 ;
 }
 
 unsigned int fill_note_time_table
@@ -175,39 +150,39 @@ unsigned int fill_note_time_table
 							 next_data[2+read_bytes] ;
 					break ;
 				case GENERAL_TEXT:
-					if (!ti->text)
+					if (ti->text.empty())
 						ti->text = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case COPYR_NOTICE:
-					if (!ti->copyright)
+					if (ti->copyright.empty())
 						ti->copyright = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case SQ_TRCK_NAME: 
-					if (!ti->track_name)
+					if (ti->track_name.empty())
 						ti->track_name = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case INSTRUM_NAME:
-					if (!ti->instrument_name)
+					if (ti->instrument_name.empty())
 						ti->instrument_name = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case LYRIC:
-					if (!ti->lyric)
+					if (ti->lyric.empty())
 						ti->lyric = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case TEXT_MARKER:
-					if (!ti->marker)
+					if (ti->marker.empty())
 						ti->marker = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case CUE_POINT:
-					if (!ti->cue_point)
+					if (ti->cue_point.empty())
 						ti->cue_point = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case PROGRAM_NAME:
-					if (!ti->program_name)
+					if (ti->program_name.empty())
 						ti->program_name = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case DEVICE_NAME:
-					if (!ti->device_name)
+					if (ti->device_name.empty())
 						ti->device_name = create_text(next_data + 1 + read_bytes, length) ;
 					break ;
 				case SET_TEMPO:

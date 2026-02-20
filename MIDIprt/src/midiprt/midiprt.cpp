@@ -25,10 +25,6 @@ wxApp * app ;
 
 PROFILED_OPTIONS options ;
 
-/* currently keeps list of open files only */
-FILE * config_file = NULL ;
-static wxString config_filepath ;
-
 /* This dummy is a workaround. Ununderstood, why IsShown() 
    always deliveres false for info_window, whereas 
    it works correctly for filter_window and params_window.
@@ -49,17 +45,17 @@ static void open_window_on_pos(wxWindow *wi, const wxPoint & pos, bool open)
 	wxRect rect ;
 	rect.x = (int)((float)(pos.x) / 1000 * drect.width + 0.5) ;
 	rect.y = (int)((float)(pos.y) / 1000 * drect.height + 0.5) ;
-	rect.x = min(drect.width - 32, max(-32, rect.x)) ;
-	rect.y = min(drect.height - 32, max(  0, rect.y)) ;
+	rect.x = std::min(drect.width  - 32, std::max(-32, rect.x)) ;
+	rect.y = std::min(drect.height - 32, std::max(  0, rect.y)) ;
 	rect.width = rect.height = -1 ;
 	wi->SetSize(rect) ;
 	if (open)
 		wi->Show() ;
 }
 
-static void fwrite_window_pos(FILE *file, wxTopLevelWindow *wi, const char *name)
+static void save_window_pos(wxTopLevelWindow *wi, const wxString & name)
 	/* write left and top of wi in relative units 0..1000
-	   to file, 1000 corresponds to desktop width/height */
+	   to config, 1000 corresponds to desktop width/height */
 {
 	if (wi == NULL)
 		return ;
@@ -68,9 +64,9 @@ static void fwrite_window_pos(FILE *file, wxTopLevelWindow *wi, const char *name
 	wxPoint pos = wi->GetPosition() ;
 	float left   = (float)pos.x * 1000 / drect.width + 0.5 ;
 	float top    = (float)pos.y * 1000 / drect.height + 0.5 ;
-	fprintf(file, "left%s = %i\n", name, (int)left) ;
-	fprintf(file, "top%s  = %i\n", name, (int)top ) ;
-	fprintf(file, "open%s = %s\n", name, wi->IsShown() ? "yes" : "no") ;
+    wxConfig::Get()->Write(wxString(_T("left")).append(name), (long)left) ;
+    wxConfig::Get()->Write(wxString(_T("top")).append(name), (long)top) ;
+    wxConfig::Get()->Write(_T("open"), wi->IsShown() ? _T("yes") : _T("no")) ;
 }
 
 
@@ -116,8 +112,7 @@ int MidiFilePrinterApplication::FilterEvent(wxEvent& event)
 				{
 					wxString msg ;
 					msg.append(_T("Could not load\n")).append(helppath).append(_T(" !")) ;
-					wxMessageDialog err(NULL, msg.c_str(),
-                           _T("Error"), wxICON_ERROR | wxCANCEL);
+					wxMessageDialog err(NULL, msg, _T("Error"), wxICON_ERROR | wxCANCEL);
 					err.ShowModal();
 				}
 				else
@@ -167,6 +162,7 @@ int MidiFilePrinterApplication::FilterEvent(wxEvent& event)
 
 bool MidiFilePrinterApplication::OnInit(void)
 {
+    wxConfig::Set(new wxConfig("MIDI_PRT"));
 	app = this ;
 	// init application path from argv:
 	// cut away application file name at the end
@@ -192,109 +188,53 @@ bool MidiFilePrinterApplication::OnInit(void)
 	filter_window = new MFPFilterWindow(NULL) ;
 	params_window = new MFPParamsWindow(NULL) ;
 
-	/* construct config file path (might be in user's $HOME) */
-	config_filepath = wxGetHomeDir() + _T(DIRSEP) + _T(".MIDI_PRT.CFG") ;
+	/* read config */
+    wxConfigBase * config = wxConfig::Get();
+    bool info_open = config->ReadBool(_T("openInfo"), false);
+    bool filter_open = config->ReadBool(_T("openFilter"), false);
+    bool params_open = config->ReadBool(_T("openParams"), false);
+    wxPoint info_pos, filter_pos, params_pos ;
+    info_pos.x = config->ReadLong(_T("leftInfo"), 0);
+    info_pos.y = config->ReadLong(_T("topInfo"), 0);
+    filter_pos.x = config->ReadLong(_T("leftFilter"), 0);
+    filter_pos.y = config->ReadLong(_T("topFilter"), 0);
+    params_pos.x = config->ReadLong(_T("leftParams"), 0);
+    params_pos.y = config->ReadLong(_T("topParams"), 0);
+    options.format = config->Read(_T("Format"), wxString()).Contains(_T("4")) ? 
+        PROFILED_OPTIONS::FORMAT_DIN_A4 : PROFILED_OPTIONS::FORMAT_US_LETTER;
+	// this option affects main frames already created
+	MFPMainFrame::update_options_all() ;
 
-	/* parse config file */
 	bool have_main_frame = false ;
-	config_file = fopen(config_filepath.ToAscii(), "r") ;
-	if (config_file)
-	{
-		char var [VAR_LEN] ;
-		char val [VAL_LEN] ;
-		wxPoint info_pos, filter_pos, params_pos ;
-		bool info_open = false, filter_open = false, params_open = false ;
-		char buffer [VAR_LEN*2 + VAL_LEN*2] ;
+    wxString lastfile = config->Read(_T("LastFile"), wxString());
+    if ( !lastfile.empty() ) {
+        new MFPMainFrame(lastfile) ; 
+		have_main_frame = true ;
+    } 
 		
-		while( fgets(buffer, (int)(sizeof(buffer)-1), config_file) ) 
-		{
-			char *c ;
-			/* Not terminated with \n, because sscanf() would read over it 
-			   into foreign memory because it is a white space char. */
-			if (c = strchr(buffer, '\n'))
-				*c = '#' ;
-			char *dupbuffer = _strdup(buffer); // because of sscanf() error in Visual C++ 2008!
-			char format[VAR_LEN*2 + VAL_LEN*2] ;
-			sprintf(format, "%%%ds = %%%d[^#]", VAR_LEN, VAL_LEN) ;
-			if ( sscanf(buffer, format, var, val) == 2 ) // destroys buffer content if not true!
-			{
-				if (strstr(var, "Format"         )) 
-				{
-					options.format = (strchr (val, '4' ) == NULL) ? PROFILED_OPTIONS::FORMAT_US_LETTER : PROFILED_OPTIONS::FORMAT_DIN_A4 ;
-					// this option affects main frames already created
-					MFPMainFrame::update_options_all() ;
-				}
-				//else if (strstr(var, "MetaPrintMode"  )) options.meta_print_mode = (strpbrk(val, "pP") == NULL) ;
-				//else if (strstr(var, "FileSelectMasks")) options.file_selectoddr   = (strpbrk(val, "lL") == NULL) ;
-				//else if (strstr(var, "FontPrintDialog")) options.use_WDIALOG     = (strpbrk(val, "nN") == NULL) ;
-				//else if (strstr(var, "Icons"          )) options.icon_arrangement= (strpbrk(val, "vV") == NULL) ;
-				//else if (strstr(var, "ImmediateUpdate")) parse_update(val, &(options.immediate_update)) ;
-				else if (strstr(var, "leftInfo"  )) info_pos.x   = atoi(val) ;
-				else if (strstr(var, "topInfo"   )) info_pos.y   = atoi(val) ;
-				else if (strstr(var, "openInfo"  )) info_open    = (strpbrk(val, "yY") != NULL) ;
-				else if (strstr(var, "leftFilter")) filter_pos.x = atoi(val) ;
-				else if (strstr(var, "topFilter" )) filter_pos.y = atoi(val) ;
-				else if (strstr(var, "openFilter")) filter_open  = (strpbrk(val, "yY") != NULL) ;
-				else if (strstr(var, "leftParams")) params_pos.x = atoi(val) ;
-				else if (strstr(var, "topParams" )) params_pos.y = atoi(val) ;
-				else if (strstr(var, "openParams")) params_open  = (strpbrk(val, "yY") != NULL) ;
-			}
-			else if (argc <= 1)
-			{
-				/* interpret as filename ***/
-				if (c = strchr(dupbuffer, '#'))
-					*c = 0 ; /* normal string */
-				new MFPMainFrame(dupbuffer) ; 
-				have_main_frame = true ;
-			}
-			free(dupbuffer);
-		}
-		fclose(config_file) ;
-		
-		//if (options.icon_arrangement == ICONS_HOR)
-			/* not the ACS default, tell it to ACS: */
-		//	Awd_hor() ;
-
-		open_window_on_pos(info_window  , info_pos  , info_open  ) ;
-		open_window_on_pos(filter_window, filter_pos, filter_open) ;
-		open_window_on_pos(params_window, params_pos, params_open) ;
-	}
+	open_window_on_pos(info_window  , info_pos  , info_open  ) ;
+	open_window_on_pos(filter_window, filter_pos, filter_open) ;
+	open_window_on_pos(params_window, params_pos, params_open) ;
 
 	if (argc <= 1)
 	{
 		if (!have_main_frame)
 			// guarantee that there is at least 1 document window
-			new MFPMainFrame(NULL);
+			new MFPMainFrame(wxString());
 	}
 	else for (int i = 1 ; i < argc ; i++)
-		new MFPMainFrame(wxString(argv[i]).ToAscii());
-
-	/* now open for writing (see main frame window) */
-	config_file = fopen(config_filepath.ToAscii(), "w") ;
+		new MFPMainFrame(wxString(argv[i]));
 
 	return true;
 }
 
 int MidiFilePrinterApplication::OnExit()
 {
-	if ( config_file )
-	{
-		/* save options */
-		fprintf(config_file, "Format          = %s\n", (options.format          == PROFILED_OPTIONS::FORMAT_DIN_A4)?"DIN A4":"US letter") ;
-		//fprintf(config_file, "MetaPrintMode   = %s\n", (options.meta_print_mode == ONE_PER_PAGE)?"one per page":"all into one") ;
-		//fprintf(config_file, "FileSelectMasks = %s\n", (options.file_selector   == UPPER_CASE_MASKS)?"upper case":"lower case") ;
-		//fprintf(config_file, "FontPrintDialog = %s\n", (options.use_WDIALOG)?"OS":"own") ;
-		//fprintf(config_file, "Icons           = %s\n", (options.icon_arrangement== ICONS_VER)?"vertical":"horizontal") ;
-		//fprintf(config_file, "ImmediateUpdate = ") ;
-		//if (options.immediate_update & IMMEDIATE_SLID) fprintf(config_file, "sliders ") ;
-		//if (options.immediate_update & IMMEDIATE_BTN ) fprintf(config_file, "buttons ") ;
-		//if (options.immediate_update & IMMEDIATE_KEYB) fprintf(config_file, "keyboard ") ;
-		//fprintf(config_file, "\n") ;
-		fwrite_window_pos(config_file, info_window  , "Info") ;
-		fwrite_window_pos(config_file, params_window, "Params") ;
-		fwrite_window_pos(config_file, filter_window, "Filter") ;
-		fclose(config_file) ;
-	}
+    /* save options */
+    wxConfig::Get()->Write(_T("Format"), options.format == PROFILED_OPTIONS::FORMAT_DIN_A4 ? _T("DIN A4") : _T("US letter"));
+    save_window_pos(info_window  , _T("Info")) ;
+    save_window_pos(params_window, _T("Params")) ;
+    save_window_pos(filter_window, _T("Filter")) ;
 	if (info_window)   info_window->Destroy() ;
 	if (params_window) params_window->Destroy() ;
 	if (filter_window) filter_window->Destroy() ;

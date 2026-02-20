@@ -45,9 +45,9 @@ typedef struct
 }
 PROFILED_DOC_PARAMS ; /* these are profiled per document (= MIDI file) */
 
-void default_doc_params(PROFILED_DOC_PARAMS *p) ;
+void default_doc_params(PROFILED_DOC_PARAMS & p);
 
-void profile_path(char *profile_path, const char *path) ;
+void profile_path(wxString & profile_path, const wxString & path) ;
 	/* Constructs a profile path by substituting the last 
 	   character in path with $ and writes it to profile_path. */
 
@@ -55,11 +55,11 @@ int write_profile
 	/* writes human readable profile */
 	/* returns 0 if good */
 (
-	const char * filename,
-	const char * apppath,	/* path of application for relative scheme path */
+	const wxString & filename,
+	const wxString & apppath,	/* path of application for relative scheme path */
 	const PARAMS_DB *,
 	const FILTER_DB *,
-	const PROFILED_DOC_PARAMS *,
+	const PROFILED_DOC_PARAMS &,
 	const int dflt	/* write default profile */
 ) ;
 	
@@ -67,11 +67,11 @@ int read_profile
 	/* reads profile to PARAMS_DB and FILTER_DB */
 	/* returns 0 if good */
 (
-	const char *filename,
-	const char * apppath,	/* path of application for relative scheme path */
+	const wxString & filename,
+	const wxString & apppath,	/* path of application for relative scheme path */
 	PARAMS_DB *,
 	FILTER_DB *,
-	PROFILED_DOC_PARAMS *,
+	PROFILED_DOC_PARAMS &,
 	const int dflt	/* read default profile */
 ) ;
 

@@ -11,6 +11,7 @@
 #ifndef INCL_COMMON
 #define INCL_COMMON
 
+#include <vector>
 #include <notimtab.h>
 #include "draw.h"
 #include "trcktabl.h"
@@ -33,14 +34,12 @@
 
 typedef struct 
 {
-	char filename[FILENAME_LENGTH], 
-	     pathname[PATHNAME_LENGTH],
-	     profile [PATHNAME_LENGTH];
+	wxString filename, pathname, profile;
 	void *RAM_file ;
 	long filesize ;
 	int has_profile ;
 
-	TRACK *track_table ;
+	std::vector<TRACK> track_table;
 	LAYOUT layout ;
 	PROFILED_DOC_PARAMS opts ;
 
@@ -53,14 +52,14 @@ typedef struct
 DOCUMENT ;
  
 
-int mm_to_pixel(const char *mm, int pixel_size) ;
+int mm_to_pixel(const wxString & mm, int pixel_size) ;
 	/* convert number of millimeters to number of pixels */
 	/* pixel_size must be in micrometers */
 	/* input must be a 3-char. string like "0.5" or "1.2" */
 
-const char * make_title(
-	const char * title,		/* as loaded from profile */
-	const char * path		/* of MIDI file */
+const wxString make_title(
+	const wxString & title,		/* as loaded from profile */
+	const wxString & path		/* of MIDI file */
 	) ;
 	/* returns title, if title is not NULL and not empty,
 	   returns the filename else */
@@ -68,31 +67,26 @@ const char * make_title(
 TIME time_per_system(int ticks_per_quarter, int eighths_per_bar, int bars_per_line) ;
 	/* returns time in ticks per system (= per line) */
 
-void init_info_from_tracks(INFO_DB *db, 
-	const TRACK track_table[], unsigned number_tracks) ;
+void init_info_from_tracks(INFO_DB *db, const std::vector<TRACK> & track_table);
 
-void init_params_from_tracks(PARAMS_DB *db, 
-	const TRACK track_table[], unsigned number_tracks) ;
+void init_params_from_tracks(PARAMS_DB *db, const std::vector<TRACK> & track_table);
 
-void init_filter_from_tracks(FILTER_DB *db, const TRACK track_table[]) ;
+void init_filter_from_tracks(FILTER_DB *db, const std::vector<TRACK> & track_table);
 	/* 1. sets track filter of non-empty tracks to 1, the other ones to DISABLED. */
 	/* 2. sets channel filter according to non-empty channels in track. */
 
 TIME get_max_time( 
-	int number_tracks,		    /* dimension for the following arrays */
-	const TRACK track_table[],	/* in: track table */ 
-	const FILTERED_TRACK ft[]   /* in: only take into account if filter is on */
+	const std::vector<TRACK> & track_table, /* in: track table */ 
+	const std::vector<FILTERED_TRACK> & ft  /* in: only take into account if filter is on */
 ) ;
 	/* search the highest time of all events of all enabled tracks */
 
-void relpath(char *relative, const char *path, const char *dir) ;
-	/* remove dir from path if contained therein and store into relative,
-	   which must be long enough (at least strlen(path)+1) */
+void relpath(wxString & absolute, const wxString & path, const wxString & dir) ;
+    /* remove dir from path if contained therein and store into relative */
 	   
-void abspath(char *absolute, const char *path, const char *dir) ;
-	/* prefix path with dir, if path is not absolute, and
-	   store into absolute, which must be long at least 
-	   strlen(dir)+strlen(path)+1. dir must end with '\' . */ 
+void abspath(wxString & absolute, const wxString & path, const wxString & dir) ;
+    /* prefix path with dir, if path is not absolute, and
+       store into absolute. dir must end with a slash. */ 
 	   
 
 #endif // include blocker

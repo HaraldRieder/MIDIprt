@@ -15,8 +15,8 @@
 
 #include <assert.h>
 #include <math.h>
+#include <wx/fontutil.h>
 #include "wxVDI.h"
-#include "wx/fontutil.h"
 
 #define POINT_PER_INCH          72
 
@@ -92,8 +92,8 @@ void VirtualDevice::setFont()
 		pointSize = pointSize * this_ppi.y/screen_ppi.y ;
 		font.SetPointSize(pointSize) ;
 	}
-	if (textEffects & BOLD)       font.SetWeight(wxBOLD) ;
-	if (textEffects & ITALIC)     font.SetStyle(wxITALIC) ;
+	if (textEffects & BOLD)       font.SetWeight(wxFONTWEIGHT_BOLD) ;
+	if (textEffects & ITALIC)     font.SetStyle(wxFONTSTYLE_ITALIC) ;
 	if (textEffects & UNDERLINED) font.SetUnderlined(true) ;
 	// the other effects we do not emulate
 	dc->SetFont(font) ;
@@ -155,10 +155,10 @@ void VirtualDevice::setTextPoint(int point)
 	dc->GetTextExtent(text, &w, &h, &descent, &externalLeading) ;
 }
 
-void VirtualDevice::setFont(const VDI_FONT_ID font_info)
+void VirtualDevice::setFont(const wxString & font_info)
 {
 	wxNativeFontInfo info ;
-	info.FromString(wxString::FromAscii(font_info)) ;
+	info.FromString(font_info);
 	wxFont font ;
 	font.SetNativeFontInfo(info) ;
 	dc->SetFont(font) ;
@@ -261,11 +261,11 @@ void VirtualDevice::drawFilledArea(int count, int *pxyarray)
 	delete [] points ;
 }
 
-void VirtualDevice::drawText(int x, int y, char *string)
+void VirtualDevice::drawText(int x, int y, const wxString & string)
 {
 	int left, top ;
 	wxCoord w, h, dummy ;
-	dc->GetTextExtent(wxString::FromAscii(string), &w, &dummy) ;
+	dc->GetTextExtent(string, &w, &dummy) ;
 	dc->GetTextExtent(_("Wq"), &dummy, &h) ;
 	// Warning: both Visual C++ and Pure C #define TA_... 
 	switch (textAlignHor)
@@ -285,7 +285,7 @@ void VirtualDevice::drawText(int x, int y, char *string)
 	}
 	dc->SetTextForeground(palette[textColor]) ;
 	dc->SetTextBackground(brush.GetColour()) ;
-	dc->DrawText(wxString::FromAscii(string), left, top) ;
+	dc->DrawText(string, left, top) ;
 }
 
 void VirtualDevice::drawBar(int *pxyarray)

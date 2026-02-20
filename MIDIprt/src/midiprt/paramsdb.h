@@ -10,7 +10,6 @@
 #ifndef INC_PARAMSDB
 #define INC_PARAMSDB 1
 
-#include <diskfile.h>
 #include "scheme.h"
 
 #define Beyreuther 0x20    /* notation mode Beyreuther */
@@ -40,15 +39,15 @@
 #define MAX_TRANSPOSE       11
 #define MIN_TRANSPOSE        0
 
-#define LINE_WIDTH_STRLEN    3  /* e.g. "0.7" millimeters */ 
+#define LINE_WIDTH_STRLEN    3   /* e.g. "0.7" millimeters */
 #define DEFAULT_LINE_WIDTH "0.2" /* millimeters */
 
 typedef struct
 {
-	char *filename ;
+	wxString filename;
 	
-	char title[FILENAME_LENGTH] ; 
-	char font[300] ; /**< wxString native font info description */
+	wxString title; 
+	wxString font; /**< wxString native font info description */
 	int points, effects ;
 
 	int left_border, right_border, upper_border, lower_border ;
@@ -57,19 +56,19 @@ typedef struct
 	float note_distance ;	/* all distances in % */
 	
 	int bars_per_line, bar_length /* in 1/8 */, sub_bars ;
-	char bar_line_width    [LINE_WIDTH_STRLEN+1] ; 	
-	char sub_bar_line_width[LINE_WIDTH_STRLEN+1] ; 	
+	wxString bar_line_width; 	
+	wxString sub_bar_line_width; 	
 	
 	int horizontal_lines ;
 	int mode ;
-	char line_width[LINE_WIDTH_STRLEN+1] ; 	
+	wxString line_width; 	
 	
 	int   note_height ;		/* relative units, normal = 5..6 */
 	int   note_dynscale ;	/* 0 .. n (relative units) */
 	int   note_type ;       /* see draw_note() */
-	char  note_line_width[LINE_WIDTH_STRLEN+1] ; 	
+	wxString note_line_width; 	
 	
-	char scheme_path[PATHNAME_LENGTH] ;
+	wxString scheme_path;
 	COLOR_SCHEME scheme ;
 	int   transpose ;
 }
@@ -85,6 +84,6 @@ void validate(PARAMS_DB *db) ;
 	
 /** tries to load scheme from file into db,
    sets init values if not possible */
-void do_load_scheme(PARAMS_DB *db, const char *path) ;
+void do_load_scheme(PARAMS_DB *db, const wxString & path) ;
  
 #endif /* include blocker */

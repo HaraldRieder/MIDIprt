@@ -20,6 +20,7 @@
 #include <wx/metafile.h>
 #include <wx/print.h>
 #include <wx/file.h>
+#include <wx/filefn.h>
 #include <wx/stdpaths.h>
 #include <wx/splash.h>
 #include <wx/html/htmlwin.h>
@@ -32,10 +33,6 @@
 #include "profile.h"
 #include "scheme.h"
 #include "version.h"
-
-#ifndef _WINDOWS
-#  define _unlink unlink
-#endif
 
 using namespace std ;
 
@@ -166,7 +163,7 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
 				MAX_DYNSCALE, db->params.note_dynscale,        
 				db->params.mode,            /* Rieder, Beyreuther, Mix */
 				db->params.note_type,    /* e.g. with tail, etc. */
-				&(db->params.scheme),
+				db->params.scheme,
 				db->params.transpose,
 				db->params.bars_per_line,
 				db->params.sub_bars,
@@ -178,14 +175,14 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
 			current_page++;
 		}
     }
-    else if (db->filename[0] != 0)
+    else if (!db->filename.empty())
     {
-        vdi.setFont((char *)"") ;  /* system font */
+        vdi.setFont(_T(""));  /* system font */
         vdi.textColor = BLACK ;    /* RGB not necessary, on screen there is always a palette */
         vdi.setTextPoint(10);
         vdi.setTextAlignment(0, 5);
         vdi.drawText(2, 2, /* + 2 because of red border line */
-            (char *)"Nothing to draw. (Did you switch all tracks off ?)") ;
+            _T("Nothing to draw. (Did you switch all tracks off ?)"));
     }
 }
 
@@ -207,7 +204,7 @@ void MFPDrawingArea::OnPaint(wxPaintEvent &WXUNUSED(event))
 class MFPPrintout: public wxPrintout
 {
  public:
-  MFPPrintout(DOCUMENT *_db):wxPrintout(wxString::FromAscii(_db->pathname)),db(_db) {}
+  MFPPrintout(DOCUMENT *_db):wxPrintout(_db->pathname),db(_db) {}
   bool OnPrintPage(int page);
   bool HasPage(int page);
   bool OnBeginDocument(int startPage, int endPage);
@@ -261,7 +258,7 @@ bool MFPPrintout::OnPrintPage(int page)
         MAX_DYNSCALE, db->params.note_dynscale,        
         db->params.mode,        /* Rieder, Beyreuther, Mix */
         db->params.note_type,    /* e.g. with tail, etc. */
-        &(db->params.scheme),
+        db->params.scheme,
         db->params.transpose,
         db->params.bars_per_line,
         db->params.sub_bars,
@@ -366,27 +363,27 @@ BEGIN_EVENT_TABLE(MFPMainFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-bool MFPMainFrame::load_file(const char *pathname)
+bool MFPMainFrame::load_file(const wxString & pathname)
 {
-    wxString msg = wxString::FromAscii(pathname) ;
-    if (!wxFile::Exists(msg))
+    wxString msg = pathname;
+    if (!wxFile::Exists(pathname))
     {
         msg.append(_T("\ndoes not exist!")) ;
-        wxMessageDialog err(this, msg.c_str(), _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
+        wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
         err.ShowModal() ;
         return false ;
     }
-    if (!wxFile::Access(msg, wxFile::read))
+    if (!wxFile::Access(pathname, wxFile::read))
     {
-        msg.append(_T(":\nAccess denied!")) ;
-        wxMessageDialog err(this, msg.c_str(), _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
+        msg.append(_T(":\ncannot be read!")) ;
+        wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
         err.ShowModal() ;
         return false ;
     }
 
     unload_file() ;
 
-    wxFile f(wxString::FromAscii(pathname)) ;
+    wxFile f(pathname);
     /*db.print.filesize =*/ db.info.filesize = db.filesize = f.Length() ;
     db.RAM_file = malloc(db.filesize);
     if (db.RAM_file == NULL)
@@ -400,8 +397,8 @@ bool MFPMainFrame::load_file(const char *pathname)
     if (f.Read(db.RAM_file, db.filesize) == wxInvalidOffset)
     {
         wxString msg = _T("Error while reading\n");
-        msg.append(wxString::FromAscii(pathname)).append(_T(" !")) ;
-        wxMessageDialog err(this, msg.c_str(), _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
+        msg.append(pathname).append(_T(" !"));
+        wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
         err.ShowModal() ;
         unload_file() ;
         return false ;
@@ -421,7 +418,7 @@ void MFPMainFrame::unload_file()
 
 void MFPMainFrame::update_print_items()
 {
-    if (db.filename[0] != 0)
+    if ( !db.filename.empty() )
     {    
         if (db.layout.npgs > 0)
         {
@@ -436,7 +433,7 @@ void MFPMainFrame::update_print_items()
 
 void MFPMainFrame::update_profile_items()
 {
-    bool has_file = (db.filename[0] != 0) ;
+    bool has_file = !db.filename.empty();
     m_profile_menu->Enable(Menu_Load_default   , has_file) ;
     m_profile_menu->Enable(Menu_Save_as_default, has_file) ;
     if (has_file)
@@ -464,7 +461,7 @@ void MFPMainFrame::update_profile_items()
 
 void MFPMainFrame::update_file_items()
 {
-    bool has_file = (db.filename[0] != 0) ;
+    bool has_file = !db.filename.empty();
     m_file_menu->Enable(wxID_CLOSE  , has_file) ;
     m_file_menu->Enable(wxID_SAVEAS , has_file) ;
     m_file_menu->Enable(Menu_Move_to, has_file) ;
@@ -580,7 +577,7 @@ void MFPMainFrame::SetAccelerators()
 }
 
 /** main frame constructor */
-MFPMainFrame::MFPMainFrame(const char * midifile) : wxFrame(NULL, -1, _T(MFP_TITLE))
+MFPMainFrame::MFPMainFrame(const wxString & midifile) : wxFrame(NULL, -1, _T(MFP_TITLE))
 
 {
     incarnation_list.push_back(this) ;
@@ -636,11 +633,11 @@ MFPMainFrame::MFPMainFrame(const char * midifile) : wxFrame(NULL, -1, _T(MFP_TIT
     m_area->SetScrollRate(UP_DOWN_SCROLL_PIXELS,UP_DOWN_SCROLL_PIXELS) ;
 
     /* make menu consistent with data */
-    memset(&db     , 0, sizeof(db     )) ;
-    memset(&db_last, 0, sizeof(db_last)) ;
+    db = DOCUMENT();
+    db_last = DOCUMENT();
     update_menu() ;    
 
-    if ( !midifile )
+    if ( midifile.empty() )
     {
         /* have the program user selected a MIDI file */
         wxCommandEvent dummy ;
@@ -717,8 +714,7 @@ void MFPMainFrame::do_load_default_profile()
 {
     static int already_warned = FALSE ;
 
-    if ( read_profile(default_profile.ToAscii(), apppath.ToAscii(),
-            &(db.params), &(db.filter), &(db.opts), TRUE) != 0 )
+    if ( read_profile(default_profile, apppath, &(db.params), &(db.filter), db.opts, TRUE) != 0 )
     {
         if ( !already_warned )
         {
@@ -734,13 +730,12 @@ void MFPMainFrame::do_load_default_profile()
 void MFPMainFrame::do_load_profile()
 {
     /* init defaults from code */
-    default_doc_params(&(db.opts)) ;
-    init_info_from_tracks  (&(db.info  ), db.track_table, db.filter.number_tracks) ;
-    init_params_from_tracks(&(db.params), db.track_table, db.filter.number_tracks) ;
-    init_filter_from_tracks(&(db.filter), db.track_table) ;
+    default_doc_params(db.opts);
+    init_info_from_tracks  (&(db.info  ), db.track_table);
+    init_params_from_tracks(&(db.params), db.track_table);
+    init_filter_from_tracks(&(db.filter), db.track_table);
     
-    if ( read_profile(db.profile, apppath.ToAscii(),
-            &(db.params), &(db.filter), &(db.opts), FALSE) != 0 )
+    if ( read_profile(db.profile, apppath, &(db.params), &(db.filter), db.opts, FALSE) != 0 )
     {
         /* no specific profile */
         db.has_profile = FALSE ;
@@ -766,12 +761,12 @@ void MFPMainFrame::redisplay()
     {
         m_page_slider->Enable() ;
         m_zoom_slider->Enable() ;
-        db.opts.page = min(db.opts.page, db.layout.npgs) ;
-        db.opts.page = max(db.opts.page, 1) ;
+        db.opts.page = std::min(db.opts.page, (int)db.layout.npgs) ;
+        db.opts.page = std::max(db.opts.page, 1) ;
         m_page_slider->SetRange(1, db.layout.npgs) ;
         m_page_slider->SetValue(db.opts.page) ;
-        db.opts.zoom = min(db.opts.zoom, MAX_ZOOM) ;
-        db.opts.zoom = max(db.opts.zoom, MIN_ZOOM) ;
+        db.opts.zoom = std::min(db.opts.zoom, MAX_ZOOM) ;
+        db.opts.zoom = std::max(db.opts.zoom, MIN_ZOOM) ;
         m_zoom_slider->SetValue(db.opts.zoom) ;
     }        
     
@@ -798,10 +793,11 @@ void MFPMainFrame::set_databases()
 
 void MFPMainFrame::new_layout()
 {
-    if (db.filename[0] == 0)
+    if (db.filename.empty())
     {
         db.layout.npgs = 0 ;
         redisplay() ; 
+        return;
     }
 
     wxString msg = _T("Out of resources:\nToo many ") ;
@@ -817,10 +813,9 @@ void MFPMainFrame::new_layout()
         (float)(db.params.track_distance ) / 100,
         (float)(db.params.note_distance  ) / 100,
         (char) (db.params.horizontal_lines),
-        db.filter.number_tracks,
         db.filter.track,
         db.track_table,
-        get_max_time(db.filter.number_tracks, db.track_table, db.filter.track),
+        get_max_time(db.track_table, db.filter.track),
         time_per_system(db.info.midi_header.ticks_per_beat,db.params.bar_length,db.params.bars_per_line) )
     )
     {
@@ -838,7 +833,7 @@ void MFPMainFrame::new_layout()
     }
     if (err)
     {
-        wxMessageDialog err(this, msg.c_str(), _T("Error"), wxCANCEL|wxICON_EXCLAMATION ) ;
+        wxMessageDialog err(this, msg, _T("Error"), wxCANCEL|wxICON_EXCLAMATION ) ;
         err.ShowModal() ;
     }
     redisplay() ; 
@@ -850,7 +845,7 @@ void MFPMainFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
     if (db_changed || filter_window->has_changed())
     {
         // something changed
-        memcpy(&db_last, &db, sizeof(db)) ;
+        db_last = db;
         new_layout() ;
     }
 }
@@ -868,10 +863,10 @@ void MFPMainFrame::quit()
     list<MFPMainFrame *>::const_iterator i = incarnation_list.begin() ;
     while (i != incarnation_list.end())
     {
-        if ((*i)->db.filename[0])
+        if (!(*i)->db.filename.empty())
         {
             // save filename
-            fprintf(config_file, "%s\n", (*i)->db.pathname) ;
+            wxConfig::Get()->Write(_T("LastFile"), (*i)->db.pathname);
             // save profile
             wxCommandEvent dummy ;
             (*i)->OnCloseFile(dummy) ;
@@ -886,14 +881,13 @@ void MFPMainFrame::quit()
 
 void MFPMainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
-    if (db.filename[0] != 0)
+    if (!db.filename.empty())
     {
-        new MFPMainFrame(NULL);
+        new MFPMainFrame(_T(""));
         return ;
     }
 
-    wxFileDialog dialog(this, _T("Open MIDI file"),_T(""),
-        wxString::FromAscii(db.filename),
+    wxFileDialog dialog(this, _T("Open MIDI file"),_T(""), db.filename,
         _T("MIDI files (*.mid,*.midi)|*.mid;*.MID;*.midi;*.MIDI"));
     if (s_open_dir.empty())
         s_open_dir = wxStandardPaths::Get().GetDocumentsDir() ;
@@ -903,42 +897,35 @@ void MFPMainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
         return ;
 
     s_open_dir = dialog.GetDirectory() ;
-    char pathname[PATHNAME_LENGTH] ;
-    strcpy(pathname, dialog.GetPath().ToAscii()) ;
+    wxString pathname = dialog.GetPath() ;
     {        
-        /* accept also .MI$ files for opening (replace extension with .MID) */
-        char *s ;
-        if ((s = strstr(pathname, ".MI$")) != NULL) 
-            strcpy(s, ".MID") ;
-        else if ((s = strstr(pathname, ".MID$")) != NULL)
-            strcpy(s, ".MIDI") ;
-        else if ((s = strstr(pathname, ".mi$")) != NULL)
-            strcpy(s, ".mid") ;
-        else if ((s = strstr(pathname, ".mid$")) != NULL)
-            strcpy(s, ".midi") ;
+        /* accept also .MI$ files for opening (replace extension with .MID), and so on ... */
+		pathname.Replace(_T(".MI$"),_T(".MID"));
+		pathname.Replace(_T(".MID$"),_T(".MIDI"));
+		pathname.Replace(_T(".mi$"),_T(".mid"));
+		pathname.Replace(_T(".mid$"),_T(".midi"));
     }
     do_open_file(pathname) ;
 }
 
 
-void MFPMainFrame::do_open_file(const char * pathname) 
+void MFPMainFrame::do_open_file(const wxString & pathname) 
 {
     /* load the selected file into RAM */
     if ( !load_file(pathname) )
         return ;
 
-    strcpy(db.pathname, pathname) ;
-    strcpy(db.filename, wxFileName::FileName(wxString::FromAscii(pathname)).GetFullName().ToAscii()) ;
+    db.pathname = pathname;
+    db.filename = wxFileName::FileName(pathname).GetFullName();
     profile_path(db.profile, db.pathname) ;
 
     /* enter pathname into window info line */
     wxString title(_T(MFP_TITLE)) ;
-    title.append(_T(" - ")).append(wxString::FromAscii(pathname)) ;
+    title.append(_T(" - ")).append(pathname);
     SetTitle(title) ;
 
     /* enter filename into DBs of slave windows */
-    db.info.filename  = db.filter.filename  = 
-    db.params.filename = db.filename ;
+    db.info.filename  = db.filter.filename = db.params.filename = db.filename;
     
     /* fit window format to paper format */
     update_format() ;
@@ -946,9 +933,8 @@ void MFPMainFrame::do_open_file(const char * pathname)
     db.info.midi_header = read_midi_file_header((const unsigned char *)db.RAM_file) ;
     if (db.info.midi_header.midi_file_type < 0 || db.info.midi_header.number_tracks <= 0 )
     {
-        wxString msg = wxString::FromAscii(db.pathname);
-        msg.append(_T("\nis no MIDI standard file.")) ;
-        wxMessageDialog err(this, msg.c_str(), _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
+        wxString msg = db.pathname.append(_T("\nis no MIDI standard file.")) ;
+        wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
         err.ShowModal() ;
         unload_file() ;
         return ; 
@@ -964,14 +950,13 @@ void MFPMainFrame::do_open_file(const char * pathname)
         (const unsigned char *)db.RAM_file,
         db.filesize, 
         db.info.midi_header.number_tracks,
-        &(db.track_table),
+        db.track_table,
         &(db.info.transformed_size)) )
     {
         case TRANSFORM_INVALID_FILE_FORMAT:
             {
-                wxString msg = wxString::FromAscii(db.pathname) ;
-                msg.append(_T("\nis no MIDI standard file.")) ;
-                wxMessageDialog err(this, msg.c_str(), _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
+                wxString msg = db.pathname.append(_T("\nis no MIDI standard file.")) ;
+                wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_EXCLAMATION ) ;
                 err.ShowModal() ;
             }
             unload_file() ;
@@ -988,9 +973,7 @@ void MFPMainFrame::do_open_file(const char * pathname)
     /* in any case file is no longer needed in RAM */
     unload_file() ; 
 
-    if (!set_number_tracks(&(db.filter), db.info.midi_header.number_tracks ))
-        return ;
-    
+    set_number_tracks(&(db.filter), db.info.midi_header.number_tracks );
     do_load_profile() ;
 
 //    if (!db->opts.has_toolbar)
@@ -1037,7 +1020,7 @@ void MFPMainFrame::OnActivateWindow( wxActivateEvent &WXUNUSED(event) )
 {
     //app->SetTopWindow(this);
     current_window = this ;
-    if (db.filename[0] != 0)
+    if (!db.filename.empty())
     {
         set_databases() ;
     }
@@ -1055,20 +1038,12 @@ void MFPMainFrame::OnCloseFile( wxCommandEvent &WXUNUSED(event) )
         if (filter_window) filter_window->set_database(NULL) ;
         if (params_window) params_window->set_database(NULL) ;
     }
-    /* save file path in common config file */
+    /* save file path in common config */
     /* if started with command line filenames: save NOT! */
-/*    if ( ACSblk->argc <= 1 && ACSblk->appexit )
-    {
-        if ( !config_file )
-            config_file = fopen(config_filepath, "w") ;
-        if ( config_file )
-            fprintf(config_file, "%s\n", db->pathname) ;
-    }*/
     /* own object instance */
     unload_file() ;
-    free_track_table(db.track_table) ;
     set_number_tracks(&(db.filter), 0) ;
-    memset(&db, 0, sizeof(db));
+    db = DOCUMENT();
     update_file_items() ;
     SetTitle(_T(MFP_TITLE)) ;
 }
@@ -1107,34 +1082,34 @@ void MFPMainFrame::do_save_as(bool remove_originals)
 {
     wxString msg ;
     if (remove_originals)
-        msg.append(_T("Move ")).append(wxString::FromAscii(db.filename)).append(_T(" to")) ;
+        msg.append(_T("Move ")).append(db.filename).append(_T(" to"));
     else
-        msg.append(_T("Save ")).append(wxString::FromAscii(db.filename)).append(_T(" as")) ;
+        msg.append(_T("Save ")).append(db.filename).append(_T(" as"));
     if (s_save_as_dir.empty())
-        s_save_as_dir = wxString::FromAscii(db.pathname) ;
-    wxFileDialog dialog(this, msg, s_save_as_dir, wxString::FromAscii(db.filename),
+        s_save_as_dir = db.pathname;
+    wxFileDialog dialog(this, msg, s_save_as_dir, db.filename,
                         _T("MIDI files (*.mid,*.midi)|*.mid;*.MID;*.midi;*.MIDI"),
                         wxFD_SAVE|wxFD_OVERWRITE_PROMPT) ;
     dialog.SetFilterIndex(1);
     if (dialog.ShowModal() == wxID_OK)
     {
         s_save_as_dir = dialog.GetDirectory() ;
-        if ( Fcopy(dialog.GetPath().ToAscii(), db.pathname) != 0 )
+        if ( !wxCopyFile(db.pathname, dialog.GetPath()) )
         {
             wxString msg = _T("Could not copy\n") ;
-            msg.append(wxString::FromAscii(db.pathname)) ;
+            msg.append(db.pathname);
             wxMessageDialog err(this, msg, _T("Error"), wxCANCEL|wxICON_ERROR ) ;
             err.ShowModal() ;
             return ;
         }
         if (db.has_profile)
         {
-            char buff[256] ;
-            profile_path(buff, dialog.GetPath().ToAscii()) ;
-            if ( Fcopy(buff, db.profile) != 0 )
+            wxString profile_copy;
+            profile_path(profile_copy, dialog.GetPath());
+            if ( !wxCopyFile(db.profile, profile_copy) )
             {
                 wxString msg = _T("Could not copy\n") ;
-                msg.append(wxString::FromAscii(db.pathname)) ;
+                msg.append(db.profile);
                 wxMessageDialog err(this, msg, _T("Error"), wxCANCEL|wxICON_ERROR ) ;
                 err.ShowModal() ;
                 return ;
@@ -1142,23 +1117,23 @@ void MFPMainFrame::do_save_as(bool remove_originals)
         }
         if (remove_originals)
         {
-            if (_unlink(db.pathname) != 0)
+            if ( !wxRemoveFile(db.pathname) )
             {
                 wxString msg = _T("Could not remove\n");
-                msg.append(wxString::FromAscii(db.pathname)) ;
+                msg.append(db.pathname);
                 wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_ERROR ) ;
                 err.ShowModal() ;
             }
-            if (_unlink(db.profile) != 0)
+            if ( !wxRemoveFile(db.profile) )
             {
                 wxString msg = _T("Could not remove\n");
-                msg.append(wxString::FromAscii(db.profile)) ;
+                msg.append(db.profile);
                 wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_ERROR ) ;
                 err.ShowModal() ;
             }
         }
-        strcpy(db.pathname, dialog.GetPath().ToAscii()) ;
-        strcpy(db.filename, dialog.GetFilename().ToAscii()) ;
+        db.pathname = dialog.GetPath();
+        db.filename = dialog.GetFilename();
         profile_path(db.profile, db.pathname) ;
     
         /* update pathname in window info line */
@@ -1197,11 +1172,10 @@ void MFPMainFrame::do_write_profile()
 {
     update_pos() ;
 
-    if ( write_profile(db.profile, apppath.ToAscii(), 
-            &(db.params), &(db.filter), &(db.opts), FALSE) != 0 )
+    if ( write_profile(db.profile, apppath, &(db.params), &(db.filter), db.opts, FALSE) != 0 )
     {
         wxString msg ;
-        msg.append(_T("Could not write profile\n")).append(wxString::FromAscii(db.profile)) ;
+        msg.append(_T("Could not write profile\n")).append(db.profile);
         wxMessageDialog err(this, msg, _T("Error"), wxCANCEL|wxICON_ERROR ) ;
         err.ShowModal() ;
         return ;
@@ -1217,15 +1191,11 @@ void MFPMainFrame::OnAttach( wxCommandEvent &WXUNUSED(event) )
 
 void MFPMainFrame::OnRemove( wxCommandEvent &WXUNUSED(event) )
 {
-    wxString msg = wxString::FromAscii(db.profile) ;
-    if ( _unlink(db.profile) != 0 ) 
+    if ( !wxRemoveFile(db.profile) ) 
     {
-        switch (errno)
-        {
-        case ENOENT: msg.append(_T("\ndoes not exist!")) ; break ;
-        case EACCES: msg.append(_T(":\nAccess denied!")) ; break ;
-        }
-        wxMessageDialog err(this, msg.c_str(), _T("Error"), wxOK|wxICON_EXCLAMATION) ;
+        wxString msg = db.profile;
+        msg.append(_T("\ncould not be removed!"));
+        wxMessageDialog err(this, msg, _T("Error"), wxOK|wxICON_EXCLAMATION) ;
         err.ShowModal() ;
         return ;
     }
@@ -1235,14 +1205,12 @@ void MFPMainFrame::OnRemove( wxCommandEvent &WXUNUSED(event) )
 
 void MFPMainFrame::OnRevertToSaved( wxCommandEvent &WXUNUSED(event) )
 {
-    if (db.filename[0] == 0)
+    if (db.filename.empty())
         return ;
 
-    wxString msg ;
-    msg.append(_T("Reload\n"))
-     .append(wxString::FromAscii(db.profile))
-     .append(_T("\nand loose changes ?"))  ;
-    wxMessageDialog quest(this, msg.c_str(), 
+    wxString msg(_T("Reload\n"));
+    msg.append(db.profile).append(_T("\nand loose changes ?"));
+    wxMessageDialog quest(this, msg, 
         _T("Question"), wxYES_NO|wxYES_DEFAULT|wxICON_QUESTION ) ;
     if (quest.ShowModal() == wxID_YES)
     {
@@ -1258,11 +1226,7 @@ void MFPMainFrame::OnSaveAsDefault( wxCommandEvent &WXUNUSED(event) )
 {
 	update_pos() ;
 	
-    if ( write_profile(
-            default_profile.ToAscii(), apppath.ToAscii(),
-            &(db.params), 
-            &(db.filter),
-            &(db.opts), TRUE) != 0)
+    if ( write_profile(default_profile, apppath, &(db.params), &(db.filter), db.opts, TRUE) != 0 )
     {
         wxString msg ;
         msg.append(_T("Could not write default profile\n")).append(default_profile) ;
@@ -1371,8 +1335,7 @@ void MFPMainFrame::OnHelp( wxCommandEvent &WXUNUSED(event) )
     {
         wxString msg ;
         msg.append(_T("Could not load\n")).append(helppath).append(_T(" !")) ;
-        wxMessageDialog err(this, msg.c_str(),
-                           _T("Error"), wxICON_ERROR | wxCANCEL);
+        wxMessageDialog err(this, msg, _T("Error"), wxICON_ERROR | wxCANCEL);
         err.ShowModal();
         return ;
     }
@@ -1397,7 +1360,7 @@ void MFPMainFrame::OnKeys(wxCommandEvent & event)
 {
     int x,y,vw,vh,cw,ch,x0,y0 ;
 
-    if (db.filename[0] == 0)
+    if (db.filename.empty())
         return ;
 
     switch (event.GetId())
