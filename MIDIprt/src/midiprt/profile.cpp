@@ -64,26 +64,26 @@ int write_profile
 	/* section "MidiPrt" */	
     profile.AddLine(_T("[ MidiPrt ]"));
     profile.AddLine(wxString(_T("font = ")).append(params->font));
-    profile.AddLine(wxString(_T("titleHeight = ")).append(wxString::Format(_T("%d"),(int)params->points)));
-    profile.AddLine(wxString(_T("barsPerSystem = ")).append(wxString::Format(_T("%d"),(int)params->bars_per_line)));
-    if (!dflt) profile.AddLine(wxString(_T("barLength = ")).append(wxString::Format(_T("%d"),(int)params->bar_length)));
-    if (!dflt) profile.AddLine(wxString(_T("subBarLevel = ")).append(wxString::Format(_T("%d"),(int)params->sub_bars -1)));
-    profile.AddLine(wxString(_T("leftBorder = ")).append(wxString::Format(_T("%d"),(int)params->left_border)));
-    profile.AddLine(wxString(_T("rightBorder = ")).append(wxString::Format(_T("%d"),(int)params->right_border)));
-    profile.AddLine(wxString(_T("upperBorder = ")).append(wxString::Format(_T("%d"),(int)params->upper_border)));
-    profile.AddLine(wxString(_T("lowerBorder = ")).append(wxString::Format(_T("%d"),(int)params->lower_border)));
-    profile.AddLine(wxString(_T("systemDistance = ")).append(wxString::Format(_T("%d"),(int)params->system_distance)));
-    profile.AddLine(wxString(_T("trackDistance = ")).append(wxString::Format(_T("%d"),(int)params->track_distance)));
-    profile.AddLine(wxString(_T("noteDistance = ")).append(wxString::Format(_T("%d"),(int)params->note_distance)));
-    profile.AddLine(wxString(_T("noteHeight = ")).append(wxString::Format(_T("%d"),(int)params->note_height)));
-    profile.AddLine(wxString(_T("noteDynamic = ")).append(wxString::Format(_T("%d"),(int)params->note_dynscale)));
-    profile.AddLine(wxString(_T("horizontalLines = ")).append(wxString::Format(_T("%d"),(int)params->note_height)));
+    profile.AddLine(wxString(_T("titleHeight = ")).append(wxString::Format(_T("%d"),params->points)));
+    profile.AddLine(wxString(_T("barsPerSystem = ")).append(wxString::Format(_T("%d"),params->bars_per_line)));
+    if (!dflt) profile.AddLine(wxString(_T("barLength = ")).append(wxString::Format(_T("%d"),params->bar_length)));
+    if (!dflt) profile.AddLine(wxString(_T("subBarLevel = ")).append(wxString::Format(_T("%d"),params->sub_bars -1)));
+    profile.AddLine(wxString(_T("leftBorder = ")).append(wxString::Format(_T("%d"),params->left_border)));
+    profile.AddLine(wxString(_T("rightBorder = ")).append(wxString::Format(_T("%d"),params->right_border)));
+    profile.AddLine(wxString(_T("upperBorder = ")).append(wxString::Format(_T("%d"),params->upper_border)));
+    profile.AddLine(wxString(_T("lowerBorder = ")).append(wxString::Format(_T("%d"),params->lower_border)));
+    profile.AddLine(wxString(_T("systemDistance = ")).append(wxString::Format(_T("%d"),params->system_distance)));
+    profile.AddLine(wxString(_T("trackDistance = ")).append(wxString::Format(_T("%d"),params->track_distance)));
+    profile.AddLine(wxString(_T("noteDistance = ")).append(wxString::Format(_T("%f"),params->note_distance)));
+    profile.AddLine(wxString(_T("noteHeight = ")).append(wxString::Format(_T("%d"),params->note_height)));
+    profile.AddLine(wxString(_T("noteDynamic = ")).append(wxString::Format(_T("%d"),params->note_dynscale)));
+    profile.AddLine(wxString(_T("horizontalLines = ")).append(wxString::Format(_T("%d"),params->note_height)));
     profile.AddLine(wxString(_T("lineWidthHorizontal = ")).append(params->line_width));
     profile.AddLine(wxString(_T("lineWidthBars = ")).append(params->bar_line_width));
     profile.AddLine(wxString(_T("lineWidthSubBars = ")).append(params->sub_bar_line_width));
     profile.AddLine(wxString(_T("lineWidthNotes = ")).append(params->note_line_width));
-    profile.AddLine(wxString(_T("noteHeight = ")).append(wxString::Format(_T("%d"),(int)params->note_height)));
-    if (!dflt) profile.AddLine(wxString(_T("transpose = ")).append(wxString::Format(_T("%d"),(int)params->transpose)));
+    profile.AddLine(wxString(_T("noteHeight = ")).append(wxString::Format(_T("%d"),params->note_height)));
+    if (!dflt) profile.AddLine(wxString(_T("transpose = ")).append(wxString::Format(_T("%d"),params->transpose)));
     if (!dflt) profile.AddLine(wxString(_T("title = ")).append(params->title));
 
     wxString path;
@@ -221,6 +221,8 @@ int write_profile
     profile.AddLine(wxString(_T("bottom = ")).append(wxString::Format(_T("%d"),(int)doc_params.bottom)));
 	if (!dflt) profile.AddLine(wxString(_T("open   = ")).append(doc_params.is_open  ? yes : no ));
     
+    profile.Write();
+    profile.Close();
     return 0;
 }
 
@@ -296,7 +298,7 @@ static void parse_title_effects(const wxChar *s, int *effects)
   if ( wxStrpbrk(s, _T("uU")) ) *effects |= TF_UNDERLINED ; /* underlined */
 }
 
-static void parse_track_filter(wxChar *s, FILTER_DB *db)
+static void parse_track_filter(const wxString & s, FILTER_DB *db)
 	/* parses string s for comma separated "on" and "off"
 	   and sets .filter correspondingly */
 	/* if the number of hex values is smaller than the
@@ -315,7 +317,7 @@ static void parse_track_filter(wxChar *s, FILTER_DB *db)
 }
 
 
-static void parse_channel_filter(wxChar *s, FILTER_DB *db)
+static void parse_channel_filter(const wxString & s, FILTER_DB *db)
 	/* parses string s for comma separated "$XXXX" hex values
 	   and sets .ch_filter correspondingly */
 	/* if the number of hex values is smaller than the
@@ -331,7 +333,7 @@ static void parse_channel_filter(wxChar *s, FILTER_DB *db)
 }
 
 
-static void parse_track_label(wxChar *s, FILTER_DB *db)
+static void parse_track_label(const wxString & s, FILTER_DB *db)
 	/* parses string s for comma separated string values
 	   and sets .select correspondingly */
 	/* if the number of hex values is smaller than the
@@ -363,25 +365,20 @@ int read_profile
 	const int dflt	/* read default profile */
 ) 
 {
-#define VAR_LEN  30  /* length of a variable name incl. " = " */
-#define VAL_LEN  700 /* lenght of a variable value (longest case is a path) */
-
-	wxChar var [VAR_LEN ] ;
-	wxChar val [VAL_LEN ] ;
-	wxString sect;
-	
   	wxTextFile profile(filename);
 	if (!profile.Open())
 		return -1 ;
 		
 	params->note_type = 0 ;  /* 3-part variable with flags for head, body, tail */
 
-    wxString line;
+    wxString line, var, val, sect;
     for ( line = profile.GetFirstLine(); !profile.Eof(); line = profile.GetNextLine() )
     {
-        if ( wxSscanf(line, _T("%s = %s"), var, val) == 2 )
+        if ( line.Contains(_T("=")) )
 		{
 			/* this is a variable = value line */
+            var = line.BeforeFirst('=').Trim(true).Trim(false);
+            val = line.AfterFirst('=').Trim(true).Trim(false);
 			if ( sect.Contains(_T("MidiPrt")) )
 			{
 				if      (wxStrstr(var, _T("font")           )) params->font = val;
@@ -396,7 +393,7 @@ int read_profile
 				else if (wxStrstr(var, _T("lowerBorder")    )) params->lower_border     = wxAtoi(val) ;
 				else if (wxStrstr(var, _T("systemDistance") )) params->system_distance  = wxAtoi(val) ;
 				else if (wxStrstr(var, _T("trackDistance")  )) params->track_distance   = wxAtoi(val) ;
-				else if (wxStrstr(var, _T("noteDistance")   )) params->note_distance    = wxAtoi(val) ;
+				else if (wxStrstr(var, _T("noteDistance")   )) params->note_distance    = wxAtof(val) ;
 				else if (wxStrstr(var, _T("noteHeight")     )) params->note_height      = wxAtoi(val) ;
 				else if (wxStrstr(var, _T("noteDynamic")    )) params->note_dynscale    = wxAtoi(val) ;
 				else if (wxStrstr(var, _T("horizontalLines"))) params->horizontal_lines = wxAtoi(val) ;
@@ -439,10 +436,10 @@ int read_profile
 				else if (!dflt && wxStrstr(var, _T("open")  )) doc_params.is_open = (wxStrpbrk(val, _T("yY")) != NULL) ;
 			}
 		}
-		else if ( wxSscanf(line, "[ %s ]", val) == 1 )
+		else if ( line.Contains(_T("[")) and line.Contains(_T("]")) )
 		{
 			/* this is a section header */
-			sect = val;
+            sect = line.AfterFirst('[').BeforeFirst(']').Trim(true).Trim(false);
 		}
 	}
     return 0;

@@ -20,8 +20,9 @@ int mm_to_pixel(const wxString & mm, int pixel_size)
 {
     int pixel = 0 ;
     
-    if (mm.length() >= 3)
-        pixel = (1000 * (mm[0]-'0') + 100 * (mm[2]-'0'))/pixel_size ; // TODO
+    if (mm.length() >= 3) {
+        pixel = (1000 * wxAtoi(mm.SubString(0,1)) + 100 * wxAtoi(mm.SubString(2,3)))/pixel_size ;
+    }
     
     return (pixel | 1) ; /* make odd */
 }

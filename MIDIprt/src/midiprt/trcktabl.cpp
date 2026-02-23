@@ -48,7 +48,7 @@ int make_track_table(
 
 			/* allocate enough RAM for note time table */
 			track_table[current_track].first_element = (NOTE_TIME_TABLE_ELEMENT *)
-				calloc( length/3, sizeof(TRACK) )  ; // TODO
+				calloc( length/3, sizeof(TRACK) );
 			if (!track_table[current_track].first_element) 
 			{
 				track_table.clear();

@@ -66,7 +66,7 @@ static void save_window_pos(wxTopLevelWindow *wi, const wxString & name)
 	float top    = (float)pos.y * 1000 / drect.height + 0.5 ;
     wxConfig::Get()->Write(wxString(_T("left")).append(name), (long)left) ;
     wxConfig::Get()->Write(wxString(_T("top")).append(name), (long)top) ;
-    wxConfig::Get()->Write(_T("open"), wi->IsShown() ? _T("yes") : _T("no")) ;
+    wxConfig::Get()->Write(wxString(_T("open")).append(name), wi->IsShown() ? _T("yes") : _T("no")) ;
 }
 
 
@@ -162,7 +162,7 @@ int MidiFilePrinterApplication::FilterEvent(wxEvent& event)
 
 bool MidiFilePrinterApplication::OnInit(void)
 {
-    wxConfig::Set(new wxConfig("MIDI_PRT"));
+    wxConfig::Set(new wxConfig("MIDI_PRT.CFG"));
 	app = this ;
 	// init application path from argv:
 	// cut away application file name at the end
