@@ -21,13 +21,6 @@
 typedef struct 
 {
 	enum { FORMAT_DIN_A4 = 0, FORMAT_US_LETTER = 1 } format ;
-	enum { ONE_PER_PAGE = 0, ALL_INTO_ONE = 1 } meta_print_mode ;
-	enum { LOWER_CASE_MASKS = 0, UPPER_CASE_MASKS = 1 } file_selector ;
-	int immediate_update ;
-	/* ACS does not remember icon arrangement mode, so we have to: */
-	enum { ICONS_VER = 0, ICONS_HOR = 1} icon_arrangement ;
-	/* use WDIALOG or avoid it because it crashes */
-	int use_WDIALOG ;
 }
 PROFILED_OPTIONS ; 
 
