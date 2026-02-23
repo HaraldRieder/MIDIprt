@@ -57,8 +57,8 @@ int write_profile
 (
 	const wxString & filename,
 	const wxString & apppath,	/* path of application for relative scheme path */
-	const PARAMS_DB *,
-	const FILTER_DB *,
+	const PARAMS_DB &,
+	const FILTER_DB &,
 	const PROFILED_DOC_PARAMS &,
 	const int dflt	/* write default profile */
 ) ;
@@ -69,8 +69,8 @@ int read_profile
 (
 	const wxString & filename,
 	const wxString & apppath,	/* path of application for relative scheme path */
-	PARAMS_DB *,
-	FILTER_DB *,
+	PARAMS_DB &,
+	FILTER_DB &,
 	PROFILED_DOC_PARAMS &,
 	const int dflt	/* read default profile */
 ) ;

@@ -15,6 +15,6 @@
 #define CAPTION_WITH_BLANKS " MIDI File Printer " 
 
 #define PLATFORM "wxWidgets"
-#define VERSION "4.3" 
+#define VERSION "4.4" 
 
 #endif /* include blocker */

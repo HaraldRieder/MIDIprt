@@ -714,7 +714,7 @@ void MFPMainFrame::do_load_default_profile()
 {
     static int already_warned = FALSE ;
 
-    if ( read_profile(default_profile, apppath, &(db.params), &(db.filter), db.opts, TRUE) != 0 )
+    if ( read_profile(default_profile, apppath, db.params, db.filter, db.opts, TRUE) != 0 )
     {
         if ( !already_warned )
         {
@@ -735,7 +735,7 @@ void MFPMainFrame::do_load_profile()
     init_params_from_tracks(&(db.params), db.track_table);
     init_filter_from_tracks(&(db.filter), db.track_table);
     
-    if ( read_profile(db.profile, apppath, &(db.params), &(db.filter), db.opts, FALSE) != 0 )
+    if ( read_profile(db.profile, apppath, db.params, db.filter, db.opts, FALSE) != 0 )
     {
         /* no specific profile */
         db.has_profile = FALSE ;
@@ -1172,7 +1172,7 @@ void MFPMainFrame::do_write_profile()
 {
     update_pos() ;
 
-    if ( write_profile(db.profile, apppath, &(db.params), &(db.filter), db.opts, FALSE) != 0 )
+    if ( write_profile(db.profile, apppath, db.params, db.filter, db.opts, FALSE) != 0 )
     {
         wxString msg ;
         msg.append(_T("Could not write profile\n")).append(db.profile);
@@ -1226,7 +1226,7 @@ void MFPMainFrame::OnSaveAsDefault( wxCommandEvent &WXUNUSED(event) )
 {
 	update_pos() ;
 	
-    if ( write_profile(default_profile, apppath, &(db.params), &(db.filter), db.opts, TRUE) != 0 )
+    if ( write_profile(default_profile, apppath, db.params, db.filter, db.opts, TRUE) != 0 )
     {
         wxString msg ;
         msg.append(_T("Could not write default profile\n")).append(default_profile) ;
