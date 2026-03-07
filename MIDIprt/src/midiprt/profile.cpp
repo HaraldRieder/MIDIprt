@@ -366,7 +366,7 @@ int read_profile
 ) 
 {
   	wxTextFile profile(filename);
-	if (!profile.Open())
+	if (!profile.Exists() || !profile.Open())
 		return -1 ;
 		
 	params.note_type = 0 ;  /* 3-part variable with flags for head, body, tail */
@@ -399,7 +399,7 @@ int read_profile
 				else if (wxStrstr(var, _T("horizontalLines"))) params.horizontal_lines = wxAtoi(val) ;
 				else if (!dflt && wxStrstr(var, _T("transpose"))) params.transpose  = wxAtoi(val) ;
 				else if (!dflt && wxStrstr(var, _T("title")    )) params.title = val;
-				else if (wxStrstr(var, _T("scheme")))
+				else if (wxStrstr(var, _T("scheme")) && !val.empty())
 				{
 					/* make path absolute */
 					abspath(params.scheme_path, val, apppath) ;
