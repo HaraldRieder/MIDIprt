@@ -4,13 +4,11 @@
 *.swp
 *.cfg
 *.CFG
-/target
-**/*.rs.bk
-Cargo.lock
 **/*.PAR
 **/*.par
 **/*.mi$
 MIDIprt/schmedit
+MIDIprt/midiprt
 my_libs/lib/*.a
 my_libs/lib/*.lib
 
